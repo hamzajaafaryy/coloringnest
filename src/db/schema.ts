@@ -1,59 +1,164 @@
-import { pgTable, serial, text, varchar, boolean, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  bigint,
+  text,
+  boolean,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
-export const categoriesTable = pgTable("categories", {
-  id: serial("id").primaryKey(),
-  slug: varchar("slug", { length: 120 }).notNull().unique(),
-  name: varchar("name", { length: 120 }).notNull(),
-  description: text("description").notNull(),
-  seoTitle: varchar("seo_title", { length: 200 }),
+/* ==========================================
+   CATEGORIES
+   ========================================== */
+
+export const categories = pgTable("categories", {
+  id: bigint("id", { mode: "number" })
+    .primaryKey()
+    .generatedAlwaysAsIdentity(),
+
+  name: text("name").notNull(),
+  slug: text("slug"),
+  description: text("description"),
+  imageUrl: text("image_url"),
+
+  seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
-  icon: varchar("icon", { length: 60 }).default("Palette"),
+
+  iconName: text("icon_name"),
+
   featured: boolean("featured").default(false),
   popular: boolean("popular").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+
+  heroColor: text("hero_color"),
+
+  subcategories: text("subcategories").array(),
 });
 
-export const coloringPagesTable = pgTable("coloring_pages", {
-  id: serial("id").primaryKey(),
-  slug: varchar("slug", { length: 160 }).notNull().unique(),
-  title: varchar("title", { length: 200 }).notNull(),
-  categorySlug: varchar("category_slug", { length: 120 }).notNull(),
-  description: text("description").notNull(),
-  instructions: text("instructions"),
-  svgContent: text("svg_content").notNull(),
-  altText: varchar("alt_text", { length: 255 }).notNull(),
-  seoTitle: varchar("seo_title", { length: 200 }),
+/* ==========================================
+   CATEGORY FAQs
+   ========================================== */
+
+export const categoryFaqs = pgTable("category_faqs", {
+  id: bigint("id", { mode: "number" })
+    .primaryKey()
+    .generatedAlwaysAsIdentity(),
+
+  categoryId: bigint("category_id", { mode: "number" })
+    .notNull(),
+
+  question: text("question"),
+  answer: text("answer"),
+
+  sortOrder: bigint("sort_order", { mode: "number" }),
+});
+
+/* ==========================================
+   COLORING PAGES
+   ========================================== */
+
+export const coloringPages = pgTable("coloring_pages", {
+  id: bigint("id", { mode: "number" })
+    .primaryKey()
+    .generatedAlwaysAsIdentity(),
+
+  title: text("title").notNull(),
+  slug: text("slug"),
+  description: text("description"),
+
+  categoryId: bigint("category_id", { mode: "number" }),
+
+  imageUrl: text("image_url"),
+  svgUrl: text("svg_url"),
+  svgContent: text("svg_content"),
+
+  seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
-  tags: jsonb("tags").$type<string[]>().default([]),
-  ageRange: varchar("age_range", { length: 60 }).default("All Ages"),
-  difficulty: varchar("difficulty", { length: 40 }).default("Medium"), // Easy, Medium, Detailed
+
+  isPublished: boolean("is_published"),
+
+  altText: text("alt_text"),
+
+  tags: text("tags").array(),
+
+  ageRange: text("age_range"),
+  difficulty: text("difficulty"),
+
   featured: boolean("featured").default(false),
   popular: boolean("popular").default(false),
-  viewsCount: integer("views_count").default(0),
-  downloadsCount: integer("downloads_count").default(0),
-  printsCount: integer("prints_count").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+
+  publishedAt: timestamp("published_at", {
+    withTimezone: true,
+  }),
 });
 
-export const blogPostsTable = pgTable("blog_posts", {
-  id: serial("id").primaryKey(),
-  slug: varchar("slug", { length: 160 }).notNull().unique(),
-  title: varchar("title", { length: 200 }).notNull(),
-  excerpt: text("excerpt").notNull(),
-  content: text("content").notNull(),
-  author: varchar("author", { length: 100 }).default("ColoringNest Team"),
-  category: varchar("category", { length: 100 }).default("Coloring Tips"),
-  seoTitle: varchar("seo_title", { length: 200 }),
+/* ==========================================
+   TAGS
+   ========================================== */
+
+export const tags = pgTable("tags", {
+  id: bigint("id", { mode: "number" })
+    .primaryKey()
+    .generatedAlwaysAsIdentity(),
+
+  name: text("name").notNull(),
+  slug: text("slug"),
+});
+
+/* ==========================================
+   BLOG POSTS
+   ========================================== */
+
+export const blogPosts = pgTable("blog_posts", {
+  id: bigint("id", { mode: "number" })
+    .primaryKey()
+    .generatedAlwaysAsIdentity(),
+
+  title: text("title").notNull(),
+  slug: text("slug"),
+
+  excerpt: text("excerpt"),
+  content: text("content"),
+
+  author: text("author"),
+  category: text("category"),
+  readTime: text("read_time"),
+
+  featuredImage: text("featured_image"),
+
+  seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
-  readTime: varchar("read_time", { length: 30 }).default("5 min read"),
-  publishedAt: timestamp("published_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+
+  tags: text("tags").array(),
+
+  isPublished: boolean("is_published"),
+
+  publishedAt: timestamp("published_at", {
+    withTimezone: true,
+  }),
 });
 
-export const pageEventsTable = pgTable("page_events", {
-  id: serial("id").primaryKey(),
-  pageSlug: varchar("page_slug", { length: 160 }).notNull(),
-  eventType: varchar("event_type", { length: 60 }).notNull(), // 'view' | 'download_original' | 'download_colored' | 'print' | 'color_start'
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+/* ==========================================
+   COLORING PAGE FAQs
+   ========================================== */
+
+export const faqs = pgTable("faqs", {
+  id: bigint("id", { mode: "number" })
+    .primaryKey()
+    .generatedAlwaysAsIdentity(),
+
+  coloringPageId: bigint("coloring_page_id", {
+    mode: "number",
+  }).notNull(),
+
+  question: text("question"),
+  answer: text("answer"),
+
+  sortOrder: bigint("sort_order", { mode: "number" }),
 });
+
+/* ==========================================
+   ALIASES
+   ========================================== */
+
+export const categoriesTable = categories;
+export const coloringPagesTable = coloringPages;
+export const blogPostsTable = blogPosts;

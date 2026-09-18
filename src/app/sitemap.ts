@@ -1,11 +1,20 @@
 import { MetadataRoute } from "next";
-import { CATEGORIES } from "@/lib/data/categories";
-import { COLORING_PAGES } from "@/lib/data/coloringPages";
-import { BLOG_POSTS } from "@/lib/data/blogPosts";
+
+import {
+  getAllPublishedColoringPagesWithCategory,
+  getAllPublishedCategories,
+  getAllPublishedBlogPosts,
+} from "@/db/queries";
 
 const DOMAIN = "https://coloringnest.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [pages, categories, blogPosts] = await Promise.all([
+    getAllPublishedColoringPagesWithCategory(),
+    getAllPublishedCategories(),
+    getAllPublishedBlogPosts(),
+  ]);
+
   const routes: MetadataRoute.Sitemap = [
     {
       url: `${DOMAIN}/`,
@@ -64,15 +73,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // Category URLs
-  CATEGORIES.forEach((cat) => {
+  categories.forEach((category) => {
+    if (!category.slug) return;
+
     routes.push({
-      url: `${DOMAIN}/coloring-pages/${cat.slug}/`,
+      url: `${DOMAIN}/coloring-pages/${category.slug}/`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     });
+
     routes.push({
-      url: `${DOMAIN}/printable-coloring-pages/${cat.slug}/`,
+      url: `${DOMAIN}/printable-coloring-pages/${category.slug}/`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
@@ -80,26 +92,33 @@ export default function sitemap(): MetadataRoute.Sitemap {
   });
 
   // Individual Coloring Page URLs & Color Online URLs
-  COLORING_PAGES.forEach((page) => {
+  pages.forEach((page) => {
+    if (!page.slug || !page.categorySlug) return;
+
+    const lastModified = page.publishedAt ?? new Date();
+
     routes.push({
       url: `${DOMAIN}/coloring-pages/${page.categorySlug}/${page.slug}/`,
-      lastModified: new Date(page.publishedDate),
+      lastModified,
       changeFrequency: "monthly",
       priority: 0.9,
     });
+
     routes.push({
       url: `${DOMAIN}/color-online/${page.slug}/`,
-      lastModified: new Date(page.publishedDate),
+      lastModified,
       changeFrequency: "monthly",
       priority: 0.8,
     });
   });
 
   // Blog Post URLs
-  BLOG_POSTS.forEach((post) => {
+  blogPosts.forEach((post) => {
+    if (!post.slug) return;
+
     routes.push({
       url: `${DOMAIN}/blog/${post.slug}/`,
-      lastModified: new Date(post.publishedDate),
+      lastModified: post.publishedAt ?? new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     });

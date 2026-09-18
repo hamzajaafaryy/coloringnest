@@ -1,134 +1,206 @@
 import Link from "next/link";
-import { Palette, Heart, ShieldCheck, Sparkles, Printer } from "lucide-react";
-import { CATEGORIES } from "@/lib/data/categories";
 
-export default function Footer() {
-  const topCategories = CATEGORIES.slice(0, 8);
+import { getAllPublishedCategories } from "@/db/queries";
+
+export default async function Footer() {
+  const categories =
+    await getAllPublishedCategories();
+
+  const topCategories = categories
+    .filter(
+      (category) =>
+        category.featured ||
+        category.popular
+    )
+    .slice(0, 8);
 
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-800">
-          {/* Brand Info */}
-          <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center text-white">
-                <Palette className="w-5 h-5" />
-              </div>
-              <span className="font-bold text-2xl text-white tracking-tight">
-                Coloring<span className="text-indigo-400">Nest</span>
+    <footer className="border-t border-slate-200 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+
+          {/* =================================================
+              BRAND
+          ================================================= */}
+
+          <div className="space-y-4">
+
+            <Link
+              href="/"
+              className="inline-flex items-center"
+            >
+              <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+                ColoringNest
               </span>
             </Link>
-            <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
-              Free printable and online coloring pages for kids, toddlers, preschoolers, and adults. Designed with high quality, vector line art for creative fun, learning, and stress relief.
+
+            <p className="text-sm text-slate-600 leading-relaxed max-w-xs">
+              Free online coloring pages for
+              kids and adults. Color directly
+              in your browser or print your
+              favorite designs.
             </p>
-            <div className="flex items-center gap-4 pt-2">
-              <span className="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                100% Free & Safe
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                No Account Needed
-              </span>
-            </div>
+
           </div>
 
-          {/* Popular Categories */}
+          {/* =================================================
+              POPULAR CATEGORIES
+          ================================================= */}
+
           <div>
-            <h3 className="text-white font-semibold text-sm tracking-wider uppercase mb-4">
-              Top Categories
-            </h3>
-            <ul className="space-y-2.5 text-sm">
-              {topCategories.map((cat) => (
-                <li key={cat.slug}>
-                  <Link
-                    href={`/coloring-pages/${cat.slug}/`}
-                    className="hover:text-indigo-400 transition-colors"
-                  >
-                    {cat.name}
-                  </Link>
-                </li>
-              ))}
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">
+              Popular Categories
+            </h2>
+
+            <ul className="space-y-2">
+
+              {topCategories.map(
+                (category) => (
+                  <li key={category.id}>
+
+                    <Link
+                      href={`/coloring-pages/${category.slug}/`}
+                      className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+
+                  </li>
+                )
+              )}
+
+              <li>
+                <Link
+                  href="/coloring-pages/"
+                  className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                >
+                  Explore all categories →
+                </Link>
+              </li>
+
             </ul>
           </div>
 
-          {/* Special Hubs */}
+          {/* =================================================
+              RESOURCES
+          ================================================= */}
+
           <div>
-            <h3 className="text-white font-semibold text-sm tracking-wider uppercase mb-4">
-              Explore Hubs
-            </h3>
-            <ul className="space-y-2.5 text-sm">
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">
+              Resources
+            </h2>
+
+            <ul className="space-y-2">
+
               <li>
-                <Link href="/printable-coloring-pages/" className="hover:text-indigo-400 transition-colors">
+                <Link
+                  href="/coloring-pages/"
+                  className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                >
+                  Coloring Pages
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/color-online/"
+                  className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                >
+                  Color Online
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  href="/printable-coloring-pages/"
+                  className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                >
                   Printable Coloring Pages
                 </Link>
               </li>
+
               <li>
-                <Link href="/free-coloring-pages/" className="hover:text-indigo-400 transition-colors">
-                  Free Coloring Pages
+                <Link
+                  href="/blog/"
+                  className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                >
+                  Blog
                 </Link>
               </li>
-              <li>
-                <Link href="/coloring-pages/preschool/" className="hover:text-indigo-400 transition-colors">
-                  Preschool & Toddlers
-                </Link>
-              </li>
-              <li>
-                <Link href="/coloring-pages/kindergarten/" className="hover:text-indigo-400 transition-colors">
-                  Kindergarten Sheets
-                </Link>
-              </li>
-              <li>
-                <Link href="/coloring-pages/adults/" className="hover:text-indigo-400 transition-colors">
-                  Adults & Stress Relief
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog/" className="hover:text-indigo-400 transition-colors">
-                  Coloring Guides & Blog
-                </Link>
-              </li>
+
             </ul>
           </div>
 
-          {/* Company & Legal */}
+          {/* =================================================
+              COMPANY
+          ================================================= */}
+
           <div>
-            <h3 className="text-white font-semibold text-sm tracking-wider uppercase mb-4">
-              About & Support
-            </h3>
-            <ul className="space-y-2.5 text-sm">
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">
+              Information
+            </h2>
+
+            <ul className="space-y-2">
+
               <li>
-                <Link href="/about/" className="hover:text-indigo-400 transition-colors">
-                  About ColoringNest
+                <Link
+                  href="/about/"
+                  className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                >
+                  About
                 </Link>
               </li>
+
               <li>
-                <Link href="/contact/" className="hover:text-indigo-400 transition-colors">
-                  Contact Us
+                <Link
+                  href="/contact/"
+                  className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                >
+                  Contact
                 </Link>
               </li>
+
               <li>
-                <Link href="/privacy-policy/" className="hover:text-indigo-400 transition-colors">
+                <Link
+                  href="/privacy-policy/"
+                  className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </li>
+
               <li>
-                <Link href="/terms/" className="hover:text-indigo-400 transition-colors">
+                <Link
+                  href="/terms/"
+                  className="text-sm text-slate-600 hover:text-indigo-600 transition-colors"
+                >
                   Terms of Service
                 </Link>
               </li>
+
             </ul>
           </div>
+
         </div>
 
-        {/* Bottom copyright */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} ColoringNest. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Made with <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500" /> for creative kids and families worldwide.
+        {/* ===================================================
+            BOTTOM
+        =================================================== */}
+
+        <div className="mt-10 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+
+          <p className="text-xs text-slate-500">
+            © {new Date().getFullYear()}{" "}
+            ColoringNest. All rights reserved.
           </p>
+
+          <p className="text-xs text-slate-500">
+            Free Online Coloring Pages
+          </p>
+
         </div>
+
       </div>
     </footer>
   );

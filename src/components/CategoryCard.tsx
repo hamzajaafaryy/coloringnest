@@ -1,88 +1,61 @@
 import Link from "next/link";
-import {
-  Sparkles,
-  Footprints,
-  Dog,
-  Crown,
-  Car,
-  Wand2,
-  Trees,
-  Gift,
-  Snowflake,
-  Ghost,
-  Egg,
-  Waves,
-  Rocket,
-  Pizza,
-  Flower2,
-  CircleDot,
-  Feather,
-  Baby,
-  BookOpen,
-  Trophy,
-  Palette,
-  ArrowRight,
-} from "lucide-react";
-import { Category } from "@/lib/data/categories";
+import { ArrowRight } from "lucide-react";
 
-const iconMap: Record<string, React.ElementType> = {
-  Sparkles,
-  Footprints,
-  Dog,
-  Crown,
-  Car,
-  Wand2,
-  Trees,
-  Gift,
-  Snowflake,
-  Ghost,
-  Egg,
-  Waves,
-  Rocket,
-  Pizza,
-  Flower2,
-  CircleDot,
-  Feather,
-  Baby,
-  BookOpen,
-  Trophy,
-  Palette,
-};
-
-interface CategoryCardProps {
-  category: Category;
-  itemCount?: number;
+interface CategoryCardCategory {
+  id: string | number;
+  name: string;
+  slug: string | null;
+  description?: string | null;
+  imageUrl?: string | null;
 }
 
-export default function CategoryCard({ category, itemCount = 12 }: CategoryCardProps) {
-  const IconComponent = iconMap[category.iconName] || Palette;
-  const gradientClass = category.heroColor || "from-indigo-50 to-purple-50 border-indigo-100";
+interface CategoryCardProps {
+  category: CategoryCardCategory;
+}
+
+export default function CategoryCard({
+  category,
+}: CategoryCardProps) {
+  const slug = category.slug ?? "coloring-pages";
+  const description = category.description ?? "";
+  const imageUrl = category.imageUrl ?? null;
 
   return (
     <Link
-      href={`/coloring-pages/${category.slug}/`}
-      className={`group relative rounded-2xl p-6 bg-gradient-to-br ${gradientClass} border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between h-full`}
+      href={`/coloring-pages/${slug}/`}
+      className="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-indigo-200 transition-all duration-300"
     >
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="w-12 h-12 rounded-xl bg-white shadow-xs flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
-            <IconComponent className="w-6 h-6" />
+      <div className="relative aspect-[4/3] bg-slate-50 overflow-hidden">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={category.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
+            <span className="text-4xl font-extrabold text-indigo-200">
+              {category.name.charAt(0).toUpperCase()}
+            </span>
           </div>
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/80 text-slate-700 shadow-2xs">
-            {itemCount} pages
-          </span>
-        </div>
-        <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2">
-          {category.name}
-        </h3>
-        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-          {category.description}
-        </p>
+        )}
       </div>
 
-      <div className="mt-5 pt-3 border-t border-black/5 flex items-center justify-between text-xs font-semibold text-indigo-600 group-hover:text-indigo-800">
-        <span>Explore Category</span>
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      <div className="p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">
+            {category.name}
+          </h3>
+
+          <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all shrink-0" />
+        </div>
+
+        {description && (
+          <p className="mt-2 text-sm text-slate-500 line-clamp-2 leading-relaxed">
+            {description}
+          </p>
+        )}
       </div>
     </Link>
   );

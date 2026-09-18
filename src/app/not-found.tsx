@@ -1,62 +1,113 @@
 import Link from "next/link";
-import { Palette, Search, ArrowLeft } from "lucide-react";
-import SearchBar from "@/components/SearchBar";
-import ColoringGrid from "@/components/ColoringGrid";
-import CategoryCard from "@/components/CategoryCard";
-import { COLORING_PAGES } from "@/lib/data/coloringPages";
-import { CATEGORIES } from "@/lib/data/categories";
 
-export default function NotFound() {
-  const popularPages = COLORING_PAGES.slice(0, 4);
-  const featuredCategories = CATEGORIES.slice(0, 4);
+import {
+  getAllPublishedCategories,
+} from "@/db/queries";
+
+export default async function NotFound() {
+  const categories =
+    await getAllPublishedCategories();
+
+  const featuredCategories =
+    categories
+      .filter(
+        (category) =>
+          category.featured ||
+          category.popular
+      )
+      .slice(0, 4);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 text-center">
-      <div className="max-w-2xl mx-auto space-y-4">
-        <div className="w-16 h-16 rounded-3xl bg-indigo-100 text-indigo-600 mx-auto flex items-center justify-center">
-          <Palette className="w-8 h-8" />
-        </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-          Oops! Coloring Page Not Found
-        </h1>
-        <p className="text-slate-600 text-base leading-relaxed">
-          We couldn&apos;t find the page you were looking for. It might have moved, or you can search our library below:
-        </p>
+    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+      <div className="max-w-3xl w-full text-center">
 
-        <div className="pt-2 max-w-md mx-auto">
-          <SearchBar placeholder="Search coloring pages..." size="md" />
+        {/* =================================================
+            404
+        ================================================= */}
+
+        <div className="space-y-4">
+
+          <p className="text-7xl sm:text-8xl font-black text-indigo-600">
+            404
+          </p>
+
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
+            Page Not Found
+          </h1>
+
+          <p className="text-slate-600 max-w-xl mx-auto leading-relaxed">
+            Sorry, we couldn't find the page
+            you're looking for. Explore one of
+            our coloring categories below or
+            browse all coloring pages.
+          </p>
+
         </div>
 
-        <div className="pt-4">
+        {/* =================================================
+            ACTIONS
+        ================================================= */}
+
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-colors"
+          >
+            Back to Home
+          </Link>
+
           <Link
             href="/coloring-pages/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-md hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 font-semibold hover:bg-slate-50 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Coloring Pages
+            Browse Coloring Pages
           </Link>
+
         </div>
+
+        {/* =================================================
+            POPULAR CATEGORIES
+        ================================================= */}
+
+        {featuredCategories.length > 0 && (
+          <section className="mt-14">
+
+            <h2 className="text-xl font-bold text-slate-900 mb-6">
+              Explore Popular Categories
+            </h2>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+              {featuredCategories.map(
+                (category) => (
+                  <Link
+                    key={category.id}
+                    href={`/coloring-pages/${category.slug}/`}
+                    className="group p-5 rounded-2xl border border-slate-200 bg-white hover:bg-indigo-50 hover:border-indigo-200 transition-all"
+                  >
+
+                    <h3 className="font-bold text-sm text-slate-900 group-hover:text-indigo-600">
+                      {category.name.replace(
+                        "Coloring Pages",
+                        ""
+                      )}
+                    </h3>
+
+                    <span className="mt-2 block text-xs text-slate-500">
+                      Explore →
+                    </span>
+
+                  </Link>
+                )
+              )}
+
+            </div>
+
+          </section>
+        )}
+
       </div>
-
-      {/* Recommended Categories */}
-      <section className="space-y-6 text-left">
-        <h2 className="text-2xl font-bold text-slate-900 text-center">
-          Explore Popular Categories
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredCategories.map((cat) => (
-            <CategoryCard key={cat.slug} category={cat} />
-          ))}
-        </div>
-      </section>
-
-      {/* Recommended Pages */}
-      <section className="space-y-6 text-left">
-        <h2 className="text-2xl font-bold text-slate-900 text-center">
-          Try These Popular Coloring Pages
-        </h2>
-        <ColoringGrid pages={popularPages} />
-      </section>
-    </div>
+    </main>
   );
 }
