@@ -4,8 +4,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { constructMetadata } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "About ColoringNest | Free Online & Printable Coloring Pages",
-  description: "Learn about ColoringNest - our mission to provide high quality, 100% free online and printable coloring pages for kids, teachers, and adults.",
+  title: "About CraftColoring | Free Online & Printable Coloring Pages",
+  description: "Learn about CraftColoring - our mission to provide high quality, 100% free online and printable coloring pages for kids, teachers, and adults.",
   path: "/about/",
 });
 
@@ -22,10 +22,10 @@ export default function AboutPage() {
           <span>Our Mission & Story</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-          Welcome to ColoringNest
+          Welcome to CraftColoring
         </h1>
         <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-          ColoringNest was founded with a simple goal: to provide children, parents, teachers, and adult artists with high-quality, completely free coloring pages accessible anytime, anywhere.
+          CraftColoring was founded with a simple goal: to provide children, parents, teachers, and adult artists with high-quality, completely free coloring pages accessible anytime, anywhere.
         </p>
       </div>
 
