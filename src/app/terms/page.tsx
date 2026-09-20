@@ -2,8 +2,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { constructMetadata } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "Terms of Service | ColoringNest",
-  description: "Terms of service for using ColoringNest free coloring pages for personal and educational use.",
+  title: "Terms of Service | CraftColoring",
+  description: "Terms of service for using CraftColoring free coloring pages for personal and educational use.",
   path: "/terms/",
 });
 
@@ -18,12 +18,12 @@ export default function TermsPage() {
 
       <h2>1. Permitted Use</h2>
       <p>
-        All coloring pages provided on ColoringNest are free for personal, educational, homeschool, and classroom use. You are welcome to print and color as many pages as you like.
+        All coloring pages provided on CraftColoring are free for personal, educational, homeschool, and classroom use. You are welcome to print and color as many pages as you like.
       </p>
 
       <h2>2. Intellectual Property</h2>
       <p>
-        The original vector artwork, website design, and logos are the property of ColoringNest. Redistribution of artwork files for commercial sale or paid collections is prohibited without prior consent.
+        The original vector artwork, website design, and logos are the property of CraftColoring. Redistribution of artwork files for commercial sale or paid collections is prohibited without prior consent.
       </p>
     </div>
   );
