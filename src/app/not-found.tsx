@@ -36,8 +36,8 @@ export default async function NotFound() {
           </h1>
 
           <p className="text-slate-600 max-w-xl mx-auto leading-relaxed">
-            Sorry, we couldn't find the page
-            you're looking for. Explore one of
+            Sorry, we couldn&apos;t find the page
+            you&apos;re looking for. Explore one of
             our coloring categories below or
             browse all coloring pages.
           </p>
