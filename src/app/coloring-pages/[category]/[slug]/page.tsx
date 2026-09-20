@@ -380,7 +380,7 @@ export default async function IndividualColoringPage({
               </strong>{" "}
               Click the{" "}
               <em>
-                "Color This Page Online"
+                &quot;Color This Page Online&quot;
               </em>{" "}
               button to open the interactive
               browser editor.
@@ -392,7 +392,7 @@ export default async function IndividualColoringPage({
               </strong>{" "}
               Click the{" "}
               <em>
-                "Print Page"
+                &quot;Print Page&quot;
               </em>{" "}
               button to open the
               printer-friendly dialog.
