@@ -22,7 +22,7 @@ export const BLOG_POSTS: BlogPost[] = [
     excerpt: "Discover why coloring is more than just fun. Learn how coloring sheets foster pencil grip, hand-eye coordination, spatial awareness, and creative focus in young children.",
     author: "Dr. Elena Rostova, Educational Specialist",
     category: "Child Development",
-    seoTitle: "10 Benefits of Coloring for Kids' Fine Motor Skills | ColoringNest Blog",
+    seoTitle: "10 Benefits of Coloring for Kids' Fine Motor Skills | CraftColoring Blog",
     seoDescription: "Learn how coloring pages build fine motor skills, pencil control, hand-eye coordination, and emotional regulation in toddlers and preschoolers.",
     readTime: "6 min read",
     publishedDate: "2026-01-18",
@@ -57,7 +57,7 @@ Coloring acts as a peaceful outlet for self-expression. When children feel overw
     slug: "how-to-print-coloring-pages-at-home-guide",
     title: "How to Print High-Quality Coloring Pages at Home: Complete Guide",
     excerpt: "Learn the best paper weight, printer settings, scale options, and tips for printing sharp, smear-free coloring pages on any home printer.",
-    author: "ColoringNest Studio Team",
+    author: "CraftColoring Studio Team",
     category: "Print Guides",
     seoTitle: "How to Print Coloring Pages at Home (Best Paper & Settings)",
     seoDescription: "Step-by-step guide to printing sharp, printable coloring pages at home. Covers paper weight, ink saver settings, and PDF scaling tips.",
@@ -77,8 +77,8 @@ Printing your favorite coloring pages at home should be effortless. However, low
 - **Set Quality to 'High' or 'Best':** Ensures smooth continuous outlines without jagged edges or pixelation.
 - **Select Black & White / Grayscale:** Saves colored ink while outputting crisp monochrome line art.
 
-### 3. Printing Directly from ColoringNest
-When viewing any coloring page on ColoringNest, simply click the **"Print Page"** button. Our clean print stylesheet automatically hides headers, sidebars, and ads, printing ONLY your high-resolution line art artwork!
+### 3. Printing Directly from CraftColoring
+When viewing any coloring page on CraftColoring, simply click the **"Print Page"** button. Our clean print stylesheet automatically hides headers, sidebars, and ads, printing ONLY your high-resolution line art artwork!
     `
   },
   {
@@ -88,7 +88,7 @@ When viewing any coloring page on ColoringNest, simply click the **"Print Page"*
     excerpt: "Discover how adult coloring books and intricate mandalas calm the amygdala, lower heart rate, and induce a meditative state of flow state.",
     author: "Dr. Sarah Lin, Art Therapist",
     category: "Mindfulness",
-    seoTitle: "Adult Coloring & Mandalas for Stress Relief | ColoringNest",
+    seoTitle: "Adult Coloring & Mandalas for Stress Relief | CraftColoring",
     seoDescription: "Explore the psychological benefits of adult coloring mandalas. Learn how coloring calms anxiety and boosts mindfulness.",
     readTime: "5 min read",
     publishedDate: "2026-01-12",
