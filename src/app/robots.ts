@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/search?*", "/admin/"],
     },
-    sitemap: "https://coloringnest.com/sitemap.xml",
+    sitemap: "https://craftcoloring.com/sitemap.xml",
   };
 }
