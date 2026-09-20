@@ -15,9 +15,9 @@ import {
 } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "Coloring Nest Blog | Creative Activities & Development Guides",
+  title: "CraftColoring Blog | Creative Activities & Development Guides",
   description:
-    "Read child development articles, fine motor skill guides, printing tips, and adult coloring mandala techniques on the ColoringNest Blog.",
+    "Read child development articles, fine motor skill guides, printing tips, and adult coloring mandala techniques on the CraftColoring Blog.",
   path: "/blog/",
 });
 
@@ -43,7 +43,7 @@ export default async function BlogIndexPage() {
 
       <div className="space-y-3 max-w-3xl">
         <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-          ColoringNest Blog
+          CraftColoring Blog
         </span>
 
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
@@ -110,7 +110,7 @@ export default async function BlogIndexPage() {
           </h2>
 
           <p className="mt-2 text-slate-600">
-            Check back soon for new ColoringNest articles and guides.
+            Check back soon for new CraftColoring articles and guides.
           </p>
         </div>
       )}
