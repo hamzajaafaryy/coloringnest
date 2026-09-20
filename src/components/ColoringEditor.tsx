@@ -70,7 +70,7 @@ export default function ColoringEditor({
   useEffect(() => {
     if (!svgWrapperRef.current) return;
 
-    const storageKey = `coloringnest_saved_${slug}`;
+    const storageKey = `craftcoloring_saved_${slug}`;
     const savedState = localStorage.getItem(storageKey);
 
     svgWrapperRef.current.innerHTML = savedState || svgContent;
@@ -457,7 +457,7 @@ export default function ColoringEditor({
       }
     }
 
-    localStorage.removeItem(`coloringnest_saved_${slug}`);
+    localStorage.removeItem(`craftcoloring_saved_${slug}`);
   };
 
   /*
@@ -469,7 +469,7 @@ export default function ColoringEditor({
   const handleSaveLocal = () => {
     if (!svgWrapperRef.current) return;
 
-    const key = `coloringnest_saved_${slug}`;
+    const key = `craftcoloring_saved_${slug}`;
 
     localStorage.setItem(
       key,
