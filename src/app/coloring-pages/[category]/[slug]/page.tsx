@@ -164,7 +164,7 @@ export default async function IndividualColoringPage({
 
   const imageUrl =
     page.imageUrl ||
-    `https://coloringnest.com/images/${page.slug}.png`;
+    `https://craftcoloring.com/images/${page.slug}.png`;
 
   const imageSchema =
     generateImageObjectSchema({
