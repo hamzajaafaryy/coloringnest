@@ -68,10 +68,6 @@ export default function SearchBar({
     const trimmed = query.trim();
 
     if (!trimmed) {
-      setResults({
-        categories: [],
-        pages: [],
-      });
       setIsLoading(false);
       return;
     }
