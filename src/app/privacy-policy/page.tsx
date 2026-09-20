@@ -2,8 +2,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { constructMetadata } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "Privacy Policy | ColoringNest",
-  description: "ColoringNest privacy policy detailing how we protect user privacy and handle data.",
+  title: "Privacy Policy | CraftColoring",
+  description: "CraftColoring privacy policy detailing how we protect user privacy and handle data.",
   path: "/privacy-policy/",
 });
 
@@ -17,12 +17,12 @@ export default function PrivacyPolicyPage() {
       <p className="text-sm">Last updated: January 2026</p>
 
       <p>
-        At ColoringNest (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;), we prioritize the privacy and safety of our visitors, especially children and families. This Privacy Policy explains our practices regarding data collection.
+        At CraftColoring (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;), we prioritize the privacy and safety of our visitors, especially children and families. This Privacy Policy explains our practices regarding data collection.
       </p>
 
       <h2>1. Account-Free Experience</h2>
       <p>
-        ColoringNest does not require user registration or personal account creation to access, download, print, or color any of our coloring pages.
+        CraftColoring does not require user registration or personal account creation to access, download, print, or color any of our coloring pages.
       </p>
 
       <h2>2. Local Browser Storage</h2>
