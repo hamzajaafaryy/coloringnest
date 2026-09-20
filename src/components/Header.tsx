@@ -49,7 +49,7 @@ export default function Header() {
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-xl sm:text-2xl tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-900 bg-clip-text text-transparent">
-                  Coloring<span className="text-indigo-600">Nest</span>
+                  Craft<span className="text-indigo-600">Coloring</span>
                 </span>
                 <span className="text-[10px] text-slate-500 tracking-wider uppercase font-semibold hidden sm:inline-block -mt-1">
                   Free Online & Printable
