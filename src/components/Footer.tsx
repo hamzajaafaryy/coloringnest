@@ -31,7 +31,7 @@ export default async function Footer() {
               className="inline-flex items-center"
             >
               <span className="text-2xl font-extrabold tracking-tight text-slate-900">
-                ColoringNest
+                CraftColoring
               </span>
             </Link>
 
@@ -192,7 +192,7 @@ export default async function Footer() {
 
           <p className="text-xs text-slate-500">
             © {new Date().getFullYear()}{" "}
-            ColoringNest. All rights reserved.
+            CraftColoring. All rights reserved.
           </p>
 
           <p className="text-xs text-slate-500">
