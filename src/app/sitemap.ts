@@ -6,7 +6,7 @@ import {
   getAllPublishedBlogPosts,
 } from "@/db/queries";
 
-const DOMAIN = "https://coloringnest.com";
+const DOMAIN = "https://craftcoloring.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [pages, categories, blogPosts] = await Promise.all([
