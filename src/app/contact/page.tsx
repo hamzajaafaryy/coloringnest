@@ -2,8 +2,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { constructMetadata } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "Contact Us | ColoringNest",
-  description: "Get in touch with the ColoringNest team for feedback, category suggestions, or inquiries.",
+  title: "Contact Us | CraftColoring",
+  description: "Get in touch with the CraftColoring team for feedback, category suggestions, or inquiries.",
   path: "/contact/",
 });
 
@@ -15,7 +15,7 @@ export default function ContactPage() {
       <Breadcrumbs items={breadcrumbItems} />
 
       <div className="space-y-3">
-        <h1 className="text-3xl font-extrabold text-slate-900">Contact ColoringNest</h1>
+        <h1 className="text-3xl font-extrabold text-slate-900">Contact CraftColoring</h1>
         <p className="text-slate-600 text-sm">
           Have a suggestion for a new coloring category or page? We would love to hear from you!
         </p>
