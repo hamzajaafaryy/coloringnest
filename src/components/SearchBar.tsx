@@ -68,7 +68,6 @@ export default function SearchBar({
     const trimmed = query.trim();
 
     if (!trimmed) {
-      setIsLoading(false);
       return;
     }
 
