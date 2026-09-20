@@ -1,13 +1,13 @@
 import { Metadata } from "next";
 
 export const SITE_CONFIG = {
-  name: "ColoringNest",
+  name: "CraftColoring",
   tagline: "Free Online Coloring Pages for Kids and Adults",
-  domain: "https://coloringnest.com",
-  defaultTitle: "Free Coloring Pages for Kids & Adults | ColoringNest",
+  domain: "https://craftcoloring.com",
+  defaultTitle: "Free Coloring Pages for Kids & Adults | CraftColoring",
   defaultDescription: "Explore thousands of free printable coloring pages for kids and adults. Color online in your browser, download high-res PNG files, or print for free.",
-  ogImage: "https://coloringnest.com/images/og-default.jpg",
-  twitterHandle: "@coloringnest",
+  ogImage: "https://craftcoloring.com/images/og-default.jpg",
+  twitterHandle: undefined,
 };
 
 export function buildCanonicalUrl(path: string): string {
@@ -90,7 +90,7 @@ export function generateWebSiteSchema() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_CONFIG.name,
-    alternateName: ["Coloring Nest", "ColoringNest Free Coloring Pages"],
+    alternateName: ["CraftColoring", "CraftColoring Coloring Pages"],
     url: SITE_CONFIG.domain,
     potentialAction: {
       "@type": "SearchAction",
