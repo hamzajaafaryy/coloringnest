@@ -95,15 +95,15 @@ export default async function BlogPostDetailPage({
 const articleImage = post.featuredImage
   ? post.featuredImage.startsWith("http")
     ? post.featuredImage
-    : `https://coloringnest.com${post.featuredImage}`
-  : "https://coloringnest.com/og-image.jpg";
+    : `https://craftcoloring.com${post.featuredImage}`
+  : "https://craftcoloring.com/og-image.jpg";
 
 const articleSchema = generateArticleSchema({
   title: post.title,
   description: post.excerpt || "",
-  url: `https://coloringnest.com/blog/${slug}/`,
+  url: `https://craftcoloring.com/blog/${slug}/`,
   datePublished: publishedDate,
-  authorName: post.author || "ColoringNest",
+  authorName: post.author || "CraftColoring",
   image: articleImage,
 });
   return (
@@ -162,7 +162,7 @@ const articleSchema = generateArticleSchema({
           <User className="w-4 h-4 text-indigo-600" />
 
           <span className="font-semibold">
-            {post.author || "ColoringNest"}
+            {post.author || "CraftColoring"}
           </span>
         </div>
       </header>
