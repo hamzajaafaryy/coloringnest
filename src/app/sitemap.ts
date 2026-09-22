@@ -18,55 +18,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes: MetadataRoute.Sitemap = [
     {
       url: `${DOMAIN}/`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: `${DOMAIN}/coloring-pages/`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
       url: `${DOMAIN}/printable-coloring-pages/`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${DOMAIN}/free-coloring-pages/`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${DOMAIN}/blog/`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
     },
     {
       url: `${DOMAIN}/about/`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.4,
     },
     {
       url: `${DOMAIN}/contact/`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.4,
     },
     {
       url: `${DOMAIN}/privacy-policy/`,
-      lastModified: new Date(),
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${DOMAIN}/terms/`,
-      lastModified: new Date(),
       changeFrequency: "yearly",
       priority: 0.3,
     },
@@ -78,14 +69,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     routes.push({
       url: `${DOMAIN}/coloring-pages/${category.slug}/`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     });
 
     routes.push({
       url: `${DOMAIN}/printable-coloring-pages/${category.slug}/`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
     });
@@ -95,18 +84,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   pages.forEach((page) => {
     if (!page.slug || !page.categorySlug) return;
 
-    const lastModified = page.publishedAt ?? new Date();
+    const lastModified = page.publishedAt ?? undefined;
 
     routes.push({
       url: `${DOMAIN}/coloring-pages/${page.categorySlug}/${page.slug}/`,
-      lastModified,
+      ...(lastModified ? { lastModified } : {}),
       changeFrequency: "monthly",
       priority: 0.9,
     });
 
     routes.push({
       url: `${DOMAIN}/color-online/${page.slug}/`,
-      lastModified,
+      ...(lastModified ? { lastModified } : {}),
       changeFrequency: "monthly",
       priority: 0.8,
     });
@@ -118,7 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     routes.push({
       url: `${DOMAIN}/blog/${post.slug}/`,
-      lastModified: post.publishedAt ?? new Date(),
+      ...(post.publishedAt ? { lastModified: post.publishedAt } : {}),
       changeFrequency: "monthly",
       priority: 0.7,
     });
