@@ -31,7 +31,7 @@ export const metadata = constructMetadata({
 
 const HOMEPAGE_FAQS = [
   {
-    question: "Are all coloring pages on ColoringNest free?",
+    question: "Are all coloring pages on CraftColoring free?",
     answer:
       "Yes! 100% of our coloring pages are completely free to color online in your browser, download as high-resolution PNG images, or print at home. No account or registration is required.",
   },
@@ -254,7 +254,7 @@ export default async function HomePage() {
             </h2>
 
             <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-              No need for paper, crayons, or messy cleanups! ColoringNest
+              No need for paper, crayons, or messy cleanups! CraftColoring
               features an interactive, touch-friendly digital coloring tool.
               Click or tap any closed shape to flood-fill colors instantly,
               use the freehand brush for custom shading, or undo stokes
