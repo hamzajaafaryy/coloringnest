@@ -14,7 +14,7 @@ import {
 } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "100% Free Coloring Pages for Everyone | ColoringNest",
+  title: "100% Free Coloring Pages for Everyone | CraftColoring",
   description:
     "Browse 100% free online and printable coloring pages. No subscription, no account required. High quality vector art for kids and adults.",
   path: "/free-coloring-pages/",
@@ -57,7 +57,7 @@ export default async function FreeColoringPagesPage() {
         </h1>
 
         <p className="text-pink-100 text-base sm:text-lg max-w-2xl leading-relaxed">
-          At ColoringNest, we believe creativity should be accessible to all
+          At CraftColoring, we believe creativity should be accessible to all
           kids, parents, and teachers. Enjoy unlimited free downloads and
           browser coloring.
         </p>
