@@ -55,7 +55,7 @@ export default async function ColoringPagesDirectoryPage() {
         </h1>
 
         <p className="text-slate-600 text-base leading-relaxed">
-          Welcome to the complete ColoringNest collection! Pick a
+          Welcome to the complete CraftColoring collection! Pick a
           category below to find free coloring pages, or color any
           page directly online in your web browser.
         </p>
