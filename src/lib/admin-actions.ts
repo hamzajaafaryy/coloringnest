@@ -1,6 +1,9 @@
 "use server";
 
-import { loginAdmin as authenticateAdmin, logoutAdmin } from "@/lib/admin-auth";
+import {
+  loginAdmin as authenticateAdmin,
+  logoutAdmin as clearAdminSession,
+} from "@/lib/admin-auth";
 
 export async function loginAdmin(formData: FormData) {
   const username = String(formData.get("username") ?? "").trim();
@@ -27,5 +30,5 @@ export async function loginAdmin(formData: FormData) {
 }
 
 export async function logoutAdmin() {
-  await logoutAdmin();
+  await clearAdminSession();
 }
