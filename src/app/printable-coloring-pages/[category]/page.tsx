@@ -53,16 +53,20 @@ export async function generateMetadata({
     });
   }
 
+  const pages =
+    await getPublishedColoringPagesByCategorySlug(slug);
+
   return constructMetadata({
     title:
       cat.seoTitle ||
-      `Printable ${cat.name} (Free PNG & PDF)`,
+      `Printable ${cat.name} (Free PNG)`,
 
     description:
       cat.seoDescription ||
-      `Free printable ${cat.name.toLowerCase()} for kids and adults. Download high resolution coloring sheets or print directly from your browser.`,
+      `Free printable ${cat.name.toLowerCase()} for kids and adults. Download high-resolution PNG coloring sheets or print directly from your browser.`,
 
     path: `/printable-coloring-pages/${cat.slug}/`,
+    noindex: pages.length === 0,
   });
 }
 
