@@ -21,7 +21,7 @@ export const CATEGORIES: Category[] = [
     name: "Unicorn Coloring Pages",
     description: "Discover magical unicorn coloring pages with rainbows, castles, and cute stars. Perfect for kids, preschoolers, and fantasy lovers.",
     seoTitle: "Free Unicorn Coloring Pages for Kids (Printable & Online) | CraftColoring",
-    seoDescription: "Explore our collection of free unicorn coloring pages. Color online or download printable PDF/PNG unicorn sheets for kids and toddlers.",
+    seoDescription: "Explore our collection of free unicorn coloring pages. Color online or download printable PNG unicorn sheets for kids and toddlers.",
     iconName: "Sparkles",
     featured: true,
     popular: true,
