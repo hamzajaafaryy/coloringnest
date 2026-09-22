@@ -93,7 +93,7 @@ export default async function BlogPostDetailPage({
     ? post.featuredImage.startsWith("http")
       ? post.featuredImage
       : `https://craftcoloring.com${post.featuredImage}`
-    : "https://craftcoloring.com/images/og-default.jpg";
+    : "https://craftcoloring.com/opengraph-image";
 
   const articleSchema = generateArticleSchema({
     title: post.title,
