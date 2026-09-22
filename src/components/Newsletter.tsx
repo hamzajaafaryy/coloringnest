@@ -34,7 +34,7 @@ export default function Newsletter() {
         {submitted ? (
           <div className="inline-flex items-center gap-2 px-6 py-4 bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 font-semibold rounded-2xl text-sm animate-in fade-in">
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            Thank you! You are now subscribed to ColoringNest updates.
+            Thank you! You are now subscribed to CraftColoring updates.
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto pt-2">
