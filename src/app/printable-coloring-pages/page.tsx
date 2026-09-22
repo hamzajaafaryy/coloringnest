@@ -31,7 +31,7 @@ const PRINTABLE_FAQS = [
   {
     question: "Can teachers print these pages for classroom use?",
     answer:
-      "Yes! All printable coloring pages on ColoringNest are 100% free for teachers, homeschoolers, parents, and community programs.",
+      "Yes! All printable coloring pages on CraftColoring are 100% free for teachers, homeschoolers, parents, and community programs.",
   },
 ];
 
