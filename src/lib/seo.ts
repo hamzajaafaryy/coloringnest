@@ -7,7 +7,7 @@ export const SITE_CONFIG = {
   defaultTitle: "Free Coloring Pages for Kids & Adults | CraftColoring",
   defaultDescription:
     "Explore free printable coloring pages for kids and adults. Color online in your browser, download high-res PNG files, or print for free.",
-  ogImage: "https://craftcoloring.com/images/og-default.jpg",
+  ogImage: "https://craftcoloring.com/opengraph-image",
   twitterHandle: undefined,
 };
 
@@ -112,7 +112,7 @@ export function generateOrganizationSchema() {
     "@type": "Organization",
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.domain,
-    logo: `${SITE_CONFIG.domain}/images/logo.png`,
+    logo: `${SITE_CONFIG.domain}/icon.svg`,
     description: SITE_CONFIG.defaultDescription,
   };
 }
@@ -217,7 +217,7 @@ export function generateArticleSchema({
       name: SITE_CONFIG.name,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_CONFIG.domain}/images/logo.png`,
+        url: `${SITE_CONFIG.domain}/icon.svg`,
       },
     },
     mainEntityOfPage: {
