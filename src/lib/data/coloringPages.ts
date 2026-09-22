@@ -329,7 +329,7 @@ export const COLORING_PAGES: ColoringPage[] = [
     `),
     altText: "Playful kitten cat playing with ball of yarn coloring page",
     seoTitle: "Playful Cat & Yarn Coloring Page | Free Printable & Online",
-    seoDescription: "Free cat coloring page featuring a cute kitten playing with yarn. Color online or download printable PDF/PNG sheet.",
+    seoDescription: "Free cat coloring page featuring a cute kitten playing with yarn. Color online or download printable PNG sheet.",
     tags: ["cat", "kitten", "pets", "yarn", "animals", "cute"],
     ageRange: "Preschool (3-5)",
     difficulty: "Easy",
