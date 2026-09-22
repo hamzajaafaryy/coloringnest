@@ -15,26 +15,12 @@ interface SearchPageProps {
   searchParams: Promise<{ q?: string }>;
 }
 
-export async function generateMetadata({
-  searchParams,
-}: SearchPageProps) {
-  const { q } = await searchParams;
-
-  const query = q ? q.trim() : "";
-
+export async function generateMetadata({}: SearchPageProps) {
   return constructMetadata({
-    title: query
-      ? `Search results for "${query}"`
-      : "Search Free Coloring Pages",
-
-    description: `Browse free coloring page search results for ${
-      query || "kids and adults"
-    }. Color online or print for free.`,
-
-    path: `/search${
-      query ? `?q=${encodeURIComponent(query)}` : ""
-    }`,
-
+    title: "Search Free Coloring Pages",
+    description:
+      "Search CraftColoring coloring pages by title, category, or topic.",
+    path: "/search/",
     noindex: true,
   });
 }
@@ -46,26 +32,17 @@ export default async function SearchPage({
 
   const query = q ? q.trim().toLowerCase() : "";
 
-  /*
-   * Everything now comes from Supabase.
-   */
   const [allPages, allCategories] = await Promise.all([
     getAllPublishedColoringPagesWithCategory(),
     getAllPublishedCategories(),
   ]);
 
-  /*
-   * Search coloring pages.
-   */
   const results = query
     ? allPages.filter((page) => {
         const title = page.title?.toLowerCase() ?? "";
-        const description =
-          page.description?.toLowerCase() ?? "";
-        const categoryName =
-          page.categoryName?.toLowerCase() ?? "";
-        const categorySlug =
-          page.categorySlug?.toLowerCase() ?? "";
+        const description = page.description?.toLowerCase() ?? "";
+        const categoryName = page.categoryName?.toLowerCase() ?? "";
+        const categorySlug = page.categorySlug?.toLowerCase() ?? "";
 
         return (
           title.includes(query) ||
@@ -76,16 +53,10 @@ export default async function SearchPage({
       })
     : [];
 
-  /*
-   * Search categories.
-   */
   const matchedCategories = query
     ? allCategories.filter((category) => {
-        const name =
-          category.name?.toLowerCase() ?? "";
-
-        const description =
-          category.description?.toLowerCase() ?? "";
+        const name = category.name?.toLowerCase() ?? "";
+        const description = category.description?.toLowerCase() ?? "";
 
         return (
           name.includes(query) ||
@@ -94,10 +65,6 @@ export default async function SearchPage({
       })
     : [];
 
-  /*
-   * When there is no search query,
-   * show the first 12 published pages.
-   */
   const displayPages = query
     ? results
     : allPages.slice(0, 12);
@@ -107,7 +74,6 @@ export default async function SearchPage({
       label: "Search",
       href: "/search/",
     },
-
     ...(query
       ? [
           {
@@ -135,7 +101,6 @@ export default async function SearchPage({
         />
       </div>
 
-      {/* Matched Categories Pills */}
       {matchedCategories.length > 0 && (
         <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 space-y-2">
           <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
@@ -156,7 +121,6 @@ export default async function SearchPage({
         </div>
       )}
 
-      {/* Results Grid */}
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-slate-900">
           {query
@@ -166,7 +130,11 @@ export default async function SearchPage({
 
         <ColoringGrid
           pages={displayPages}
-          emptyMessage={`No coloring pages matching "${query}". Try searching for unicorn, dinosaur, cat, or princess.`}
+          emptyMessage={
+            query
+              ? `No coloring pages matching "${query}". Try searching for unicorn, dinosaur, cat, or princess.`
+              : "Start by searching for a coloring page."
+          }
         />
       </section>
     </div>
