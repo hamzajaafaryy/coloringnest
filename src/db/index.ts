@@ -15,11 +15,11 @@ if (!databaseUrl) {
 }
 
 const globalForDb = globalThis as typeof globalThis & {
-  __coloringNestPostgresPool?: Pool;
+  __craftColoringPostgresPool?: Pool;
 };
 
 export const pool =
-  globalForDb.__coloringNestPostgresPool ??
+  globalForDb.__craftColoringPostgresPool ??
   new Pool({
     connectionString: databaseUrl,
 
@@ -36,7 +36,7 @@ export const pool =
   });
 
 if (process.env.NODE_ENV !== "production") {
-  globalForDb.__coloringNestPostgresPool = pool;
+  globalForDb.__craftColoringPostgresPool = pool;
 }
 
 export const db = drizzle(pool, {
