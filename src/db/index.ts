@@ -22,10 +22,17 @@ export const pool =
   globalForDb.__coloringNestPostgresPool ??
   new Pool({
     connectionString: databaseUrl,
+
+    // Keep only one connection to avoid Supabase connection limits.
     max: 1,
     min: 0,
-    idleTimeoutMillis: 5_000,
-    connectionTimeoutMillis: 10_000,
+
+    // Give Next.js build workers enough time
+    // to wait for the available database connection.
+    connectionTimeoutMillis: 60_000,
+
+    // Keep the connection alive longer between queries.
+    idleTimeoutMillis: 30_000,
   });
 
 if (process.env.NODE_ENV !== "production") {
