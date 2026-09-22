@@ -5,7 +5,8 @@ export const SITE_CONFIG = {
   tagline: "Free Online Coloring Pages for Kids and Adults",
   domain: "https://craftcoloring.com",
   defaultTitle: "Free Coloring Pages for Kids & Adults | CraftColoring",
-  defaultDescription: "Explore thousands of free printable coloring pages for kids and adults. Color online in your browser, download high-res PNG files, or print for free.",
+  defaultDescription:
+    "Explore free printable coloring pages for kids and adults. Color online in your browser, download high-res PNG files, or print for free.",
   ogImage: "https://craftcoloring.com/images/og-default.jpg",
   twitterHandle: undefined,
 };
@@ -45,10 +46,13 @@ export function constructMetadata({
     description: metaDescription,
     metadataBase: new URL(SITE_CONFIG.domain),
     alternates: {
-      canonical: canonical,
+      canonical,
     },
     robots: noindex
-      ? { index: false, follow: true }
+      ? {
+          index: false,
+          follow: true,
+        }
       : {
           index: true,
           follow: true,
@@ -72,7 +76,7 @@ export function constructMetadata({
           alt: metaTitle,
         },
       ],
-      type: type,
+      type,
       locale: "en_US",
     },
     twitter: {
@@ -80,7 +84,6 @@ export function constructMetadata({
       title: metaTitle,
       description: metaDescription,
       images: [imageUrl],
-      creator: SITE_CONFIG.twitterHandle,
     },
   };
 }
@@ -90,7 +93,7 @@ export function generateWebSiteSchema() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_CONFIG.name,
-    alternateName: ["CraftColoring", "CraftColoring Coloring Pages"],
+    alternateName: "CraftColoring",
     url: SITE_CONFIG.domain,
     potentialAction: {
       "@type": "SearchAction",
@@ -135,7 +138,7 @@ export function generateBreadcrumbSchema(items: BreadcrumbInputItem[]) {
       return {
         "@type": "ListItem",
         position: index + 1,
-        name: name,
+        name,
         item: fullUrl,
       };
     }),
@@ -161,12 +164,14 @@ export function generateImageObjectSchema({
     acquireLicensePage: `${SITE_CONFIG.domain}/terms/`,
     name: title,
     caption: description,
-    description: description,
+    description,
     genre: category,
   };
 }
 
-export function generateFAQSchema(faqs: { question: string; answer: string }[]) {
+export function generateFAQSchema(
+  faqs: { question: string; answer: string }[]
+) {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -192,7 +197,7 @@ export function generateArticleSchema({
   title: string;
   description: string;
   url: string;
-  datePublished: string;
+  datePublished?: string;
   authorName: string;
   image: string;
 }) {
@@ -200,9 +205,9 @@ export function generateArticleSchema({
     "@context": "https://schema.org",
     "@type": "Article",
     headline: title,
-    description: description,
-    image: image,
-    datePublished: datePublished,
+    description,
+    image,
+    ...(datePublished ? { datePublished } : {}),
     author: {
       "@type": "Person",
       name: authorName,
