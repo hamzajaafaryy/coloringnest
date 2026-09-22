@@ -229,7 +229,7 @@ export default async function CategoryDetailPage({
             {cat.description} Choose your
             favorite design below, color it
             online in your browser, or print
-            out high quality PNG/PDF sheets
+            out high quality PNG sheets
             for free.
           </p>
 
