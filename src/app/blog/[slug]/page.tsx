@@ -66,9 +66,6 @@ export default async function BlogPostDetailPage({
     notFound();
   }
 
-  /*
-   * Recommended coloring pages now come from Supabase.
-   */
   const allColoringPages =
     await getAllPublishedColoringPagesWithCategory();
 
@@ -88,24 +85,25 @@ export default async function BlogPostDetailPage({
   const breadcrumbSchema =
     generateBreadcrumbSchema(breadcrumbItems);
 
- const publishedDate = post.publishedAt
-  ? new Date(post.publishedAt).toISOString()
-  : new Date().toISOString();
+  const publishedDate = post.publishedAt
+    ? new Date(post.publishedAt).toISOString()
+    : undefined;
 
-const articleImage = post.featuredImage
-  ? post.featuredImage.startsWith("http")
-    ? post.featuredImage
-    : `https://craftcoloring.com${post.featuredImage}`
-  : "https://craftcoloring.com/og-image.jpg";
+  const articleImage = post.featuredImage
+    ? post.featuredImage.startsWith("http")
+      ? post.featuredImage
+      : `https://craftcoloring.com${post.featuredImage}`
+    : "https://craftcoloring.com/images/og-default.jpg";
 
-const articleSchema = generateArticleSchema({
-  title: post.title,
-  description: post.excerpt || "",
-  url: `https://craftcoloring.com/blog/${slug}/`,
-  datePublished: publishedDate,
-  authorName: post.author || "CraftColoring",
-  image: articleImage,
-});
+  const articleSchema = generateArticleSchema({
+    title: post.title,
+    description: post.excerpt || "",
+    url: `https://craftcoloring.com/blog/${slug}/`,
+    datePublished: publishedDate,
+    authorName: post.author || "CraftColoring",
+    image: articleImage,
+  });
+
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <script
@@ -172,7 +170,6 @@ const articleSchema = generateArticleSchema({
         format="horizontal"
       />
 
-      {/* Article Content */}
       <div className="prose prose-indigo max-w-none text-slate-700 leading-relaxed text-base sm:text-lg space-y-6">
         {(post.content || "")
           .split("\n\n")
