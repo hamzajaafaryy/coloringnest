@@ -91,6 +91,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...(lastModified ? { lastModified } : {}),
       changeFrequency: "monthly",
       priority: 0.9,
+      ...(page.imageUrl ? { images: [page.imageUrl] } : {}),
     });
 
     routes.push({
@@ -110,6 +111,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...(post.publishedAt ? { lastModified: post.publishedAt } : {}),
       changeFrequency: "monthly",
       priority: 0.7,
+      ...(post.featuredImage ? { images: [post.featuredImage] } : {}),
     });
   });
 
