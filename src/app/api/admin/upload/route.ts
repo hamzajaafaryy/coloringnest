@@ -124,7 +124,8 @@ export async function POST(request: Request) {
     if (kind === "svg") {
       const svgText = new TextDecoder().decode(bytes);
       try {
-        bytes = new TextEncoder().encode(sanitizeSvg(svgText)).buffer;
+        const sanitized = new TextEncoder().encode(sanitizeSvg(svgText));
+        bytes = sanitized.buffer.slice(sanitized.byteOffset, sanitized.byteOffset + sanitized.byteLength) as ArrayBuffer;
       } catch {
         return NextResponse.json({ error: "Invalid or unsafe SVG file." }, { status: 400 });
       }
