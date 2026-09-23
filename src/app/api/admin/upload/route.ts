@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { sanitizeSvg } from "@/lib/sanitize-svg";
 
 const BUCKET = "coloring-pages";
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -119,6 +120,16 @@ export async function POST(request: Request) {
     const { url, serviceRoleKey } = getSupabaseConfig();
     await ensureBucket(url, serviceRoleKey);
 
+    let bytes = await file.arrayBuffer();
+    if (kind === "svg") {
+      const svgText = new TextDecoder().decode(bytes);
+      try {
+        bytes = new TextEncoder().encode(sanitizeSvg(svgText)).buffer;
+      } catch {
+        return NextResponse.json({ error: "Invalid or unsafe SVG file." }, { status: 400 });
+      }
+    }
+
     const extension =
       file.type === "image/svg+xml"
         ? "svg"
@@ -130,8 +141,6 @@ export async function POST(request: Request) {
 
     const folder = kind === "svg" ? "svg" : "images";
     const path = `${folder}/${slug}-${Date.now()}.${extension}`;
-    const bytes = await file.arrayBuffer();
-
     const uploadResponse = await fetch(
       `${url}/storage/v1/object/${BUCKET}/${path}`,
       {
@@ -153,7 +162,7 @@ export async function POST(request: Request) {
     }
 
     const publicUrl = `${url}/storage/v1/object/public/${BUCKET}/${path}`;
-    return NextResponse.json({ url: publicUrl, path, size: file.size });
+    return NextResponse.json({ url: publicUrl, path, size: bytes.byteLength });
   } catch (error) {
     console.error("Admin upload error:", error);
     return NextResponse.json(
