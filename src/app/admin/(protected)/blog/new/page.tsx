@@ -1,0 +1,7 @@
+import Link from "next/link";
+import { createBlogPost } from "@/lib/admin-crud-actions";
+import { AdminShell, Check, Field, Submit, TextArea } from "@/components/admin/AdminForm";
+
+export default function NewBlogPost() {
+  return <AdminShell title="New Article" description="Create a useful, crawlable CraftColoring article."><form action={createBlogPost} className="space-y-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><section className="grid gap-5 md:grid-cols-2"><Field label="Title" name="title" required /><Field label="Slug" name="slug" placeholder="benefits-of-coloring-for-children" /><Field label="Author" name="author" defaultValue="CraftColoring" /><Field label="Category" name="category" /><Field label="Read time" name="readTime" placeholder="5 min read" /><Field label="Featured image URL" name="featuredImage" /></section><TextArea label="Excerpt" name="excerpt" rows={4} /><TextArea label="Content" name="content" rows={18} placeholder="Write the full article content here." /><Field label="Tags" name="tags" placeholder="coloring, kids, creativity" /><section className="grid gap-5 md:grid-cols-2"><Field label="SEO title" name="seoTitle" /><Field label="SEO description" name="seoDescription" /></section><Check label="Published" name="isPublished" /><div className="flex gap-3"><Submit label="Create article" /><Link href="/admin/blog/" className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700">Cancel</Link></div></form></AdminShell>;
+}
