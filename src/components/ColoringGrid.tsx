@@ -28,7 +28,7 @@ export default function ColoringGrid({
         <ColoringCard
           key={page.id}
           page={page}
-          priority={index < 4}
+          priority={index === 0}
         />
       ))}
     </div>
