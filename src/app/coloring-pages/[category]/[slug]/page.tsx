@@ -256,11 +256,11 @@ export default async function IndividualColoringPage({
         {/* Artwork */}
         <div className="md:col-span-7 bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
           <figure className="w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center">
-            {page.svgContent ? (
+            {safeSvgContent ? (
               <div
                 className="w-full h-full flex items-center justify-center select-none"
                 dangerouslySetInnerHTML={{
-                  __html: page.svgContent,
+                  __html: safeSvgContent,
                 }}
               />
             ) : page.imageUrl ? (
@@ -306,10 +306,10 @@ export default async function IndividualColoringPage({
               Color This Page Online
             </Link>
 
-            {page.svgContent && (
+            {safeSvgContent && (
               <DownloadButton
                 slug={page.slug!}
-                svgContent={page.svgContent}
+                svgContent={safeSvgContent}
                 title={page.title}
               />
             )}
