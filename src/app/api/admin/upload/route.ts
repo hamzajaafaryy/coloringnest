@@ -65,7 +65,7 @@ async function ensureBucket(url: string, serviceRoleKey: string) {
   }
 }
 
-function safeSegment(value: string) {
+\nfunction hasValidMagic(bytes: Uint8Array, type: string) {\n  if (type === "image/webp") return bytes.length >= 12 && new TextDecoder().decode(bytes.slice(8, 12)) === "WEBP";\n  if (type === "image/png") return bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;\n  if (type === "image/jpeg") return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;\n  if (type === "image/svg+xml") return true;\n  return false;\n}\n\nfunction safeSegment(value: string) {
   return value
     .toLowerCase()
     .normalize("NFKD")
@@ -117,10 +117,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { url, serviceRoleKey } = getSupabaseConfig();
+    const originalBytes = new Uint8Array(await file.arrayBuffer());\n    if (!hasValidMagic(originalBytes, file.type)) {\n      return NextResponse.json({ error: "The file content does not match its declared image type." }, { status: 400 });\n    }\n\n    const { url, serviceRoleKey } = getSupabaseConfig();
     await ensureBucket(url, serviceRoleKey);
 
-    let bytes = await file.arrayBuffer();
+    let bytes = originalBytes.buffer.slice(originalBytes.byteOffset, originalBytes.byteOffset + originalBytes.byteLength) as ArrayBuffer;
     if (kind === "svg") {
       const svgText = new TextDecoder().decode(bytes);
       try {
