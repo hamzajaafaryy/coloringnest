@@ -56,8 +56,11 @@ export async function isAdminAuthenticated() {
 }
 
 export async function loginAdmin(username: string, password: string) {
-  const { username: configuredUsername, password: configuredPassword, secret } =
-    getConfig();
+  const {
+    username: configuredUsername,
+    password: configuredPassword,
+    secret,
+  } = getConfig();
 
   if (username !== configuredUsername || password !== configuredPassword) {
     return false;
@@ -68,7 +71,7 @@ export async function loginAdmin(username: string, password: string) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/admin",
+    path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });
 
