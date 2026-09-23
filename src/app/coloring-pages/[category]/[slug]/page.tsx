@@ -14,6 +14,7 @@ import FAQ from "@/components/FAQ";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import DownloadButton from "@/components/DownloadButton";
 import PrintButton from "@/components/PrintButton";
+import { sanitizeSvg } from "@/lib/sanitize-svg";
 
 import {
   getAllPublishedColoringPagesWithCategory,
@@ -161,6 +162,16 @@ export default async function IndividualColoringPage({
     generateBreadcrumbSchema(
       breadcrumbItems
     );
+
+  const safeSvgContent = page.svgContent
+    ? (() => {
+        try {
+          return sanitizeSvg(page.svgContent);
+        } catch {
+          return "";
+        }
+      })()
+    : "";
 
   const imageUrl =
     page.imageUrl ||
