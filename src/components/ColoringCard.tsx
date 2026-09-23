@@ -3,6 +3,7 @@ import { Sparkles, Printer } from "lucide-react";
 
 import type { ColoringPage } from "@/lib/data/coloringPages";
 import type { DbColoringPageCard } from "@/types/coloring";
+import { sanitizeSvg } from "@/lib/sanitize-svg";
 
 interface ColoringCardProps {
   page: ColoringPage | DbColoringPageCard;
@@ -22,7 +23,7 @@ export default function ColoringCard({
     : page.categorySlug;
 
   const description = page.description || "";
-  const svgContent = page.svgContent || "";
+  const svgContent = page.svgContent ? sanitizeSvg(page.svgContent) : "";
 
   const imageUrl = isDbPage
     ? page.imageUrl
@@ -61,6 +62,7 @@ export default function ColoringCard({
               alt={altText || page.title}
               className="w-full h-full object-contain"
               loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : "auto"}
             />
           ) : (
             <div className="text-sm text-slate-400">
