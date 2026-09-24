@@ -51,7 +51,7 @@ export async function updateColoringPage(id: number, formData: FormData) {
   await db.update(coloringPages).set({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
   if (existing[0]?.imageUrl && existing[0].imageUrl !== nextImageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   if (existing[0]?.svgUrl && existing[0].svgUrl !== nextSvgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
-  revalidatePath("/"); revalidatePath("/");
+  revalidatePath("/");
   revalidatePath("/coloring-pages/");
   revalidatePath("/coloring-pages/[category]/[slug]", "page");
   revalidatePath("/color-online/");
@@ -108,7 +108,10 @@ export async function updateBlogPost(id: number, formData: FormData) {
   const nextFeaturedImage = text(formData, "featuredImage");
   await db.update(blogPosts).set({ title, slug: text(formData, "slug") || slugify(title), excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: nextFeaturedImage, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt }).where(eq(blogPosts.id, id));
   if (existing[0]?.featuredImage && existing[0].featuredImage !== nextFeaturedImage) await deleteCraftColoringStorageUrl(existing[0].featuredImage);
-  revalidatePath("/blog/"); revalidatePath("/sitemap.xml"); redirect("/admin/blog/");
+  revalidatePath("/blog/");
+  revalidatePath("/blog/[slug]", "page");
+  revalidatePath("/sitemap.xml");
+  redirect("/admin/blog/");
 }
 
 export async function deleteBlogPost(id: number) {
