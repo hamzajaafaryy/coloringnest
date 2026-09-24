@@ -63,6 +63,12 @@ export default async function BlogIndexPage() {
               key={post.slug}
               className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col justify-between group"
             >
+              {post.featuredImage && (
+                <Link href={`/blog/${post.slug}/`} className="block aspect-[16/9] overflow-hidden bg-slate-100">
+                  <img src={post.featuredImage} alt={post.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </Link>
+              )}
+
               <div className="p-6 space-y-4">
                 <div className="flex items-center justify-between text-xs text-slate-500">
                   <span className="font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full border border-indigo-100">
