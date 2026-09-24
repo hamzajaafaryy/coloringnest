@@ -68,7 +68,9 @@ export function ImageUploadField({
   async function handleChange(file: File | undefined) {
     if (!file) return;
     setUploading(true);
+    setSelectedName(file.name);
     setStatus("Preparing file…");
+    if (required) setUrl("");
 
     try {
       const prepared = kind === "image" ? await compressImage(file) : file;
