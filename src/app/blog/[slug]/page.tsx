@@ -165,6 +165,18 @@ export default async function BlogPostDetailPage({
         </div>
       </header>
 
+      {post.featuredImage && (
+        <figure className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+          <img
+            src={post.featuredImage}
+            alt={post.title}
+            className="w-full aspect-[16/9] object-cover"
+            loading="eager"
+            fetchPriority="high"
+          />
+        </figure>
+      )}
+
       <AdPlaceholder
         slotName="Article Top Banner"
         format="horizontal"
