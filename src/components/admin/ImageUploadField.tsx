@@ -119,7 +119,8 @@ export function ImageUploadField({
             ? "Images are automatically resized to max 1600px and converted to WebP. Target size: under 1.5 MB."
             : "SVG is kept as vector. Maximum file size: 2 MB."}
         </p>
-        {selectedName && <p className="mt-2 truncate text-xs text-slate-500">Selected: {selectedName}</p>}\n        {status && <p className="mt-2 text-xs font-medium text-slate-600">{status}</p>}
+        {selectedName && <p className="mt-2 truncate text-xs text-slate-500">Selected: {selectedName}</p>}
+        {status && <p className="mt-2 text-xs font-medium text-slate-600">{status}</p>}
         {url && kind === "image" && (
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white p-2">
             <img src={url} alt="Uploaded coloring page preview" className="max-h-48 w-auto object-contain" />
