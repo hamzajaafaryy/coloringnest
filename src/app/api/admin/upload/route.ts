@@ -40,7 +40,29 @@ async function ensureBucket(url: string, serviceRoleKey: string) {
   }
 
   const buckets = (await listResponse.json()) as Array<{ id?: string }>;
-  if (buckets.some((bucket) => bucket.id === BUCKET)) return;
+  const bucketExists = buckets.some((bucket) => bucket.id === BUCKET);
+
+  if (bucketExists) {
+    const updateResponse = await fetch(`${url}/storage/v1/bucket/${BUCKET}`, {
+      method: "PUT",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        public: true,
+        file_size_limit: MAX_BYTES,
+        allowed_mime_types: [...SUPPORTED_TYPES],
+      }),
+    });
+
+    if (!updateResponse.ok) {
+      const message = await updateResponse.text();
+      throw new Error(`Could not configure Supabase Storage bucket: ${message}`);
+    }
+
+    return;
+  }
 
   const createResponse = await fetch(`${url}/storage/v1/bucket`, {
     method: "POST",
