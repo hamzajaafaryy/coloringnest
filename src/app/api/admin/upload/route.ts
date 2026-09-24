@@ -89,7 +89,7 @@ async function ensureBucket(url: string, serviceRoleKey: string) {
 
 
 function hasValidMagic(bytes: Uint8Array, type: string) {
-  if (type === "image/webp") return bytes.length >= 12 && new TextDecoder().decode(bytes.slice(8, 12)) === "WEBP";
+  if (type === "image/webp") return bytes.length >= 12 && new TextDecoder().decode(bytes.slice(0, 4)) === "RIFF" && new TextDecoder().decode(bytes.slice(8, 12)) === "WEBP";
   if (type === "image/png") return bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
   if (type === "image/jpeg") return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
   if (type === "image/svg+xml") return true;
@@ -156,6 +156,21 @@ export async function POST(request: Request) {
     const { url, serviceRoleKey } = getSupabaseConfig();
     await ensureBucket(url, serviceRoleKey);
 
+    const bucketCheck = await fetch(url + "/storage/v1/bucket/" + BUCKET, {
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: "Bearer " + serviceRoleKey,
+      },
+      cache: "no-store",
+    });
+    if (!bucketCheck.ok) {
+      throw new Error("Could not verify Supabase Storage bucket configuration.");
+    }
+    const bucketConfig = (await bucketCheck.json()) as { public?: boolean };
+    if (bucketConfig.public !== true) {
+      throw new Error("Supabase Storage bucket is not public. Make the coloring-pages bucket public in Supabase Storage.");
+    }
+
     let bytes = originalBytes.buffer.slice(originalBytes.byteOffset, originalBytes.byteOffset + originalBytes.byteLength) as ArrayBuffer;
     if (kind === "svg") {
       const svgText = new TextDecoder().decode(bytes);
@@ -164,6 +179,9 @@ export async function POST(request: Request) {
         bytes = sanitized.buffer.slice(sanitized.byteOffset, sanitized.byteOffset + sanitized.byteLength) as ArrayBuffer;
       } catch {
         return NextResponse.json({ error: "Invalid or unsafe SVG file." }, { status: 400 });
+      }
+      if (bytes.byteLength > MAX_BYTES) {
+        return NextResponse.json({ error: "Sanitized SVG is larger than 2 MB." }, { status: 413 });
       }
     }
 
