@@ -51,7 +51,12 @@ export async function updateColoringPage(id: number, formData: FormData) {
   await db.update(coloringPages).set({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
   if (existing[0]?.imageUrl && existing[0].imageUrl !== nextImageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   if (existing[0]?.svgUrl && existing[0].svgUrl !== nextSvgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
-  revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/color-online/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
+  revalidatePath("/"); revalidatePath("/");
+  revalidatePath("/coloring-pages/");
+  revalidatePath("/coloring-pages/[category]/[slug]", "page");
+  revalidatePath("/color-online/");
+  revalidatePath("/sitemap.xml");
+  redirect("/admin/coloring-pages/");
 }
 
 export async function deleteColoringPage(id: number) {
@@ -91,7 +96,10 @@ export async function deleteCategory(id: number) {
 export async function createBlogPost(formData: FormData) {
   await requireAdmin(); const title = text(formData, "title"); if (!title) return; const published = checkbox(formData, "isPublished");
   await db.insert(blogPosts).values({ title, slug: text(formData, "slug") || slugify(title), excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: text(formData, "featuredImage"), seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt: published ? new Date() : null });
-  revalidatePath("/blog/"); revalidatePath("/sitemap.xml"); redirect("/admin/blog/");
+  revalidatePath("/blog/");
+  revalidatePath("/blog/[slug]", "page");
+  revalidatePath("/sitemap.xml");
+  redirect("/admin/blog/");
 }
 
 export async function updateBlogPost(id: number, formData: FormData) {
