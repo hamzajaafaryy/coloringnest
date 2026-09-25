@@ -32,7 +32,7 @@ export default async function NotFound() {
           </p>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-            Page Not Found
+            Oops! Coloring Page Not Found
           </h1>
 
           <p className="text-slate-600 max-w-xl mx-auto leading-relaxed">
