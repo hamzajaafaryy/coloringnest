@@ -25,7 +25,7 @@ import { constructMetadata, generateFAQSchema } from "@/lib/seo";
 export const metadata = constructMetadata({
   title: "Free Online Coloring Pages for Kids & Adults",
   description:
-    "Explore free online coloring pages for kids and adults. Color directly in your browser with interactive tools, themed collections, and creative activities."
+    "Explore free online coloring pages for kids and adults. Color directly in your browser with interactive tools, themed collections, and creative activities.",
   path: "/",
 });
 
