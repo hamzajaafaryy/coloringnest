@@ -49,20 +49,20 @@ export default function ColoringCard({
         aria-label={`View ${page.title}`}
       >
         <div className="w-full h-full flex items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-105">
-          {svgContent ? (
-            <div
-              className="w-full h-full flex items-center justify-center"
-              dangerouslySetInnerHTML={{
-                __html: svgContent,
-              }}
-            />
-          ) : imageUrl ? (
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt={altText || page.title}
               className="w-full h-full object-contain"
               loading={priority ? "eager" : "lazy"}
               fetchPriority={priority ? "high" : "auto"}
+            />
+          ) : svgContent ? (
+            <div
+              className="w-full h-full flex items-center justify-center"
+              dangerouslySetInnerHTML={{
+                __html: svgContent,
+              }}
             />
           ) : (
             <div className="text-sm text-slate-400">
