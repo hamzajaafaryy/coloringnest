@@ -32,6 +32,32 @@ const PRESET_COLORS = [
 
 type Tool = "fill" | "brush" | "eraser";
 
+function prepareColoringSvg(svgContent: string) {
+  const template = document.createElement("template");
+  template.innerHTML = svgContent.trim();
+  const svg = template.content.querySelector("svg");
+  if (!svg) return svgContent;
+
+  svg.style.backgroundColor = "#ffffff";
+
+  svg.querySelectorAll<SVGGraphicsElement>(
+    "path, polygon, circle, ellipse, rect"
+  ).forEach((element) => {
+    const fill = (element.getAttribute("fill") || "").trim().toLowerCase();
+    const stroke = (element.getAttribute("stroke") || "").trim().toLowerCase();
+
+    if (!fill || fill !== "none") {
+      element.setAttribute("fill", "#ffffff");
+    }
+
+    if (!stroke || stroke === "none") {
+      element.setAttribute("stroke", "#111827");
+    }
+  });
+
+  return svg.outerHTML;
+}
+
 function getSvgVersion(svg: string) {
   let hash = 2166136261;
   for (let i = 0; i < svg.length; i += 1) {
@@ -55,7 +81,14 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
 
   // The source SVG version is part of the local-save key. When admin replaces
   // the artwork, the old saved drawing can no longer override the new source.
-  const svgVersion = useMemo(() => getSvgVersion(svgContent), [svgContent]);
+  const preparedSvgContent = useMemo(
+    () => prepareColoringSvg(svgContent),
+    [svgContent]
+  );
+  const svgVersion = useMemo(
+    () => getSvgVersion(preparedSvgContent),
+    [preparedSvgContent]
+  );
   const storageKey = useMemo(
     () => `craftcoloring_saved_${slug}_${svgVersion}`,
     [slug, svgVersion]
@@ -81,12 +114,12 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
       localStorage.removeItem(`craftcoloring_saved_${slug}`);
     } catch {}
 
-    svgWrapperRef.current.innerHTML = savedState || svgContent;
+    svgWrapperRef.current.innerHTML = savedState || preparedSvgContent;
     applySvgPresentation();
 
     setHistory([svgWrapperRef.current.innerHTML]);
     setHistoryIndex(0);
-  }, [slug, svgContent, storageKey, applySvgPresentation]);
+  }, [slug, preparedSvgContent, storageKey, applySvgPresentation]);
 
   const pushHistory = useCallback(() => {
     if (!svgWrapperRef.current) return;
@@ -226,7 +259,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
 
   const handleReset = () => {
     if (svgWrapperRef.current) {
-      svgWrapperRef.current.innerHTML = svgContent;
+      svgWrapperRef.current.innerHTML = preparedSvgContent;
       applySvgPresentation();
       setHistory([svgWrapperRef.current.innerHTML]);
       setHistoryIndex(0);
