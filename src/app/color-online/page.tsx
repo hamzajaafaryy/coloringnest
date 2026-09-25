@@ -4,6 +4,8 @@ import ColoringGrid from "@/components/ColoringGrid";
 import { getAllPublishedColoringPagesWithCategory } from "@/db/queries";
 import { constructMetadata, generateBreadcrumbSchema } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = constructMetadata({
   title: "Coloring Pages Online",
   description:
