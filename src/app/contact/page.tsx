@@ -17,11 +17,11 @@ export default function ContactPage() {
       <div className="space-y-3">
         <h1 className="text-3xl font-extrabold text-slate-900">Contact CraftColoring</h1>
         <p className="text-slate-600 text-sm">
-          Have a suggestion for a new coloring category or page? We would love to hear from you!
+          Have a suggestion, correction, copyright question, or idea for a new coloring category or page? We would love to hear from you.
         </p>
       </div>
 
-      <form className="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 space-y-4">
+      <div className="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 space-y-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
             Your Name
@@ -58,13 +58,10 @@ export default function ContactPage() {
           />
         </div>
 
-        <button
-          type="submit"
-          className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm shadow-md transition-colors"
-        >
-          Send Message
-        </button>
-      </form>
+        <p className="text-sm text-slate-600 leading-relaxed border-t border-slate-200 pt-4">
+          The contact form is currently being updated. Please check back soon for direct contact options. For privacy requests, you may also review our <a href="/privacy-policy/" className="text-indigo-600 font-semibold hover:underline">Privacy Policy</a>.
+        </p>
+      </div>
     </div>
   );
 }
