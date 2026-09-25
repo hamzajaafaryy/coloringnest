@@ -27,7 +27,6 @@ import {
   constructMetadata,
   generateBreadcrumbSchema,
   generateImageObjectSchema,
-  generateFAQSchema,
 } from "@/lib/seo";
 
 interface IndividualPageProps {
@@ -186,9 +185,6 @@ export default async function IndividualColoringPage({
       category: categoryName,
     });
 
-  const faqSchema =
-    generateFAQSchema(pageFaqs);
-
   return (
     <article className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
       {/* Breadcrumb JSON-LD */}
@@ -213,16 +209,6 @@ export default async function IndividualColoringPage({
         }}
       />
 
-      {/* FAQ JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html:
-            JSON.stringify(
-              faqSchema
-            ),
-        }}
-      />
 
       <Breadcrumbs
         items={breadcrumbItems}
