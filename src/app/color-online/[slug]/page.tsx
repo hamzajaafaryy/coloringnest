@@ -16,6 +16,8 @@ import {
   generateBreadcrumbSchema,
 } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 interface ColorOnlinePageProps {
   params: Promise<{ slug: string }>;
 }
@@ -91,8 +93,7 @@ export default async function ColorOnlinePage({
     },
   ];
 
-  const breadcrumbSchema =
-    generateBreadcrumbSchema(breadcrumbItems);
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -105,7 +106,6 @@ export default async function ColorOnlinePage({
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      {/* Editor Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
@@ -127,14 +127,12 @@ export default async function ColorOnlinePage({
         </div>
       </div>
 
-      {/* Interactive Editor */}
       <ColoringEditor
         slug={page.slug}
         title={page.title}
         svgContent={page.svgContent || ""}
       />
 
-      {/* Related Pages */}
       <RelatedColoringPages
         pages={relatedPages}
         title="Color More Pages Online"
