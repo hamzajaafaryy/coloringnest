@@ -59,7 +59,7 @@ export async function generateMetadata({
   return constructMetadata({
     title:
       cat.seoTitle ||
-      `Printable ${cat.name} (Free PNG)`,
+      `Printable ${cat.name} Coloring Pages`,
 
     description:
       cat.seoDescription ||
