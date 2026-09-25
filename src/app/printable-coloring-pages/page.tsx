@@ -16,7 +16,7 @@ import {
 
 export const metadata = constructMetadata({
   title:
-    "Free Printable Coloring Pages for Kids & Adults (PNG)",
+    "Printable Coloring Pages for Kids & Adults",
   description:
     "Download and print free high-resolution coloring pages. Standard Letter and A4 friendly line art for home, school, and creative activities.",
   path: "/printable-coloring-pages/",
