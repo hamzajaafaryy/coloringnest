@@ -23,9 +23,9 @@ import {
 import { constructMetadata, generateFAQSchema } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "Free Coloring Pages for Kids & Adults (Printable & Online)",
+  title: "Free Online Coloring Pages for Kids & Adults",
   description:
-    "Explore thousands of free printable coloring pages for kids and adults. Color online directly in your browser, print at home, or download PNG sheets.",
+    "Explore free online coloring pages for kids and adults. Color directly in your browser with interactive tools, themed collections, and creative activities."
   path: "/",
 });
 
@@ -121,7 +121,7 @@ export default async function HomePage() {
           <div className="text-center max-w-4xl mx-auto space-y-6">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100/80 text-indigo-700 text-xs sm:text-sm font-semibold border border-indigo-200 shadow-2xs">
               <Sparkles className="w-4 h-4 text-indigo-600" />
-              <span>100% Free Online & Printable Coloring Platform</span>
+              <span>100% Free Online Coloring Platform</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
@@ -132,8 +132,8 @@ export default async function HomePage() {
             </h1>
 
             <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto font-normal">
-              Explore thousands of free coloring pages you can color online,
-              print at home, or download as PNG files.
+              Explore free coloring pages you can color directly online,
+              with interactive tools designed for kids, families, teachers, and adults.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
@@ -194,7 +194,7 @@ export default async function HomePage() {
               </h2>
 
               <p className="text-slate-500 text-sm mt-1">
-                Most downloaded and colored sheets by our community.
+                Popular designs to explore and color online.
               </p>
             </div>
 
