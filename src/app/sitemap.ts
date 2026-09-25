@@ -32,11 +32,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${DOMAIN}/free-coloring-pages/`,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
       url: `${DOMAIN}/color-online/`,
       changeFrequency: "daily",
       priority: 0.85,
