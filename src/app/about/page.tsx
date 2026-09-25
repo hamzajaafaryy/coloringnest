@@ -4,8 +4,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { constructMetadata } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "About CraftColoring | Free Online & Printable Coloring Pages",
-  description: "Learn about CraftColoring - our mission to provide high quality, 100% free online and printable coloring pages for kids, teachers, and adults.",
+  title: "About CraftColoring",
+  description: "Learn about CraftColoring and our mission to provide free, accessible online coloring experiences for kids, families, teachers, and adults.",
   path: "/about/",
 });
 
