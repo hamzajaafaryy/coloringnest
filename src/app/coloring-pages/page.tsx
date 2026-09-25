@@ -15,9 +15,9 @@ import {
 } from "@/lib/seo";
 
 export const metadata = constructMetadata({
-  title: "All Free Printable Coloring Pages & Categories",
+  title: "All Free Coloring Pages & Categories",
   description:
-    "Browse free coloring pages organized by category: Unicorns, Dinosaurs, Animals, Princesses, Vehicles, Holidays, Mandalas, and more.",
+    "Browse free online coloring pages organized by category: Unicorns, Dinosaurs, Animals, Princesses, Vehicles, Holidays, Mandalas, and more.",
   path: "/coloring-pages/",
 });
 
