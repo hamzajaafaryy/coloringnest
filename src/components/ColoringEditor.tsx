@@ -39,25 +39,45 @@ function prepareColoringSvg(svgContent: string) {
   if (!svg) return svgContent;
 
   svg.style.backgroundColor = "#ffffff";
+  svg.style.opacity = "1";
 
-  svg.querySelectorAll<SVGGraphicsElement>(
-    "path, polygon, circle, ellipse, rect"
-  ).forEach((element) => {
-    const fill = (element.getAttribute("fill") || "").trim().toLowerCase();
-    const stroke = (element.getAttribute("stroke") || "").trim().toLowerCase();
+  template.content.querySelectorAll<SVGElement>("*").forEach((element) => {
+    // Remove inherited transparency that can make line art look faded.
+    element.style.opacity = "1";
+    element.style.fillOpacity = "1";
+    element.style.strokeOpacity = "1";
 
-    if (!fill || fill !== "none") {
-      element.setAttribute("fill", "#ffffff");
-    }
+    if (element.matches("path, polygon, circle, ellipse, rect")) {
+      const fill = (element.getAttribute("fill") || "").trim().toLowerCase();
+      const stroke = (element.getAttribute("stroke") || "").trim().toLowerCase();
 
-    if (!stroke || stroke === "none") {
-      element.setAttribute("stroke", "#111827");
+      // Every closed drawing region gets a solid white base so the bucket
+      // tool has a real area to fill.
+      if (!fill || fill === "none" || fill === "transparent") {
+        element.setAttribute("fill", "#ffffff");
+      } else {
+        element.setAttribute("fill", "#ffffff");
+      }
+
+      if (!stroke || stroke === "none" || stroke === "transparent") {
+        element.setAttribute("stroke", "#111827");
+      } else {
+        element.setAttribute("stroke", "#111827");
+      }
+
+      element.setAttribute("stroke-width", "2.25");
+      element.setAttribute("stroke-linecap", "round");
+      element.setAttribute("stroke-linejoin", "round");
+      element.style.fill = "#ffffff";
+      element.style.stroke = "#111827";
+      element.style.strokeWidth = "2.25";
+      element.style.pointerEvents = "auto";
+      element.setAttribute("data-colorable", "true");
     }
   });
 
   return svg.outerHTML;
 }
-
 function getSvgVersion(svg: string) {
   let hash = 2166136261;
   for (let i = 0; i < svg.length; i += 1) {
@@ -138,7 +158,11 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     const target = event.target as Element | null;
     const colorable = target?.closest("path, polygon, circle, ellipse, rect");
     if (!colorable) return;
-    (colorable as SVGElement).setAttribute("fill", selectedColor);
+    const svgElement = colorable as SVGElement;
+    svgElement.setAttribute("fill", selectedColor);
+    svgElement.style.fill = selectedColor;
+    svgElement.style.opacity = "1";
+    svgElement.style.fillOpacity = "1";
     pushHistory();
   };
 
