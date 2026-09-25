@@ -74,12 +74,12 @@ export async function generateMetadata({
   return constructMetadata({
     title:
       page.seoTitle ||
-      `${page.title} | Free Printable & Online`,
+      `${page.title} Coloring Page Online`,
 
     description:
       page.seoDescription ||
       page.description ||
-      `Color ${page.title} online or print it for free.`,
+      `Color ${page.title} online for free in your browser. Explore the interactive coloring tools and creative features on this page.`,
 
     path: `/coloring-pages/${category}/${slug}/`,
   });
