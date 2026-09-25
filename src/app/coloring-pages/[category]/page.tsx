@@ -62,7 +62,7 @@ export async function generateMetadata({
   return constructMetadata({
     title:
       cat.seoTitle ||
-      `${cat.name} | Free Printable & Online`,
+      `${cat.name} Coloring Pages Online`,
 
     description:
       cat.seoDescription ||
@@ -218,7 +218,7 @@ export default async function CategoryDetailPage({
         <div className="max-w-3xl space-y-3">
 
           <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-white/80 px-3 py-1 rounded-full border border-indigo-100">
-            Free Printable & Online Category
+            Online Coloring Category
           </span>
 
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
@@ -226,11 +226,9 @@ export default async function CategoryDetailPage({
           </h1>
 
           <p className="text-slate-700 text-base sm:text-lg leading-relaxed">
-            {cat.description} Choose your
-            favorite design below, color it
-            online in your browser, or print
-            out high quality PNG sheets
-            for free.
+            {cat.description} Explore the collection below and color
+            your favorite designs directly in your browser. You can also
+            use the dedicated print options when available.
           </p>
 
         </div>
