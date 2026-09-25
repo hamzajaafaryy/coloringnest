@@ -22,6 +22,7 @@ import {
 
 import { constructMetadata, generateFAQSchema } from "@/lib/seo";
 
+// Production-safe homepage metadata
 export const metadata = constructMetadata({
   title: "Free Online Coloring Pages for Kids & Adults",
   description:
