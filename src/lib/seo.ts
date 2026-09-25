@@ -6,7 +6,7 @@ export const SITE_CONFIG = {
   domain: "https://craftcoloring.com",
   defaultTitle: "Free Coloring Pages for Kids & Adults | CraftColoring",
   defaultDescription:
-    "Explore free printable coloring pages for kids and adults. Color online in your browser, download high-res PNG files, or print for free.",
+    "Explore free online coloring pages for kids and adults. Color directly in your browser with interactive tools and discover themed collections for learning and creativity.",
   ogImage: "https://craftcoloring.com/opengraph-image",
   twitterHandle: undefined,
 };
@@ -34,8 +34,9 @@ export function constructMetadata({
   noindex = false,
   type = "website",
 }: MetadataParams = {}): Metadata {
-  const metaTitle = title
-    ? `${title} | ${SITE_CONFIG.name}`
+  const cleanTitle = title?.endsWith(` | ${SITE_CONFIG.name}`) ? title.slice(0, -(` | ${SITE_CONFIG.name}`).length) : title;
+  const metaTitle = cleanTitle
+    ? `${cleanTitle} | ${SITE_CONFIG.name}`
     : SITE_CONFIG.defaultTitle;
   const metaDescription = description || SITE_CONFIG.defaultDescription;
   const canonical = buildCanonicalUrl(path);
