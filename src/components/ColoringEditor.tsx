@@ -68,10 +68,17 @@ function prepareColoringSvg(svgContent: string) {
       element.setAttribute("stroke-width", "2.25");
       element.setAttribute("stroke-linecap", "round");
       element.setAttribute("stroke-linejoin", "round");
-      element.style.fill = "#ffffff";
-      element.style.stroke = "#111827";
-      element.style.strokeWidth = "2.25";
-      element.style.pointerEvents = "auto";
+      // Use !important because many coloring SVGs ship with group-level
+      // fill/stroke rules that otherwise override the interactive region.
+      element.style.setProperty("fill", "#ffffff", "important");
+      element.style.setProperty("stroke", "#111827", "important");
+      element.style.setProperty("stroke-width", "2.25", "important");
+      element.style.setProperty("stroke-linecap", "round", "important");
+      element.style.setProperty("stroke-linejoin", "round", "important");
+      element.style.setProperty("opacity", "1", "important");
+      element.style.setProperty("fill-opacity", "1", "important");
+      element.style.setProperty("stroke-opacity", "1", "important");
+      element.style.setProperty("pointer-events", "auto", "important");
       element.setAttribute("data-colorable", "true");
     }
   });
@@ -160,9 +167,11 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     if (!colorable) return;
     const svgElement = colorable as SVGElement;
     svgElement.setAttribute("fill", selectedColor);
-    svgElement.style.fill = selectedColor;
-    svgElement.style.opacity = "1";
-    svgElement.style.fillOpacity = "1";
+    svgElement.style.setProperty("fill", selectedColor, "important");
+    svgElement.style.setProperty("opacity", "1", "important");
+    svgElement.style.setProperty("fill-opacity", "1", "important");
+    svgElement.style.setProperty("stroke", "#111827", "important");
+    svgElement.style.setProperty("stroke-opacity", "1", "important");
     pushHistory();
   };
 
