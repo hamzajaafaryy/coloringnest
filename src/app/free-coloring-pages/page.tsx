@@ -16,7 +16,7 @@ import {
 export const metadata = constructMetadata({
   title: "100% Free Coloring Pages for Everyone | CraftColoring",
   description:
-    "Browse 100% free online and printable coloring pages. No subscription, no account required. High quality vector art for kids and adults.",
+    "Browse free online coloring pages for kids and adults. No subscription or account is required to explore and color.",
   path: "/free-coloring-pages/",
 });
 
@@ -53,13 +53,13 @@ export default async function FreeColoringPagesPage() {
         </span>
 
         <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-          100% Free Online & Printable Coloring Pages
+          100% Free Online Coloring Pages
         </h1>
 
         <p className="text-pink-100 text-base sm:text-lg max-w-2xl leading-relaxed">
           At CraftColoring, we believe creativity should be accessible to all
-          kids, parents, and teachers. Enjoy unlimited free downloads and
-          browser coloring.
+          kids, parents, and teachers. Explore themed collections and
+          color directly in your browser.
         </p>
       </section>
 
