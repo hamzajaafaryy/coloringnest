@@ -14,6 +14,8 @@ import {
   generateBreadcrumbSchema,
 } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = constructMetadata({
   title: "CraftColoring Blog | Creative Activities & Development Guides",
   description:
