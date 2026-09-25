@@ -14,6 +14,7 @@ import {
 } from "@/lib/seo";
 
 export const metadata = constructMetadata({
+  noindex: true,
   title: "100% Free Coloring Pages for Everyone | CraftColoring",
   description:
     "Browse free online coloring pages for kids and adults. No subscription or account is required to explore and color.",
