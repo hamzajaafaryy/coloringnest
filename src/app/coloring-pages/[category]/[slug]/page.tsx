@@ -252,10 +252,10 @@ export default async function IndividualColoringPage({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         {/* Artwork */}
         <div className="md:col-span-7 bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-          <figure className="w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center">
+          <figure className="w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center overflow-hidden">
             {safeSvgContent ? (
               <div
-                className="w-full h-full flex items-center justify-center select-none"
+                className="w-full h-full flex items-center justify-center select-none overflow-hidden [&>svg]:block [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-full [&>svg]:h-full"
                 dangerouslySetInnerHTML={{
                   __html: safeSvgContent,
                 }}
