@@ -42,20 +42,39 @@ function prepareColoringSvg(svgContent: string) {
   svg.removeAttribute("width");
   svg.removeAttribute("height");
 
+  // Some line-art SVGs store their visible artwork inside <defs>/<use>.
+  // A direct element style does not reliably override those referenced
+  // shapes, so inject a high-contrast presentation layer into the SVG.
+  const style = document.createElement("style");
+  style.textContent = `
+    path, polygon, circle, ellipse, rect, line, polyline, use {
+      fill: #ffffff !important;
+      stroke: #111111 !important;
+      stroke-width: 5 !important;
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+      opacity: 1 !important;
+      fill-opacity: 1 !important;
+      stroke-opacity: 1 !important;
+      vector-effect: non-scaling-stroke !important;
+    }
+  `;
+  svg.insertBefore(style, svg.firstChild);
+
   template.content.querySelectorAll<SVGElement>("*").forEach((element) => {
     element.style.setProperty("opacity", "1", "important");
     element.style.setProperty("fill-opacity", "1", "important");
     element.style.setProperty("stroke-opacity", "1", "important");
 
-    if (element.matches("path, polygon, circle, ellipse, rect, line, polyline")) {
+    if (element.matches("path, polygon, circle, ellipse, rect, line, polyline, use")) {
       element.setAttribute("fill", "#ffffff");
-      element.setAttribute("stroke", "#111827");
-      element.setAttribute("stroke-width", "3");
+      element.setAttribute("stroke", "#111111");
+      element.setAttribute("stroke-width", "5");
       element.setAttribute("stroke-linecap", "round");
       element.setAttribute("stroke-linejoin", "round");
       element.style.setProperty("fill", "#ffffff", "important");
-      element.style.setProperty("stroke", "#111827", "important");
-      element.style.setProperty("stroke-width", "3", "important");
+      element.style.setProperty("stroke", "#111111", "important");
+      element.style.setProperty("stroke-width", "5", "important");
       element.style.setProperty("stroke-linecap", "round", "important");
       element.style.setProperty("stroke-linejoin", "round", "important");
     }
