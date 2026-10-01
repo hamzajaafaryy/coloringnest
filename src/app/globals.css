@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+@keyframes cc-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -12px, 0) rotate(2deg); }
+}
+@keyframes cc-float-reverse {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, 10px, 0) rotate(-3deg); }
+}
+@keyframes cc-bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes cc-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.cc-float { animation: cc-float 5s ease-in-out infinite; }
+.cc-float-reverse { animation: cc-float-reverse 6s ease-in-out infinite; }
+.cc-bounce-soft { animation: cc-bounce-soft 2.8s ease-in-out infinite; }
+.cc-gradient-flow { background-size: 200% 200%; animation: cc-shimmer 8s ease infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .cc-float, .cc-float-reverse, .cc-bounce-soft, .cc-gradient-flow { animation: none !important; }
+}
