@@ -17,7 +17,6 @@ import {
   Check,
   Sparkles,
 } from "lucide-react";
-import { downloadSvgAsPng } from "@/lib/coloring/svgUtils";
 
 interface ColoringEditorProps {
   slug: string;
@@ -38,53 +37,33 @@ function prepareColoringSvg(svgContent: string) {
   const svg = template.content.querySelector("svg");
   if (!svg) return svgContent;
 
-  svg.style.backgroundColor = "#ffffff";
-  svg.style.opacity = "1";
+  svg.style.setProperty("background", "#ffffff", "important");
+  svg.style.setProperty("opacity", "1", "important");
+  svg.removeAttribute("width");
+  svg.removeAttribute("height");
 
   template.content.querySelectorAll<SVGElement>("*").forEach((element) => {
-    // Remove inherited transparency that can make line art look faded.
-    element.style.opacity = "1";
-    element.style.fillOpacity = "1";
-    element.style.strokeOpacity = "1";
+    element.style.setProperty("opacity", "1", "important");
+    element.style.setProperty("fill-opacity", "1", "important");
+    element.style.setProperty("stroke-opacity", "1", "important");
 
-    if (element.matches("path, polygon, circle, ellipse, rect")) {
-      const fill = (element.getAttribute("fill") || "").trim().toLowerCase();
-      const stroke = (element.getAttribute("stroke") || "").trim().toLowerCase();
-
-      // Every closed drawing region gets a solid white base so the bucket
-      // tool has a real area to fill.
-      if (!fill || fill === "none" || fill === "transparent") {
-        element.setAttribute("fill", "#ffffff");
-      } else {
-        element.setAttribute("fill", "#ffffff");
-      }
-
-      if (!stroke || stroke === "none" || stroke === "transparent") {
-        element.setAttribute("stroke", "#111827");
-      } else {
-        element.setAttribute("stroke", "#111827");
-      }
-
-      element.setAttribute("stroke-width", "2.25");
+    if (element.matches("path, polygon, circle, ellipse, rect, line, polyline")) {
+      element.setAttribute("fill", "#ffffff");
+      element.setAttribute("stroke", "#111827");
+      element.setAttribute("stroke-width", "3");
       element.setAttribute("stroke-linecap", "round");
       element.setAttribute("stroke-linejoin", "round");
-      // Use !important because many coloring SVGs ship with group-level
-      // fill/stroke rules that otherwise override the interactive region.
       element.style.setProperty("fill", "#ffffff", "important");
       element.style.setProperty("stroke", "#111827", "important");
-      element.style.setProperty("stroke-width", "2.25", "important");
+      element.style.setProperty("stroke-width", "3", "important");
       element.style.setProperty("stroke-linecap", "round", "important");
       element.style.setProperty("stroke-linejoin", "round", "important");
-      element.style.setProperty("opacity", "1", "important");
-      element.style.setProperty("fill-opacity", "1", "important");
-      element.style.setProperty("stroke-opacity", "1", "important");
-      element.style.setProperty("pointer-events", "auto", "important");
-      element.setAttribute("data-colorable", "true");
     }
   });
 
   return svg.outerHTML;
 }
+
 function getSvgVersion(svg: string) {
   let hash = 2166136261;
   for (let i = 0; i < svg.length; i += 1) {
@@ -92,6 +71,138 @@ function getSvgVersion(svg: string) {
     hash = Math.imul(hash, 16777619);
   }
   return (hash >>> 0).toString(36);
+}
+
+function getSvgAspectRatio(svgContent: string) {
+  const template = document.createElement("template");
+  template.innerHTML = svgContent.trim();
+  const svg = template.content.querySelector("svg");
+  if (!svg) return 4 / 3;
+
+  const viewBox = svg.getAttribute("viewBox")?.trim().split(/\s+/).map(Number);
+  if (viewBox && viewBox.length === 4 && viewBox[2] > 0 && viewBox[3] > 0) {
+    return viewBox[2] / viewBox[3];
+  }
+
+  const width = parseFloat(svg.getAttribute("width") || "");
+  const height = parseFloat(svg.getAttribute("height") || "");
+  if (width > 0 && height > 0) return width / height;
+
+  return 4 / 3;
+}
+
+function hexToRgb(hex: string) {
+  const clean = hex.replace("#", "");
+  const value = clean.length === 3
+    ? clean.split("").map((char) => char + char).join("")
+    : clean;
+  return {
+    r: parseInt(value.slice(0, 2), 16),
+    g: parseInt(value.slice(2, 4), 16),
+    b: parseInt(value.slice(4, 6), 16),
+  };
+}
+
+function isLinePixel(data: Uint8ClampedArray, index: number) {
+  const r = data[index];
+  const g = data[index + 1];
+  const b = data[index + 2];
+  const luminance = (r * 299 + g * 587 + b * 114) / 1000;
+  const grayscale = Math.max(r, g, b) - Math.min(r, g, b);
+  return luminance < 245 && grayscale < 28;
+}
+
+function floodFillCanvas(
+  canvas: HTMLCanvasElement,
+  clientX: number,
+  clientY: number,
+  color: string
+) {
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return false;
+
+  const x = Math.floor(((clientX - rect.left) / rect.width) * canvas.width);
+  const y = Math.floor(((clientY - rect.top) / rect.height) * canvas.height);
+  if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) return false;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return false;
+
+  const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = image.data;
+  const seedIndex = (y * canvas.width + x) * 4;
+
+  if (isLinePixel(data, seedIndex)) return false;
+
+  const target = {
+    r: data[seedIndex],
+    g: data[seedIndex + 1],
+    b: data[seedIndex + 2],
+    a: data[seedIndex + 3],
+  };
+  const fill = hexToRgb(color);
+
+  const tolerance = 22;
+  const matchesTarget = (index: number) => {
+    if (data[index + 3] < 20) return false;
+    if (isLinePixel(data, index)) return false;
+
+    return (
+      Math.abs(data[index] - target.r) <= tolerance &&
+      Math.abs(data[index + 1] - target.g) <= tolerance &&
+      Math.abs(data[index + 2] - target.b) <= tolerance
+    );
+  };
+
+  const seedIsHugeWhiteBackground =
+    target.r > 245 && target.g > 245 && target.b > 245;
+
+  const stack = [[x, y]];
+  const visited = new Uint8Array(canvas.width * canvas.height);
+  visited[y * canvas.width + x] = 1;
+  let changed = 0;
+
+  while (stack.length) {
+    const point = stack.pop();
+    if (!point) break;
+    const [px, py] = point;
+    const index = (py * canvas.width + px) * 4;
+
+    if (!matchesTarget(index)) continue;
+
+    data[index] = fill.r;
+    data[index + 1] = fill.g;
+    data[index + 2] = fill.b;
+    data[index + 3] = 255;
+    changed += 1;
+
+    if (px > 0) {
+      const i = py * canvas.width + px - 1;
+      if (!visited[i]) { visited[i] = 1; stack.push([px - 1, py]); }
+    }
+    if (px < canvas.width - 1) {
+      const i = py * canvas.width + px + 1;
+      if (!visited[i]) { visited[i] = 1; stack.push([px + 1, py]); }
+    }
+    if (py > 0) {
+      const i = (py - 1) * canvas.width + px;
+      if (!visited[i]) { visited[i] = 1; stack.push([px, py - 1]); }
+    }
+    if (py < canvas.height - 1) {
+      const i = (py + 1) * canvas.width + px;
+      if (!visited[i]) { visited[i] = 1; stack.push([px, py + 1]); }
+    }
+  }
+
+  // Never allow a click on the page's huge outer white background to paint
+  // the entire canvas accidentally.
+  if (seedIsHugeWhiteBackground && changed > canvas.width * canvas.height * 0.55) {
+    return false;
+  }
+
+  if (!changed) return false;
+  ctx.putImageData(image, 0, 0);
+  return true;
 }
 
 export default function ColoringEditor({ slug, title, svgContent }: ColoringEditorProps) {
@@ -103,76 +214,110 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isDrawing, setIsDrawing] = useState(false);
-  const svgWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const aspectRatio = useMemo(() => getSvgAspectRatio(svgContent), [svgContent]);
+  const preparedSvgContent = useMemo(() => prepareColoringSvg(svgContent), [svgContent]);
+  const svgVersion = useMemo(() => getSvgVersion(preparedSvgContent), [preparedSvgContent]);
+  const storageKey = useMemo(() => `craftcoloring_canvas_${slug}_${svgVersion}`, [slug, svgVersion]);
 
-  // The source SVG version is part of the local-save key. When admin replaces
-  // the artwork, the old saved drawing can no longer override the new source.
-  const preparedSvgContent = useMemo(
-    () => prepareColoringSvg(svgContent),
-    [svgContent]
-  );
-  const svgVersion = useMemo(
-    () => getSvgVersion(preparedSvgContent),
-    [preparedSvgContent]
-  );
-  const storageKey = useMemo(
-    () => `craftcoloring_saved_${slug}_${svgVersion}`,
-    [slug, svgVersion]
-  );
-
-  const applySvgPresentation = useCallback(() => {
-    const svg = svgWrapperRef.current?.querySelector("svg");
-    if (!svg) return;
-    svg.style.width = "100%";
-    svg.style.height = "100%";
-    svg.style.display = "block";
-    svg.style.pointerEvents = "auto";
-    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  const saveCanvasState = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return "";
+    return canvas.toDataURL("image/png");
   }, []);
 
-  useEffect(() => {
-    if (!svgWrapperRef.current) return;
+  const restoreCanvasState = useCallback((dataUrl: string) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !dataUrl) return false;
 
-    let savedState = "";
+    const image = new Image();
+    image.onload = () => {
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    };
+    image.src = dataUrl;
+    return true;
+  }, []);
+
+  const renderSvgToCanvas = useCallback(async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const width = 1600;
+    const height = Math.max(900, Math.round(width / aspectRatio));
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+
+    const blob = new Blob([preparedSvgContent], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
     try {
-      savedState = localStorage.getItem(storageKey) || "";
-      // Remove the legacy unversioned key once, so an old SVG can never win.
-      localStorage.removeItem(`craftcoloring_saved_${slug}`);
-    } catch {}
+      const image = new Image();
+      image.decoding = "async";
+      image.src = url;
+      await image.decode();
 
-    svgWrapperRef.current.innerHTML = savedState || preparedSvgContent;
-    applySvgPresentation();
+      const scale = Math.min(width / image.width, height / image.height);
+      const drawWidth = image.width * scale;
+      const drawHeight = image.height * scale;
+      const offsetX = (width - drawWidth) / 2;
+      const offsetY = (height - drawHeight) / 2;
 
-    setHistory([svgWrapperRef.current.innerHTML]);
-    setHistoryIndex(0);
-  }, [slug, preparedSvgContent, storageKey, applySvgPresentation]);
+      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }, [aspectRatio, preparedSvgContent]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const init = async () => {
+      await renderSvgToCanvas();
+      if (cancelled) return;
+
+      let saved = "";
+      try {
+        saved = localStorage.getItem(storageKey) || "";
+      } catch {}
+
+      if (saved) restoreCanvasState(saved);
+
+      window.setTimeout(() => {
+        if (cancelled) return;
+        const current = saveCanvasState();
+        setHistory([current]);
+        setHistoryIndex(0);
+      }, 80);
+    };
+
+    init();
+    return () => { cancelled = true; };
+  }, [renderSvgToCanvas, restoreCanvasState, saveCanvasState, storageKey]);
 
   const pushHistory = useCallback(() => {
-    if (!svgWrapperRef.current) return;
-    const currentSvg = svgWrapperRef.current.innerHTML;
+    const current = saveCanvasState();
+    if (!current) return;
     setHistory((previous) => {
-      setHistoryIndex((previousIndex) => {
-        const next = [...previous.slice(0, previousIndex + 1), currentSvg];
-        return next.length - 1;
-      });
-      return [...previous.slice(0, historyIndex + 1), currentSvg];
+      const next = [...previous.slice(0, historyIndex + 1), current];
+      setHistoryIndex(next.length - 1);
+      return next;
     });
-  }, [historyIndex]);
+  }, [historyIndex, saveCanvasState]);
 
-  const handleSvgClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleFill = (event: React.PointerEvent<HTMLCanvasElement>) => {
     if (activeTool !== "fill") return;
-    const target = event.target as Element | null;
-    const colorable = target?.closest("path, polygon, circle, ellipse, rect");
-    if (!colorable) return;
-    const svgElement = colorable as SVGElement;
-    svgElement.setAttribute("fill", selectedColor);
-    svgElement.style.setProperty("fill", selectedColor, "important");
-    svgElement.style.setProperty("opacity", "1", "important");
-    svgElement.style.setProperty("fill-opacity", "1", "important");
-    svgElement.style.setProperty("stroke", "#111827", "important");
-    svgElement.style.setProperty("stroke-opacity", "1", "important");
-    pushHistory();
+    event.preventDefault();
+    const changed = floodFillCanvas(canvasRef.current!, event.clientX, event.clientY, selectedColor);
+    if (changed) pushHistory();
   };
 
   const getCanvasCoordinates = (event: React.PointerEvent<HTMLCanvasElement>) => {
@@ -180,67 +325,26 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
+      x: (event.clientX - rect.left) * (canvas.width / rect.width),
+      y: (event.clientY - rect.top) * (canvas.height / rect.height),
     };
   };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const resizeCanvas = () => {
-      const rect = canvas.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      const dpr = Math.max(window.devicePixelRatio || 1, 1);
-      const width = Math.round(rect.width * dpr);
-      const height = Math.round(rect.height * dpr);
-      if (canvas.width === width && canvas.height === height) return;
-
-      const oldCanvas = document.createElement("canvas");
-      oldCanvas.width = canvas.width;
-      oldCanvas.height = canvas.height;
-      const oldCtx = oldCanvas.getContext("2d");
-      if (oldCtx && canvas.width && canvas.height) oldCtx.drawImage(canvas, 0, 0);
-
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (oldCanvas.width && oldCanvas.height) {
-        ctx.drawImage(oldCanvas, 0, 0, oldCanvas.width / dpr, oldCanvas.height / dpr);
-      }
-    };
-
-    resizeCanvas();
-    const observer = new ResizeObserver(resizeCanvas);
-    observer.observe(canvas);
-    window.addEventListener("resize", resizeCanvas);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", resizeCanvas);
-    };
-  }, []);
 
   const startDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
     if (activeTool === "fill") return;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
+
     event.preventDefault();
     canvas.setPointerCapture?.(event.pointerId);
     const { x, y } = getCanvasCoordinates(event);
     setIsDrawing(true);
+
+    ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
+    ctx.fillStyle = activeTool === "eraser" ? "#000000" : selectedColor;
     ctx.beginPath();
     ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
-    if (activeTool === "eraser") {
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.fillStyle = "rgba(0,0,0,1)";
-    } else {
-      ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = selectedColor;
-    }
     ctx.fill();
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -250,13 +354,14 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     if (!isDrawing || activeTool === "fill") return;
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
+
     event.preventDefault();
     const { x, y } = getCanvasCoordinates(event);
+    ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
+    ctx.strokeStyle = selectedColor;
     ctx.lineWidth = brushSize;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
-    ctx.strokeStyle = selectedColor;
     ctx.lineTo(x, y);
     ctx.stroke();
     ctx.beginPath();
@@ -269,53 +374,53 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
       try { event.currentTarget.releasePointerCapture?.(event.pointerId); } catch {}
     }
     const ctx = canvasRef.current?.getContext("2d");
-    if (ctx) {
-      ctx.closePath();
-      ctx.globalCompositeOperation = "source-over";
-    }
+    if (ctx) ctx.globalCompositeOperation = "source-over";
     setIsDrawing(false);
+    pushHistory();
   };
 
   const handleUndo = () => {
     if (historyIndex <= 0) return;
     const nextIndex = historyIndex - 1;
     setHistoryIndex(nextIndex);
-    if (svgWrapperRef.current) svgWrapperRef.current.innerHTML = history[nextIndex];
+    restoreCanvasState(history[nextIndex]);
   };
 
   const handleRedo = () => {
     if (historyIndex >= history.length - 1) return;
     const nextIndex = historyIndex + 1;
     setHistoryIndex(nextIndex);
-    if (svgWrapperRef.current) svgWrapperRef.current.innerHTML = history[nextIndex];
+    restoreCanvasState(history[nextIndex]);
   };
 
-  const handleReset = () => {
-    if (svgWrapperRef.current) {
-      svgWrapperRef.current.innerHTML = preparedSvgContent;
-      applySvgPresentation();
-      setHistory([svgWrapperRef.current.innerHTML]);
-      setHistoryIndex(0);
-    }
-    const ctx = canvasRef.current?.getContext("2d");
-    if (ctx && canvasRef.current) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+  const handleReset = async () => {
     try { localStorage.removeItem(storageKey); } catch {}
+    await renderSvgToCanvas();
+    const current = saveCanvasState();
+    setHistory([current]);
+    setHistoryIndex(0);
   };
 
   const handleSaveLocal = () => {
-    if (!svgWrapperRef.current) return;
-    try { localStorage.setItem(storageKey, svgWrapperRef.current.innerHTML); } catch {}
+    const current = saveCanvasState();
+    if (!current) return;
+    try { localStorage.setItem(storageKey, current); } catch {}
     setSavedSuccess(true);
     window.setTimeout(() => setSavedSuccess(false), 2000);
   };
 
-  const handleDownload = async () => {
-    if (!svgWrapperRef.current) return;
-    await downloadSvgAsPng(svgWrapperRef.current, `${slug}-colored.png`);
+  const handleDownload = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `${slug}-colored.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
   };
 
   const handlePrint = () => window.print();
-  const changeZoom = (amount: number) => setZoomLevel((value) => Math.min(2, Math.max(0.5, value + amount)));
+  const changeZoom = (amount: number) =>
+    setZoomLevel((value) => Math.min(2, Math.max(0.5, value + amount)));
 
   return (
     <div className="bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
@@ -360,17 +465,20 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
       </div>
 
       <div className="relative rounded-2xl bg-white overflow-auto min-h-[420px] flex items-center justify-center p-4">
-        <div className="relative w-full max-w-3xl aspect-[4/3]" style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center" }}>
-          <div ref={svgWrapperRef} onClick={handleSvgClick} className="absolute inset-0 z-10" aria-label={`Coloring area for ${title}`} />
+        <div
+          className="relative w-full max-w-3xl"
+          style={{ aspectRatio: String(aspectRatio), transform: `scale(${zoomLevel})`, transformOrigin: "center" }}
+        >
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 z-20 w-full h-full touch-none"
-            style={{ pointerEvents: activeTool === "fill" ? "none" : "auto" }}
-            onPointerDown={startDrawing}
+            className="absolute inset-0 w-full h-full touch-none block"
+            style={{ cursor: activeTool === "fill" ? "crosshair" : activeTool === "brush" ? "crosshair" : "cell" }}
+            onPointerDown={activeTool === "fill" ? handleFill : startDrawing}
             onPointerMove={draw}
             onPointerUp={stopDrawing}
             onPointerCancel={stopDrawing}
             onPointerLeave={stopDrawing}
+            aria-label={`Coloring area for ${title}`}
           />
         </div>
       </div>
