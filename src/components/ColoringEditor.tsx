@@ -228,17 +228,23 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
 
   const restoreCanvasState = useCallback((dataUrl: string) => {
     const canvas = canvasRef.current;
-    if (!canvas || !dataUrl) return false;
+    if (!canvas || !dataUrl) return Promise.resolve(false);
 
-    const image = new Image();
-    image.onload = () => {
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-    };
-    image.src = dataUrl;
-    return true;
+    return new Promise<boolean>((resolve) => {
+      const image = new Image();
+      image.onload = () => {
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(false);
+          return;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(true);
+      };
+      image.onerror = () => resolve(false);
+      image.src = dataUrl;
+    });
   }, []);
 
   const renderSvgToCanvas = useCallback(async () => {
@@ -289,14 +295,12 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
         saved = localStorage.getItem(storageKey) || "";
       } catch {}
 
-      if (saved) restoreCanvasState(saved);
+      if (saved) await restoreCanvasState(saved);
 
-      window.setTimeout(() => {
-        if (cancelled) return;
-        const current = saveCanvasState();
-        setHistory([current]);
-        setHistoryIndex(0);
-      }, 80);
+      if (cancelled) return;
+      const current = saveCanvasState();
+      setHistory([current]);
+      setHistoryIndex(0);
     };
 
     init();
@@ -383,7 +387,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     if (historyIndex <= 0) return;
     const nextIndex = historyIndex - 1;
     setHistoryIndex(nextIndex);
-    restoreCanvasState(history[nextIndex]);
+    void restoreCanvasState(history[nextIndex]);
   };
 
   const handleRedo = () => {
