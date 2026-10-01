@@ -1,11 +1,14 @@
 import Link from "next/link";
-
 import {
-  Sparkles,
-  Printer,
-  Palette,
-  CheckCircle2,
   ArrowRight,
+  CheckCircle2,
+  Heart,
+  Palette,
+  Printer,
+  Sparkles,
+  Star,
+  Wand2,
+  Zap,
 } from "lucide-react";
 
 import SearchBar from "@/components/SearchBar";
@@ -14,15 +17,9 @@ import CategoryCard from "@/components/CategoryCard";
 import FAQ from "@/components/FAQ";
 import Newsletter from "@/components/Newsletter";
 import AdPlaceholder from "@/components/AdPlaceholder";
-
-import {
-  getAllPublishedCategories,
-  getAllPublishedColoringPagesWithCategory,
-} from "@/db/queries";
-
+import { getAllPublishedCategories, getAllPublishedColoringPagesWithCategory } from "@/db/queries";
 import { constructMetadata, generateFAQSchema } from "@/lib/seo";
 
-// Production-safe homepage metadata
 export const metadata = constructMetadata({
   title: "Free Online Coloring Pages for Kids & Adults",
   description:
@@ -31,26 +28,10 @@ export const metadata = constructMetadata({
 });
 
 const HOMEPAGE_FAQS = [
-  {
-    question: "Are all coloring pages on CraftColoring free?",
-    answer:
-      "Yes! 100% of our coloring pages are completely free to color online in your browser, download as high-resolution PNG images, or print at home. No account or registration is required.",
-  },
-  {
-    question: "Can I color pages online without downloading any app?",
-    answer:
-      "Yes! Our interactive browser coloring tool works instantly on any smartphone, iPad, Android tablet, or desktop computer without installing software.",
-  },
-  {
-    question: "How do I print a coloring page at home?",
-    answer:
-      "Select any coloring page and click the 'Print' button. Your browser's print window will open with a clean, printer-optimized black-and-white outline ready for standard printer paper.",
-  },
-  {
-    question: "What age groups are these coloring sheets designed for?",
-    answer:
-      "We offer simple thick-line coloring pages for toddlers and preschoolers (ages 2-5), medium detail sheets for school-aged kids (6-10), and intricate floral/mandala designs for adults.",
-  },
+  { question: "Are all coloring pages on CraftColoring free?", answer: "Yes! CraftColoring offers free coloring experiences you can explore online without an account." },
+  { question: "Can I color pages online without downloading an app?", answer: "Yes! The interactive coloring tool works in your browser on phones, tablets and desktop computers." },
+  { question: "How do I print a coloring page at home?", answer: "Open a coloring page and use the print option to create a clean outline for home or classroom use." },
+  { question: "What age groups are these coloring pages for?", answer: "CraftColoring includes simple designs for young children, creative activities for school-age kids and detailed artwork for adults." },
 ];
 
 export default async function HomePage() {
@@ -59,375 +40,248 @@ export default async function HomePage() {
     getAllPublishedCategories(),
   ]);
 
-  const popularPages = allPages
-    .filter((page) => page.popular)
-    .slice(0, 8);
-
+  const popularPages = allPages.filter((page) => page.popular).slice(0, 8);
   const featuredCategories = allCategories.slice(0, 8);
-
   const newPages = [...allPages]
-    .sort((a, b) => {
-      const dateA = a.publishedAt
-        ? new Date(a.publishedAt).getTime()
-        : 0;
-
-      const dateB = b.publishedAt
-        ? new Date(b.publishedAt).getTime()
-        : 0;
-
-      return dateB - dateA;
-    })
+    .sort((a, b) => new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime())
     .slice(0, 4);
 
   const exampleSearches = [
-    {
-      label: "Unicorn coloring pages",
-      href: "/coloring-pages/unicorn/",
-    },
-    {
-      label: "Dinosaur coloring pages",
-      href: "/coloring-pages/dinosaurs/",
-    },
-    {
-      label: "Princess coloring pages",
-      href: "/coloring-pages/princesses/",
-    },
-    {
-      label: "Cat coloring pages",
-      href: "/coloring-pages/animals/",
-    },
-    {
-      label: "Christmas coloring pages",
-      href: "/coloring-pages/christmas/",
-    },
-    {
-      label: "Halloween coloring pages",
-      href: "/coloring-pages/halloween/",
-    },
+    ["Unicorn", "/coloring-pages/unicorn/"],
+    ["Dinosaurs", "/coloring-pages/dinosaurs/"],
+    ["Princesses", "/coloring-pages/princesses/"],
+    ["Animals", "/coloring-pages/animals/"],
+    ["Christmas", "/coloring-pages/christmas/"],
+    ["Halloween", "/coloring-pages/halloween/"],
   ];
 
-  const faqSchema = generateFAQSchema(HOMEPAGE_FAQS);
-
   return (
-    <div>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(faqSchema),
-        }}
-      />
+    <div className="overflow-hidden">
+      <script dangerouslySetInnerHTML={{ __html: JSON.stringify(generateFAQSchema(HOMEPAGE_FAQS)) }} />
 
-      <section className="relative py-12 sm:py-20 bg-gradient-to-b from-indigo-50/60 via-purple-50/30 to-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-100/80 text-indigo-700 text-xs sm:text-sm font-semibold border border-indigo-200 shadow-2xs">
-              <Sparkles className="w-4 h-4 text-indigo-600" />
-              <span>100% Free Online Coloring Platform</span>
+      <section className="relative overflow-hidden bg-[#fff9f2]">
+        <div className="absolute -left-24 top-10 h-64 w-64 rounded-full bg-fuchsia-200/50 blur-3xl cc-float" />
+        <div className="absolute -right-24 top-0 h-80 w-80 rounded-full bg-sky-200/60 blur-3xl cc-float-reverse" />
+        <div className="absolute left-[18%] top-24 h-5 w-5 rotate-12 rounded-lg bg-yellow-300 cc-bounce-soft" />
+        <div className="absolute right-[18%] top-36 h-4 w-4 rounded-full bg-pink-400 cc-float" />
+        <div className="absolute bottom-12 left-[9%] h-6 w-6 rotate-45 rounded-md bg-violet-300 cc-float-reverse" />
+
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:py-24">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-4 py-2 text-xs font-extrabold text-violet-700 shadow-sm">
+              <Sparkles className="h-4 w-4 text-fuchsia-500" />
+              A happy place to create & color
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              Free Coloring Pages for{" "}
-              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Kids & Adults
+            <h1 className="mt-5 text-5xl font-black leading-[1.02] tracking-[-0.045em] text-slate-900 sm:text-6xl lg:text-7xl">
+              Big imagination.
+              <span className="block bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent cc-gradient-flow">
+                Bright colors.
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto font-normal">
-              Explore free coloring pages you can color directly online,
-              with interactive tools designed for kids, families, teachers, and adults.
+            <p className="mt-6 max-w-xl text-base font-medium leading-7 text-slate-600 sm:text-lg">
+              Discover playful coloring pages for kids, families, teachers and creative adults — then color them right in your browser.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-              <Link
-                href="/color-online/unicorn-rainbow-coloring-page/"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-base rounded-2xl shadow-lg shadow-indigo-200 hover:from-indigo-700 hover:to-purple-700 hover:scale-105 transition-all"
-              >
-                <Sparkles className="w-5 h-5" />
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link href="/color-online/unicorn-rainbow-coloring-page/" className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-6 py-4 text-sm font-black text-white shadow-xl shadow-fuchsia-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                <Wand2 className="h-5 w-5 transition group-hover:rotate-12" />
                 Start Coloring Online
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </Link>
-
-              <Link
-                href="/coloring-pages/"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white text-slate-800 font-bold text-base rounded-2xl border border-slate-200 shadow-sm hover:bg-slate-50 transition-all"
-              >
-                <Palette className="w-5 h-5 text-indigo-600" />
-                Browse Coloring Pages
+              <Link href="/coloring-pages/" className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-6 py-4 text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:text-violet-700">
+                <Palette className="h-5 w-5 text-violet-500" />
+                Explore Pages
               </Link>
             </div>
 
-            <div className="pt-6 max-w-2xl mx-auto space-y-3">
-              <SearchBar
-                placeholder="Search coloring pages (e.g. unicorn, dino, cat)..."
-                size="lg"
-              />
-
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-                <span className="text-xs text-slate-400 font-semibold mr-1">
-                  Popular searches:
-                </span>
-
-                {exampleSearches.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="text-xs bg-white text-slate-600 hover:text-indigo-600 hover:border-indigo-200 px-3 py-1 rounded-full border border-slate-200 shadow-2xs transition-colors"
-                  >
-                    {item.label}
+            <div className="mt-7 max-w-xl">
+              <SearchBar placeholder="What do you want to color today? ✨" size="lg" />
+              <div className="mt-3 flex flex-wrap gap-2">
+                {exampleSearches.map(([label, href]) => (
+                  <Link key={label} href={href} className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:bg-violet-50 hover:text-violet-700 hover:ring-violet-200">
+                    {label}
                   </Link>
                 ))}
               </div>
+            </div>
+
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-slate-500">
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Free to explore</span>
+              <span className="inline-flex items-center gap-1.5"><Zap className="h-4 w-4 text-yellow-500" /> Instant browser coloring</span>
+              <span className="inline-flex items-center gap-1.5"><Heart className="h-4 w-4 text-pink-500" /> Made for creativity</span>
+            </div>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-xl lg:pl-8">
+            <div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-violet-200/60 via-pink-100/70 to-sky-200/70 blur-2xl" />
+            <div className="relative rotate-1 rounded-[2.5rem] border border-white bg-white/80 p-4 shadow-2xl backdrop-blur sm:p-5">
+              <div className="rounded-[2rem] bg-gradient-to-br from-violet-100 via-pink-50 to-sky-100 p-5 sm:p-7">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-violet-600 shadow-sm">Color studio</span>
+                  <span className="flex gap-1">
+                    <i className="h-3 w-3 rounded-full bg-pink-400" />
+                    <i className="h-3 w-3 rounded-full bg-yellow-300" />
+                    <i className="h-3 w-3 rounded-full bg-sky-400" />
+                  </span>
+                </div>
+                <div className="mt-5 flex aspect-[4/3] items-center justify-center rounded-[1.7rem] bg-white shadow-lg">
+                  <div className="relative h-48 w-48 sm:h-60 sm:w-60 cc-bounce-soft">
+                    <div className="absolute left-8 top-8 h-32 w-32 rounded-[45%_55%_45%_55%] border-[5px] border-slate-800 bg-yellow-200" />
+                    <div className="absolute left-20 top-2 h-10 w-10 -rotate-12 rounded-full border-4 border-slate-800 bg-pink-300" />
+                    <div className="absolute left-4 top-20 h-10 w-10 rotate-12 rounded-full border-4 border-slate-800 bg-sky-300" />
+                    <div className="absolute left-[52%] top-[42%] h-3 w-3 rounded-full bg-slate-800" />
+                    <div className="absolute left-[68%] top-[42%] h-3 w-3 rounded-full bg-slate-800" />
+                    <div className="absolute left-[55%] top-[58%] h-5 w-10 rounded-b-full border-b-4 border-slate-800" />
+                    <Sparkles className="absolute right-1 top-6 h-8 w-8 text-fuchsia-400" />
+                    <Star className="absolute bottom-5 left-0 h-7 w-7 text-orange-400" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-2 rounded-2xl bg-white p-3 shadow-sm">
+                  {["bg-pink-400", "bg-orange-300", "bg-yellow-300", "bg-emerald-300", "bg-sky-400", "bg-violet-400"].map((color) => (
+                    <span key={color} className={`h-8 w-8 rounded-full ${color} ring-2 ring-white shadow-sm`} />
+                  ))}
+                  <span className="ml-auto rounded-xl bg-violet-600 px-3 py-2 text-[10px] font-black text-white">COLOR!</span>
+                </div>
+              </div>
+            </div>
+            <div className="absolute -left-4 bottom-8 hidden rounded-2xl bg-white px-4 py-3 shadow-xl sm:block cc-float">
+              <p className="text-[10px] font-black uppercase tracking-wider text-violet-500">Creative time</p>
+              <p className="mt-1 text-sm font-black text-slate-800">Make something colorful ✨</p>
+            </div>
+            <div className="absolute -right-3 top-8 hidden rounded-2xl bg-yellow-300 px-4 py-3 shadow-lg sm:block cc-float-reverse">
+              <p className="text-xs font-black text-slate-900">100% fun</p>
             </div>
           </div>
         </div>
       </section>
 
-      <AdPlaceholder
-        slotName="Homepage Top Banner"
-        format="banner"
-      />
+      <AdPlaceholder slotName="Homepage Top Banner" format="banner" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+      <div className="mx-auto max-w-7xl space-y-20 px-4 py-12 sm:px-6 lg:px-8">
         <section>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Popular Coloring Pages
-              </h2>
-
-              <p className="text-slate-500 text-sm mt-1">
-                Popular designs to explore and color online.
-              </p>
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-fuchsia-500">Pick a favorite</span>
+              <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Popular right now</h2>
+              <p className="mt-2 text-sm text-slate-500">Fun designs ready for your next colorful adventure.</p>
             </div>
-
-            <Link
-              href="/coloring-pages/"
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-800"
-            >
-              View All Coloring Pages
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <Link href="/coloring-pages/" className="inline-flex items-center gap-1.5 text-sm font-black text-violet-600 hover:text-fuchsia-600">See all <ArrowRight className="h-4 w-4" /></Link>
           </div>
-
-          <ColoringGrid pages={popularPages} />
+          <div className="rounded-[2rem] bg-gradient-to-br from-violet-50 via-white to-pink-50 p-3 sm:p-5">
+            <ColoringGrid pages={popularPages} />
+          </div>
         </section>
 
-        <section className="bg-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-200/80">
-          <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Coloring Pages by Category
-            </h2>
-
-            <p className="text-slate-600 text-sm">
-              Discover themed collections from mythical unicorns to outer
-              space adventures.
-            </p>
+        <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-sky-400 via-violet-500 to-fuchsia-500 p-6 text-white shadow-2xl shadow-violet-200 sm:p-10">
+          <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/15 blur-2xl" />
+          <div className="absolute -bottom-24 left-1/4 h-64 w-64 rounded-full bg-yellow-200/15 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-white/80"><Wand2 className="h-4 w-4" /> Explore by mood</div>
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {[
+                ["🌈", "Cute & Magical", "Unicorns, princesses, rainbows and dreamy friends.", "/coloring-pages/unicorn/"],
+                ["🦖", "Wild & Adventurous", "Dinosaurs, animals, jungle and big adventures.", "/coloring-pages/dinosaurs/"],
+                ["🌸", "Calm & Creative", "Flowers, mandalas and relaxing designs for everyone.", "/coloring-pages/adults/"],
+              ].map(([emoji, title, text, href]) => (
+                <Link key={title} href={href} className="group rounded-3xl bg-white/15 p-5 ring-1 ring-white/20 backdrop-blur transition hover:-translate-y-1 hover:bg-white/20">
+                  <span className="text-3xl">{emoji}</span>
+                  <h3 className="mt-4 font-black">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-white/80">{text}</p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-xs font-black">Explore <ArrowRight className="h-3 w-3 transition group-hover:translate-x-1" /></span>
+                </Link>
+              ))}
+            </div>
           </div>
+        </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredCategories.map((cat) => (
-              <CategoryCard
-                key={cat.id}
-                category={cat}
-              />
+        <section>
+          <div className="mb-8 text-center">
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-sky-500">Find your theme</span>
+            <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Color by category</h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500">From cute animals to space adventures, there is always something new to color.</p>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {featuredCategories.map((cat, index) => (
+              <div key={cat.id} className={index % 2 === 0 ? "cc-float" : "cc-float-reverse"}>
+                <CategoryCard category={cat} />
+              </div>
             ))}
           </div>
-
-          <div className="mt-8 text-center">
-            <Link
-              href="/coloring-pages/"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-indigo-600 font-bold text-sm rounded-xl border border-slate-200 shadow-xs hover:bg-indigo-50 transition-colors"
-            >
-              Explore All 20+ Categories
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
         </section>
 
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              Browser-Based Interactive Coloring Engine
-            </div>
-
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Color Directly Online in Your Browser
-            </h2>
-
-            <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
-              No need for paper, crayons, or messy cleanups! CraftColoring
-              features an interactive, touch-friendly digital coloring tool.
-              Click or tap any closed shape to flood-fill colors instantly,
-              use the freehand brush for custom shading, or undo stokes
-              anytime.
-            </p>
-
-            <ul className="space-y-3 pt-2">
-              {[
-                "Instant click-to-fill bucket & smooth brush tools",
-                "Preset pastel palette + custom RGB hex color picker",
-                "Undo, Redo, Zoom, and Clear controls",
-                "Works on iPad, Android tablets, mobile, & desktop",
-              ].map((benefit, i) => (
-                <li
-                  key={i}
-                  className="flex items-center gap-3 text-sm font-medium text-slate-700"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                  {benefit}
-                </li>
+        <section className="grid items-center gap-10 lg:grid-cols-2">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1.5 text-xs font-black text-violet-700"><Palette className="h-3.5 w-3.5" /> Color online</span>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Turn a blank outline into your own masterpiece.</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">Choose colors, tap closed shapes, experiment, undo and keep creating. No complicated setup — just open a page and start.</p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {["Tap-to-fill coloring", "Brush & custom colors", "Undo, redo & zoom", "Works on mobile & desktop"].map((item) => (
+                <div key={item} className="flex items-center gap-2 rounded-2xl bg-white p-3 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-100"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> {item}</div>
               ))}
-            </ul>
-
-            <div className="pt-4">
-              <Link
-                href="/color-online/unicorn-rainbow-coloring-page/"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-md hover:bg-indigo-700 transition-colors"
-              >
-                Try Online Coloring Editor
-                <ArrowRight className="w-4 h-4" />
-              </Link>
             </div>
+            <Link href="/color-online/unicorn-rainbow-coloring-page/" className="mt-7 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-black text-white shadow-lg transition hover:-translate-y-1 hover:bg-violet-700">Try the coloring studio <ArrowRight className="h-4 w-4" /></Link>
           </div>
 
-          <div className="bg-gradient-to-tr from-indigo-100 via-purple-100 to-pink-100 p-8 rounded-3xl border border-indigo-200/60 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 space-y-4 w-full max-w-md text-center">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-600 text-white mx-auto flex items-center justify-center shadow-md">
-                <Palette className="w-8 h-8" />
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-yellow-100 via-pink-100 to-violet-200 p-7">
+            <div className="absolute right-5 top-5 cc-float"><Star className="h-8 w-8 fill-yellow-300 text-yellow-500" /></div>
+            <div className="absolute bottom-5 left-5 cc-float-reverse"><Heart className="h-7 w-7 fill-pink-400 text-pink-500" /></div>
+            <div className="rounded-[2rem] bg-white p-5 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs font-black text-slate-500">MY COLORING</span>
+                <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700">READY</span>
               </div>
-
-              <h3 className="font-bold text-slate-900 text-lg">
-                Interactive Canvas
-              </h3>
-
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Save your progress directly in your browser. Download
-                high-definition PNG files of your finished artwork anytime!
-              </p>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-pink-100 to-orange-100 p-4"><div className="h-full rounded-xl border-4 border-dashed border-pink-300" /></div>
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-sky-100 to-violet-100 p-4"><div className="h-full rounded-xl border-4 border-dashed border-violet-300" /></div>
+              </div>
+              <div className="mt-4 flex justify-center gap-2">{["bg-pink-400","bg-orange-400","bg-yellow-300","bg-emerald-400","bg-sky-400","bg-violet-500"].map(c => <span key={c} className={`h-7 w-7 rounded-full ${c}`} />)}</div>
             </div>
           </div>
         </section>
 
-        <section className="bg-slate-900 text-white p-8 sm:p-12 rounded-3xl shadow-xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-indigo-300 text-xs font-semibold">
-              <Printer className="w-3.5 h-3.5" />
-              Print at Home Easily
+        <section className="rounded-[2.5rem] bg-[#fff5df] p-7 sm:p-10">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black text-orange-600 shadow-sm"><Printer className="h-3.5 w-3.5" /> Print when you want</span>
+              <h2 className="mt-4 text-3xl font-black text-slate-900">Prefer crayons on paper?</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Explore printable-friendly outlines for home, classrooms and creative afternoons.</p>
             </div>
-
-            <h2 className="text-3xl font-extrabold tracking-tight">
-              Free Printable Coloring Pages for Home & School
-            </h2>
-
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Prefer classic crayons, colored pencils, or watercolor markers?
-              Download and print any sheet in seconds. Our printable designs
-              use sharp vector line art optimized for standard Letter and A4
-              paper sizes.
-            </p>
-
-            <div className="pt-2 flex flex-wrap gap-4 text-xs font-semibold text-slate-300">
-              <span className="bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700">
-                ✓ Letter & A4 Ready
-              </span>
-
-              <span className="bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700">
-                ✓ High Resolution 300 DPI
-              </span>
-
-              <span className="bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700">
-                ✓ Ink-Saving Outlines
-              </span>
-            </div>
-          </div>
-
-          <div className="flex justify-center lg:justify-end">
-            <Link
-              href="/printable-coloring-pages/"
-              className="px-8 py-4 bg-white text-slate-900 font-extrabold text-base rounded-2xl shadow-lg hover:bg-indigo-50 transition-all flex items-center gap-2"
-            >
-              <Printer className="w-5 h-5 text-indigo-600" />
-              Browse Printable Hub
-            </Link>
+            <Link href="/printable-coloring-pages/" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:-translate-y-1 hover:bg-orange-600">Browse printables <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </section>
 
         <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              New Coloring Pages
-            </h2>
-
-            <Link
-              href="/coloring-pages/"
-              className="text-sm font-bold text-indigo-600 hover:text-indigo-800"
-            >
-              See All →
-            </Link>
+          <div className="mb-7 flex items-end justify-between">
+            <div><span className="text-xs font-black uppercase tracking-[0.2em] text-emerald-500">Fresh from the studio</span><h2 className="mt-1 text-3xl font-black text-slate-900">New coloring pages</h2></div>
+            <Link href="/coloring-pages/" className="text-sm font-black text-violet-600">See all →</Link>
           </div>
-
           <ColoringGrid pages={newPages} />
         </section>
 
-        <section className="space-y-6">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-              Coloring Ideas & Activities
-            </h2>
-
-            <p className="text-slate-600 text-sm">
-              Tailored coloring pages and learning resources for every
-              developmental stage.
-            </p>
+        <section>
+          <div className="mb-7 text-center">
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-orange-500">Made for every age</span>
+            <h2 className="mt-1 text-3xl font-black text-slate-900">Pick your kind of fun</h2>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link
-              href="/coloring-pages/preschool/"
-              className="p-6 rounded-2xl bg-amber-50 border border-amber-200/80 hover:-translate-y-1 transition-transform group"
-            >
-              <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 mb-2">
-                Toddlers & Preschool (Ages 2-5)
-              </h3>
-
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Super simple thick outlines, large shapes, alphabet letters,
-                and basic cute animals to build early fine motor skills.
-              </p>
-            </Link>
-
-            <Link
-              href="/coloring-pages/kindergarten/"
-              className="p-6 rounded-2xl bg-sky-50 border border-sky-200/80 hover:-translate-y-1 transition-transform group"
-            >
-              <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 mb-2">
-                Kindergarten (Ages 5-7)
-              </h3>
-
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Educational sight word worksheets, count-and-color sheets,
-                dinosaurs, and fairytale stories.
-              </p>
-            </Link>
-
-            <Link
-              href="/coloring-pages/adults/"
-              className="p-6 rounded-2xl bg-purple-50 border border-purple-200/80 hover:-translate-y-1 transition-transform group"
-            >
-              <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 mb-2">
-                Adults & Stress Relief
-              </h3>
-
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Intricate botanical art, floral mandalas, zen patterns, and
-                detailed wildlife for relaxation and mindfulness.
-              </p>
-            </Link>
+          <div className="grid gap-5 md:grid-cols-3">
+            {[
+              ["🧸", "Little Artists", "Simple shapes, friendly animals and early-learning themes.", "/coloring-pages/preschool/", "bg-pink-50 border-pink-200"],
+              ["🚀", "Big Kids", "Dinosaurs, space, fantasy and exciting creative adventures.", "/coloring-pages/kindergarten/", "bg-sky-50 border-sky-200"],
+              ["🌿", "Creative Adults", "Botanical, floral and detailed designs for relaxing color time.", "/coloring-pages/adults/", "bg-violet-50 border-violet-200"],
+            ].map(([emoji, title, text, href, cls]) => (
+              <Link key={title} href={href} className={`group rounded-[2rem] border p-6 transition hover:-translate-y-1 hover:shadow-xl ${cls}`}>
+                <span className="text-4xl">{emoji}</span>
+                <h3 className="mt-5 text-xl font-black text-slate-900 group-hover:text-violet-700">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
+                <span className="mt-5 inline-flex items-center gap-1 text-xs font-black text-violet-600">Explore <ArrowRight className="h-3 w-3" /></span>
+              </Link>
+            ))}
           </div>
         </section>
 
         <FAQ items={HOMEPAGE_FAQS} />
-
         <Newsletter />
       </div>
     </div>
