@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 const MAX_OUTPUT_BYTES = 1.5 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 
 function formatBytes(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
@@ -20,8 +21,12 @@ async function compressImage(file: File) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
+
   const context = canvas.getContext("2d");
-  if (!context) throw new Error("Could not prepare the image.");
+  if (!context) {
+    bitmap.close();
+    throw new Error("Could not prepare the image.");
+  }
 
   context.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
@@ -31,14 +36,17 @@ async function compressImage(file: File) {
     canvas.toBlob(resolve, "image/webp", quality)
   );
 
-  while (blob && blob.size > MAX_OUTPUT_BYTES && quality > 0.5) {
-    quality -= 0.08;
+  while (blob && blob.size > MAX_OUTPUT_BYTES && quality > 0.42) {
+    quality = Math.max(0.42, quality - 0.06);
     blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, "image/webp", quality)
     );
   }
 
   if (!blob) throw new Error("Could not compress the image.");
+  if (blob.size > MAX_OUTPUT_BYTES) {
+    throw new Error("Could not reduce the image below 1.5 MB. Choose a smaller image.");
+  }
 
   return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, {
     type: "image/webp",
@@ -67,6 +75,7 @@ export function ImageUploadField({
 
   async function handleChange(file: File | undefined) {
     if (!file) return;
+
     setUploading(true);
     setSelectedName(file.name);
     setStatus("Preparing file…");
@@ -74,27 +83,42 @@ export function ImageUploadField({
 
     try {
       const prepared = kind === "image" ? await compressImage(file) : file;
-      if (prepared.size > 2 * 1024 * 1024) {
-        throw new Error("File is still larger than 2 MB. Choose a smaller file.");
+
+      if (prepared.size > MAX_UPLOAD_BYTES) {
+        throw new Error("File is larger than 2 MB.");
       }
 
       const formData = new FormData();
       formData.append("file", prepared);
       formData.append("kind", kind);
-      const slugInput = document.querySelector<HTMLInputElement>(`[name="${slugField}"]`);
+
+      const slugInput = document.querySelector<HTMLInputElement>(
+        `[name="${slugField}"]`
+      );
       formData.append("slug", slugInput?.value || "coloring-page");
 
       setStatus("Uploading…");
-      const response = await fetch("/api/admin/upload/", {
+
+      // Do not use a trailing slash here. It avoids an unnecessary POST redirect.
+      const response = await fetch("/api/admin/upload", {
         method: "POST",
         body: formData,
+        credentials: "same-origin",
+        cache: "no-store",
       });
-      const data = (await response.json()) as { url?: string; error?: string };
 
-      if (!response.ok || !data.url) throw new Error(data.error || "Upload failed.");
+      const data = (await response.json()) as {
+        url?: string;
+        error?: string;
+        size?: number;
+      };
+
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || `Upload failed (HTTP ${response.status}).`);
+      }
 
       setUrl(data.url);
-      setStatus(`Uploaded • ${formatBytes(prepared.size)}`);
+      setStatus(`Uploaded • ${formatBytes(data.size ?? prepared.size)}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Upload failed.");
     } finally {
@@ -105,7 +129,15 @@ export function ImageUploadField({
   return (
     <div className="block">
       <span className="mb-2 block text-sm font-medium text-slate-700">{label}</span>
-      <input type="hidden" name={name} value={url} required={required} readOnly />
+
+      <input
+        type="hidden"
+        name={name}
+        value={url}
+        required={required}
+        readOnly
+      />
+
       <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
         <input
           type="file"
@@ -114,18 +146,33 @@ export function ImageUploadField({
           onChange={(event) => void handleChange(event.target.files?.[0])}
           className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:font-semibold file:text-indigo-700"
         />
+
         <p className="mt-2 text-xs text-slate-500">
           {kind === "image"
             ? "Images are automatically resized to max 1600px and converted to WebP. Target size: under 1.5 MB."
             : "SVG is kept as vector. Maximum file size: 2 MB."}
         </p>
-        {selectedName && <p className="mt-2 truncate text-xs text-slate-500">Selected: {selectedName}</p>}
-        {status && <p className="mt-2 text-xs font-medium text-slate-600">{status}</p>}
+
+        {selectedName && (
+          <p className="mt-2 truncate text-xs text-slate-500">
+            Selected: {selectedName}
+          </p>
+        )}
+
+        {status && (
+          <p className="mt-2 text-xs font-medium text-slate-600">{status}</p>
+        )}
+
         {url && kind === "image" && (
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white p-2">
-            <img src={url} alt="Uploaded coloring page preview" className="max-h-48 w-auto object-contain" />
+            <img
+              src={url}
+              alt="Uploaded coloring page preview"
+              className="max-h-48 w-auto object-contain"
+            />
           </div>
         )}
+
         {url && (
           <p className="mt-3 break-all text-xs text-slate-400">{url}</p>
         )}
