@@ -6,11 +6,13 @@ import type { DbColoringPageCard } from "@/types/coloring";
 interface ColoringGridProps {
   pages: Array<ColoringPage | DbColoringPageCard>;
   emptyMessage?: string;
+  variant?: "coloring" | "printable";
 }
 
 export default function ColoringGrid({
   pages,
   emptyMessage = "No coloring pages found.",
+  variant = "coloring",
 }: ColoringGridProps) {
   if (!pages || pages.length === 0) {
     return (
@@ -29,6 +31,7 @@ export default function ColoringGrid({
           key={page.id}
           page={page}
           priority={index === 0}
+          variant={variant}
         />
       ))}
     </div>
