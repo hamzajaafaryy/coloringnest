@@ -315,9 +315,9 @@ export default async function IndividualColoringPage({
               />
             )}
 
-            <PrintButton
-              title={page.title}
-            />
+            <div id="print">
+              <PrintButton title={page.title} />
+            </div>
           </div>
 
           <div className="pt-4 border-t border-slate-100 space-y-2 text-xs text-slate-500">
