@@ -52,7 +52,7 @@ export default function FAQ({
               >
                 <button
                   onClick={() => toggle(index)}
-                  className="w-full px-6 py-4 text-left font-semibold text-base text-slate-900 flex items-center justify-between gap-4 hover:text-indigo-600 transition-colors"
+                  className="flex min-h-14 w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-bold text-slate-900 transition-colors hover:text-violet-600 sm:px-6 sm:text-base"
                   aria-expanded={isOpen}
                 >
                   <span>{item.question}</span>
@@ -64,7 +64,7 @@ export default function FAQ({
                 </button>
 
                 {isOpen && (
-                  <div className="px-6 pb-5 pt-1 text-slate-600 text-sm leading-relaxed border-t border-slate-50">
+                  <div className="px-4 pb-5 pt-3 text-sm leading-relaxed text-slate-600 border-t border-slate-50 sm:px-6">
                     {item.answer}
                   </div>
                 )}
