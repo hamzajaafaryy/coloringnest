@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-
 import Link from "next/link";
+import { ArrowRight, Palette, Printer, Sparkles } from "lucide-react";
 
 import ColoringGrid from "@/components/ColoringGrid";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -25,13 +25,12 @@ interface CategoryPageProps {
   params: Promise<{ category: string }>;
 }
 
-/* =========================================================
-   STATIC PARAMS
-   ========================================================= */
+function displayCategoryName(name: string) {
+  return /coloring pages/i.test(name) ? name : `${name} Coloring Pages`;
+}
 
 export async function generateStaticParams() {
-  const categories =
-    await getAllPublishedCategories();
+  const categories = await getAllPublishedCategories();
 
   return categories
     .filter((category) => category.slug)
@@ -40,17 +39,9 @@ export async function generateStaticParams() {
     }));
 }
 
-/* =========================================================
-   METADATA
-   ========================================================= */
-
-export async function generateMetadata({
-  params,
-}: CategoryPageProps) {
+export async function generateMetadata({ params }: CategoryPageProps) {
   const { category: slug } = await params;
-
-  const cat =
-    await getCategoryBySlugFromDb(slug);
+  const cat = await getCategoryBySlugFromDb(slug);
 
   if (!cat) {
     return constructMetadata({
@@ -59,78 +50,44 @@ export async function generateMetadata({
     });
   }
 
+  const categoryName = displayCategoryName(cat.name);
+
   return constructMetadata({
     title:
       cat.seoTitle ||
-      `${cat.name} Coloring Pages Online`,
-
+      `Free ${categoryName} - Print & Color Online`,
     description:
       cat.seoDescription ||
       cat.description ||
-      undefined,
-
+      `Explore free ${cat.name.toLowerCase()} coloring pages for kids. Choose a design to color online in your browser or open a printable page for home and classroom activities.`,
     path: `/coloring-pages/${cat.slug}/`,
+    image: cat.imageUrl || undefined,
+    imageAlt: `${categoryName} for kids`,
   });
 }
-
-/* =========================================================
-   PAGE
-   ========================================================= */
 
 export default async function CategoryDetailPage({
   params,
 }: CategoryPageProps) {
   const { category: slug } = await params;
-
-  /* -------------------------------------------------------
-     Get category from DB
-  ------------------------------------------------------- */
-
-  const cat =
-    await getCategoryBySlugFromDb(slug);
+  const cat = await getCategoryBySlugFromDb(slug);
 
   if (!cat) {
     notFound();
   }
 
-  /* -------------------------------------------------------
-     Get category pages + FAQs
-  ------------------------------------------------------- */
-
-  const [
-    categoryPages,
-    categoryFaqs,
-    allCategories,
-  ] = await Promise.all([
-    getPublishedColoringPagesByCategorySlug(
-      slug
-    ),
-
+  const [categoryPages, categoryFaqs, allCategories] = await Promise.all([
+    getPublishedColoringPagesByCategorySlug(slug),
     getCategoryFaqs(cat.id),
-
     getAllPublishedCategories(),
   ]);
 
-  /* -------------------------------------------------------
-     Related categories
-  ------------------------------------------------------- */
+  const relatedCategories = allCategories
+    .filter((category) => category.slug !== cat.slug)
+    .filter((category) => category.popular || category.featured)
+    .slice(0, 6);
 
-  const relatedCategories =
-    allCategories
-      .filter(
-        (category) =>
-          category.slug !== cat.slug
-      )
-      .filter(
-        (category) =>
-          category.popular ||
-          category.featured
-      )
-      .slice(0, 6);
-
-  /* -------------------------------------------------------
-     Breadcrumbs
-  ------------------------------------------------------- */
+  const categoryName = displayCategoryName(cat.name);
 
   const breadcrumbItems = [
     {
@@ -143,45 +100,24 @@ export default async function CategoryDetailPage({
     },
   ];
 
-  const breadcrumbSchema =
-    generateBreadcrumbSchema(
-      breadcrumbItems
-    );
-
-  /* -------------------------------------------------------
-     FAQ Schema
-  ------------------------------------------------------- */
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
 
   const faqItems = categoryFaqs
-    .filter(
-      (faq) =>
-        faq.question &&
-        faq.answer
-    )
+    .filter((faq) => faq.question && faq.answer)
     .map((faq) => ({
       question: faq.question!,
       answer: faq.answer!,
     }));
 
   const faqSchema =
-    faqItems.length > 0
-      ? generateFAQSchema(faqItems)
-      : null;
+    faqItems.length > 0 ? generateFAQSchema(faqItems) : null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-
-      {/* ===================================================
-          STRUCTURED DATA
-      =================================================== */}
-
+    <div className="mx-auto max-w-7xl space-y-9 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:space-y-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html:
-            JSON.stringify(
-              breadcrumbSchema
-            ),
+          __html: JSON.stringify(breadcrumbSchema),
         }}
       />
 
@@ -189,173 +125,144 @@ export default async function CategoryDetailPage({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html:
-              JSON.stringify(
-                faqSchema
-              ),
+            __html: JSON.stringify(faqSchema),
           }}
         />
       )}
 
-      {/* ===================================================
-          BREADCRUMBS
-      =================================================== */}
+      <Breadcrumbs items={breadcrumbItems} />
 
-      <Breadcrumbs
-        items={breadcrumbItems}
-      />
+      <section className="relative overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-50 via-white to-sky-50 p-5 shadow-[0_20px_50px_rgba(76,29,149,0.08)] sm:p-9 lg:p-11">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full bg-pink-200/50 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-1/4 h-48 w-48 rounded-full bg-sky-200/50 blur-3xl" />
 
-      {/* ===================================================
-          CATEGORY HERO
-      =================================================== */}
+        <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-violet-700 shadow-sm">
+              <Sparkles className="h-3.5 w-3.5 text-fuchsia-500" />
+              Free kids coloring collection
+            </span>
 
-      <section
-        className={`p-8 sm:p-12 rounded-3xl bg-gradient-to-br ${
-          cat.heroColor ||
-          "from-indigo-50 to-purple-50 border-indigo-100"
-        } border shadow-xs space-y-4`}
-      >
-        <div className="max-w-3xl space-y-3">
+            <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">
+              {categoryName}
+            </h1>
 
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-white/80 px-3 py-1 rounded-full border border-indigo-100">
-            Online Coloring Category
-          </span>
+            <p className="mt-4 max-w-3xl text-sm font-medium leading-6 text-slate-600 sm:text-lg sm:leading-8">
+              {cat.description ||
+                `Explore fun ${cat.name.toLowerCase()} designs for kids. Choose a page to color online or print it for crayons, pencils, and markers.`}
+            </p>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
-            {cat.name}
-          </h1>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs font-black">
+              <span className="rounded-full bg-white px-3 py-2 text-violet-700 shadow-sm ring-1 ring-violet-100">
+                {categoryPages.length} {categoryPages.length === 1 ? "page" : "pages"}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-slate-700 shadow-sm ring-1 ring-slate-100">
+                <Palette className="h-3.5 w-3.5 text-fuchsia-500" />
+                Color online
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-slate-700 shadow-sm ring-1 ring-slate-100">
+                <Printer className="h-3.5 w-3.5 text-orange-500" />
+                Print at home
+              </span>
+            </div>
+          </div>
 
-          <p className="text-slate-700 text-base sm:text-lg leading-relaxed">
-            {cat.description} Explore the collection below and color
-            your favorite designs directly in your browser. You can also
-            use the dedicated print options when available.
-          </p>
-
+          <Link
+            href="/color-online/"
+            className="cc-btn cc-btn-primary relative w-full px-6 lg:w-auto"
+          >
+            <Palette className="h-5 w-5" />
+            Open coloring studio
+          </Link>
         </div>
 
-        {/* =================================================
-            SUBCATEGORIES
-        ================================================= */}
-
-        {cat.subcategories &&
-          cat.subcategories.length > 0 && (
-            <div className="pt-3 flex flex-wrap items-center gap-2">
-
-              <span className="text-xs font-semibold text-slate-500">
-                Popular themes:
-              </span>
-
-              {cat.subcategories.map(
-                (sub, index) => (
-                  <span
-                    key={`${sub}-${index}`}
-                    className="text-xs bg-white text-slate-700 px-3 py-1 rounded-full font-medium shadow-2xs border border-slate-200"
-                  >
-                    {sub}
-                  </span>
-                )
-              )}
-
+        {cat.subcategories && cat.subcategories.length > 0 && (
+          <div className="relative mt-6 border-t border-violet-100 pt-5">
+            <p className="mb-2 text-xs font-black uppercase tracking-wider text-slate-500">
+              Popular ideas
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {cat.subcategories.map((sub, index) => (
+                <span
+                  key={`${sub}-${index}`}
+                  className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm ring-1 ring-slate-100"
+                >
+                  {sub}
+                </span>
+              ))}
             </div>
-          )}
-
+          </div>
+        )}
       </section>
 
-      {/* ===================================================
-          SEARCH
-      =================================================== */}
-
-      <div className="max-w-xl">
+      <div className="max-w-2xl">
         <SearchBar
-          placeholder={`Search in ${cat.name}...`}
+          placeholder={`Search ${cat.name.toLowerCase()} pages...`}
           size="md"
         />
       </div>
-
-      {/* ===================================================
-          AD
-      =================================================== */}
 
       <AdPlaceholder
         slotName={`${cat.name} Category Top Banner`}
         format="horizontal"
       />
 
-      {/* ===================================================
-          MAIN GRID
-      =================================================== */}
-
-      <section className="space-y-6">
-
-        <div className="flex items-center justify-between">
-
-          <h2 className="text-2xl font-bold text-slate-900">
-            Free {cat.name} (
-            {categoryPages.length} Pages)
+      <section aria-labelledby="category-pages-heading">
+        <div className="mb-6">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-violet-500">
+            Pick your favorite
+          </span>
+          <h2
+            id="category-pages-heading"
+            className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl"
+          >
+            Free {categoryName}
           </h2>
-
+          <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
+            Open any design for a bigger preview, online coloring tools, printing, and downloading options.
+          </p>
         </div>
 
         <ColoringGrid
           pages={categoryPages}
-          emptyMessage={`No coloring pages currently available in ${cat.name}. Check back soon!`}
+          emptyMessage={`No ${cat.name.toLowerCase()} coloring pages are available yet. Check back soon!`}
         />
-
       </section>
 
-      {/* ===================================================
-          CATEGORY FAQS
-      =================================================== */}
-
       {faqItems.length > 0 && (
-        <FAQ
-          items={faqItems}
-          title={`${cat.name} FAQ`}
-        />
+        <FAQ items={faqItems} title={`${cat.name} Coloring Page Questions`} />
       )}
-
-      {/* ===================================================
-          RELATED CATEGORIES
-      =================================================== */}
 
       {relatedCategories.length > 0 && (
-        <section className="pt-8 border-t border-slate-200 space-y-6">
-
-          <h2 className="text-2xl font-bold text-slate-900">
-            Explore Related Coloring Categories
-          </h2>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-
-            {relatedCategories.map(
-              (relatedCategory) => (
-                <Link
-                  key={
-                    relatedCategory.slug ??
-                    relatedCategory.id
-                  }
-                  href={`/coloring-pages/${relatedCategory.slug}/`}
-                  className="p-4 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-2xl text-center space-y-2 transition-all group"
-                >
-                  <h3 className="font-bold text-sm text-slate-900 group-hover:text-indigo-600 truncate">
-                    {relatedCategory.name.replace(
-                      "Coloring Pages",
-                      ""
-                    )}
-                  </h3>
-
-                  <span className="text-[11px] text-slate-500 block">
-                    Explore →
-                  </span>
-                </Link>
-              )
-            )}
-
+        <section className="border-t border-violet-100 pt-8">
+          <div className="mb-5">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-sky-500">
+              Keep exploring
+            </span>
+            <h2 className="mt-1 text-2xl font-black text-slate-950">
+              More coloring themes for kids
+            </h2>
           </div>
 
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {relatedCategories.map((relatedCategory) => (
+              <Link
+                key={relatedCategory.slug ?? relatedCategory.id}
+                href={`/coloring-pages/${relatedCategory.slug}/`}
+                className="group flex min-h-24 flex-col justify-between rounded-2xl border border-violet-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-violet-200 hover:bg-violet-50 hover:shadow-md"
+              >
+                <span className="text-sm font-black leading-tight text-slate-900 group-hover:text-violet-700">
+                  {relatedCategory.name.replace(/Coloring Pages/gi, "").trim()}
+                </span>
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-black text-violet-600">
+                  Explore
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
-
     </div>
   );
 }
