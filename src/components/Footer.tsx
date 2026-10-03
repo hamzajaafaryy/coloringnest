@@ -27,7 +27,7 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
+        <div className="grid min-w-0 grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))]">
           <div>
             <Link href="/" className="inline-flex items-center gap-2">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-sky-400 text-white shadow-md"><Palette className="h-5 w-5" /></span>
@@ -42,7 +42,7 @@ export default async function Footer() {
           <div>
             <h2 className="mb-4 text-xs font-black uppercase tracking-[0.18em] text-violet-600">Popular themes</h2>
             <ul className="space-y-2.5">
-              {topCategories.map((category) => <li key={category.id}><Link href={`/coloring-pages/${category.slug}/`} className="text-sm font-medium text-slate-600 transition hover:pl-1 hover:text-violet-700">{category.name}</Link></li>)}
+              {topCategories.map((category) => <li key={category.id}><Link href={`/coloring-pages/${category.slug}/`} className="cc-safe-wrap text-sm font-medium text-slate-600 transition hover:pl-1 hover:text-violet-700">{category.name}</Link></li>)}
               <li><Link href="/coloring-pages/" className="text-sm font-black text-violet-600">See all themes →</Link></li>
             </ul>
           </div>

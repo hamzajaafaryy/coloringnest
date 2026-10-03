@@ -146,7 +146,7 @@ export default function SearchBar({
   const sizeClasses = {
     sm: "py-1.5 pl-9 pr-8 text-sm",
     md: "py-2.5 pl-10 pr-10 text-base",
-    lg: "py-3.5 pl-12 pr-12 text-lg font-medium shadow-sm",
+    lg: "py-3.5 pl-12 pr-12 text-base font-medium shadow-sm sm:text-lg",
   };
 
   const iconSizes = {
@@ -158,11 +158,11 @@ export default function SearchBar({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full ${className}`}
+      className={`relative w-full min-w-0 ${className}`}
     >
       <form
         onSubmit={handleSearchSubmit}
-        className="relative w-full"
+        className="relative w-full min-w-0"
       >
         <Search
           className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${iconSizes[size]}`}
@@ -181,7 +181,7 @@ export default function SearchBar({
             }
           }}
           placeholder={placeholder}
-          className={`w-full max-w-full rounded-full border border-violet-100 bg-white text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-300 transition-all ${sizeClasses[size]}`}
+          className={`min-w-0 w-full max-w-full rounded-full border border-violet-100 bg-white text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-300 transition-all ${sizeClasses[size]}`}
         />
 
         {query && (

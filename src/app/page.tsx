@@ -104,14 +104,14 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute left-[16%] top-24 h-5 w-5 rotate-12 rounded-lg bg-yellow-300 cc-bounce-soft" />
         <div className="pointer-events-none absolute right-[12%] top-32 h-4 w-4 rounded-full bg-pink-400 cc-float" />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-10 sm:px-6 sm:py-16 lg:grid-cols-[1.06fr_.94fr] lg:px-8 lg:py-20">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3.5 py-2 text-xs font-black text-violet-700 shadow-sm sm:px-4">
-              <Sparkles className="h-4 w-4 text-fuchsia-500" />
-              Free creative fun for kids, families & classrooms
+        <div className="relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-10 px-4 py-10 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,.94fr)] lg:px-8 lg:py-20">
+          <div className="min-w-0 max-w-2xl">
+            <div className="inline-flex max-w-full items-center gap-2 rounded-2xl border border-violet-200 bg-white px-3.5 py-2 text-xs font-black text-violet-700 shadow-sm sm:px-4">
+              <Sparkles className="h-4 w-4 shrink-0 text-fuchsia-500" />
+              <span>Free creative fun for kids, families & classrooms</span>
             </div>
 
-            <h1 className="mt-5 text-[2.55rem] font-black leading-[1.03] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-[4.45rem]">
+            <h1 className="cc-safe-wrap mt-5 text-[clamp(2rem,8vw,2.55rem)] font-black leading-[1.03] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-[4.45rem]">
               Free coloring pages
               <span className="block bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent cc-gradient-flow">
                 for kids to print or color online
@@ -177,7 +177,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-xl">
+          <div className="relative mx-auto w-full min-w-0 max-w-xl">
             <div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-violet-200/60 via-pink-100/70 to-sky-200/70 blur-2xl" />
             <div className="relative rounded-[2.35rem] border border-white bg-white/90 p-3 shadow-2xl backdrop-blur sm:p-5">
               <div className="rounded-[1.9rem] bg-gradient-to-br from-violet-100 via-pink-50 to-sky-100 p-4 sm:p-6">
@@ -203,8 +203,8 @@ export default async function HomePage() {
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-[1fr_auto] gap-3">
-                  <div className="flex items-center justify-center gap-2 rounded-2xl bg-white px-3 py-3 shadow-sm">
+                <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                  <div className="grid min-w-0 grid-cols-6 place-items-center gap-1 rounded-2xl bg-white px-2 py-3 shadow-sm">
                     {[
                       "bg-pink-400",
                       "bg-orange-300",
@@ -219,7 +219,7 @@ export default async function HomePage() {
                       />
                     ))}
                   </div>
-                  <div className="flex items-center justify-center rounded-2xl bg-violet-600 px-3 text-xs font-black text-white">
+                  <div className="flex min-h-12 items-center justify-center rounded-2xl bg-violet-600 px-3 text-xs font-black text-white">
                     COLOR
                   </div>
                 </div>

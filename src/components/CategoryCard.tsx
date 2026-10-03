@@ -21,7 +21,7 @@ const accents = [
   "from-violet-100 via-fuchsia-50 to-pink-100",
 ];
 
-const emojiAccents = ["🌈", "⭐", "🖍️", "✨"];
+
 
 export default function CategoryCard({
   category,
@@ -37,29 +37,21 @@ export default function CategoryCard({
   const imageUrl = category.imageUrl ?? null;
   const accentIndex = Math.abs(Number(category.id) || String(category.id).length) % accents.length;
   const accent = accents[accentIndex];
-  const emoji = emojiAccents[accentIndex];
 
   return (
     <Link
       href={categoryUrl}
-      className="group relative block h-full overflow-hidden rounded-[1.65rem] border border-violet-100 bg-white p-2.5 shadow-[0_10px_28px_rgba(76,29,149,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(76,29,149,0.14)] active:scale-[.99]"
+      className="group relative block h-full min-w-0 overflow-hidden rounded-[1.65rem] border border-violet-100 bg-white p-2.5 shadow-[0_10px_28px_rgba(76,29,149,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(76,29,149,0.14)] active:scale-[.99]"
     >
       <div className={`relative aspect-[4/3] overflow-hidden rounded-[1.3rem] bg-gradient-to-br ${accent}`}>
-        <span className="absolute left-3 top-3 z-10 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-violet-700 shadow-sm">
-          {variant === "printable" ? "Print" : "Explore"}
-        </span>
-
-        <span className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-lg shadow-sm" aria-hidden="true">
-          {emoji}
-        </span>
-
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={`${category.name} coloring pages`}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-            loading="lazy"
-          />
+          <div className="cc-card-art absolute inset-3 flex items-center justify-center overflow-hidden rounded-xl bg-white p-3">
+            <img
+              src={imageUrl}
+              alt={`${category.name} coloring pages`}
+              loading="lazy"
+            />
+          </div>
         ) : (
           <div className="flex h-full items-center justify-center">
             <span className="text-6xl font-black text-violet-300/70">
@@ -71,7 +63,7 @@ export default function CategoryCard({
 
       <div className="px-2.5 pb-2 pt-3">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-black leading-tight text-slate-950 sm:text-lg">
+          <h3 className="cc-safe-wrap min-w-0 text-base font-black leading-tight text-slate-950 sm:text-lg">
             {category.name}
           </h3>
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600 transition group-hover:bg-violet-600 group-hover:text-white">
