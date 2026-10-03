@@ -181,6 +181,7 @@ export default async function PrintableCategoryPage({
 
         <ColoringGrid
           pages={displayPages}
+          variant="printable"
         />
 
       </section>
