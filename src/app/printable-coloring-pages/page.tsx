@@ -62,20 +62,26 @@ export default async function PrintableColoringPagesPage() {
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      <section className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-8 sm:p-12 rounded-3xl shadow-xl space-y-4">
+      <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-50 via-white to-amber-50 p-8 sm:p-12 shadow-xl ring-1 ring-orange-100">
+        <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-orange-200/60 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-16 left-1/3 h-32 w-32 rounded-full bg-yellow-200/70 blur-2xl" />
         <span className="text-xs font-bold uppercase tracking-wider text-indigo-300 bg-indigo-900/60 px-3 py-1 rounded-full border border-indigo-700">
           Printable Coloring Hub
         </span>
 
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-          Free Printable Coloring Pages
+        <h1 className="relative mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
+          Ready-to-print sheets for crayons, pencils & markers
         </h1>
 
-        <p className="text-slate-300 text-base sm:text-lg max-w-3xl leading-relaxed">
-          Select any design to open the printable preview, click print, or
-          save high-definition black-and-white PNG outline files to print at
-          home.
+        <p className="relative text-slate-600 text-base sm:text-lg max-w-3xl leading-relaxed">
+          Clean black-and-white outlines designed for paper. Choose a sheet, open its print-ready preview, and print on standard Letter or A4 paper.
         </p>
+
+        <div className="relative flex flex-wrap gap-2 pt-2 text-xs font-bold text-slate-700">
+          <span className="rounded-full bg-white px-3 py-2 shadow-sm ring-1 ring-orange-100">A4 friendly</span>
+          <span className="rounded-full bg-white px-3 py-2 shadow-sm ring-1 ring-orange-100">US Letter friendly</span>
+          <span className="rounded-full bg-white px-3 py-2 shadow-sm ring-1 ring-orange-100">Black & white line art</span>
+        </div>
       </section>
 
       <section className="space-y-6">
@@ -99,11 +105,12 @@ export default async function PrintableColoringPagesPage() {
       />
 
       <section className="space-y-6">
-        <h2 className="text-2xl font-bold text-slate-900">
-          Featured Printable Sheets
-        </h2>
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Featured Printable Sheets</h2>
+          <p className="mt-1 text-sm text-slate-500">Pick a sheet to print. Want the interactive experience? Open the same design online.</p>
+        </div>
 
-        <ColoringGrid pages={pages} />
+        <ColoringGrid pages={pages} variant="printable" />
       </section>
 
       <FAQ
