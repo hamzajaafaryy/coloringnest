@@ -288,238 +288,199 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     };
 
     init();
-    return (
-    <div className="mx-auto my-4 flex max-w-5xl flex-col gap-4 rounded-[2rem] border border-violet-100 bg-gradient-to-b from-violet-50 via-white to-sky-50 p-3 text-slate-900 shadow-2xl shadow-violet-100 sm:gap-5 sm:p-5">
-      <div className="flex flex-col gap-3 rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-violet-100 sm:p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-violet-500">
-              Coloring tools
-            </p>
-            <p className="mt-0.5 text-sm font-black text-slate-900">
-              Pick a tool, then tap the picture
-            </p>
-          </div>
-          <span className="hidden rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-black text-emerald-700 sm:inline-flex">
-            Save your picture anytime
-          </span>
-        </div>
+    return () => { cancelled = true; };
+  }, [renderSvgToCanvas, restoreCanvasState, saveCanvasState, storageKey]);
 
-        <div className="grid grid-cols-3 gap-2">
+  const pushHistory = useCallback(() => {
+    const current = saveCanvasState();
+    if (!current) return;
+    setHistory((previous) => {
+      const next = [...previous.slice(0, historyIndex + 1), current];
+      setHistoryIndex(next.length - 1);
+      return next;
+    });
+  }, [historyIndex, saveCanvasState]);
+
+  const handleFill = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (activeTool !== "fill") return;
+    event.preventDefault();
+    const changed = floodFillCanvas(canvasRef.current!, event.clientX, event.clientY, selectedColor);
+    if (changed) pushHistory();
+  };
+
+  const getCanvasCoordinates = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (event.clientX - rect.left) * (canvas.width / rect.width),
+      y: (event.clientY - rect.top) * (canvas.height / rect.height),
+    };
+  };
+
+  const startDrawing = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (activeTool === "fill") return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    event.preventDefault();
+    canvas.setPointerCapture?.(event.pointerId);
+    const { x, y } = getCanvasCoordinates(event);
+    setIsDrawing(true);
+
+    ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
+    ctx.fillStyle = activeTool === "eraser" ? "#000000" : selectedColor;
+    ctx.beginPath();
+    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const draw = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || activeTool === "fill") return;
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
+
+    event.preventDefault();
+    const { x, y } = getCanvasCoordinates(event);
+    ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const stopDrawing = (event?: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    if (event) {
+      try { event.currentTarget.releasePointerCapture?.(event.pointerId); } catch {}
+    }
+    const ctx = canvasRef.current?.getContext("2d");
+    if (ctx) ctx.globalCompositeOperation = "source-over";
+    setIsDrawing(false);
+    pushHistory();
+  };
+
+  const handleUndo = () => {
+    if (historyIndex <= 0) return;
+    const nextIndex = historyIndex - 1;
+    setHistoryIndex(nextIndex);
+    void restoreCanvasState(history[nextIndex]);
+  };
+
+  const handleRedo = () => {
+    if (historyIndex >= history.length - 1) return;
+    const nextIndex = historyIndex + 1;
+    setHistoryIndex(nextIndex);
+    restoreCanvasState(history[nextIndex]);
+  };
+
+  const handleReset = async () => {
+    try { localStorage.removeItem(storageKey); } catch {}
+    await renderSvgToCanvas();
+    const current = saveCanvasState();
+    setHistory([current]);
+    setHistoryIndex(0);
+  };
+
+  const handleSaveLocal = () => {
+    const current = saveCanvasState();
+    if (!current) return;
+    try { localStorage.setItem(storageKey, current); } catch {}
+    setSavedSuccess(true);
+    window.setTimeout(() => setSavedSuccess(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `${slug}-colored.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
+  const handlePrint = () => window.print();
+  const changeZoom = (amount: number) =>
+    setZoomLevel((value) => Math.min(2, Math.max(0.5, value + amount)));
+
+  return (
+    <div className="bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+        <div className="flex items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60">
           {(["fill", "brush", "eraser"] as Tool[]).map((tool) => {
-            const Icon =
-              tool === "fill" ? PaintBucket : tool === "brush" ? Brush : Eraser;
-            const label =
-              tool === "fill" ? "Fill" : tool === "brush" ? "Brush" : "Eraser";
-
+            const Icon = tool === "fill" ? PaintBucket : tool === "brush" ? Brush : Eraser;
             return (
-              <button
-                key={tool}
-                type="button"
-                onClick={() => setActiveTool(tool)}
-                aria-pressed={activeTool === tool}
-                className={`flex min-h-14 items-center justify-center gap-2 rounded-2xl border-2 px-3 text-xs font-black transition active:scale-[.98] sm:text-sm ${activeTool === tool ? "border-violet-600 bg-violet-600 text-white shadow-lg shadow-violet-100" : "border-slate-200 bg-slate-50 text-slate-700 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"}`}
-              >
-                <Icon className="h-5 w-5" />
-                {label}
+              <button key={tool} onClick={() => setActiveTool(tool)} className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm ${activeTool === tool ? "bg-indigo-600 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"}`}>
+                <Icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{tool === "fill" ? "Fill Bucket" : tool === "brush" ? "Brush" : "Eraser"}</span>
               </button>
             );
           })}
         </div>
+
+        <div className="flex items-center gap-1.5">
+          <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" title="Undo"><Undo2 className="w-4 h-4" /></button>
+          <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" title="Redo"><Redo2 className="w-4 h-4" /></button>
+          <button onClick={() => changeZoom(-0.1)} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
+          <span className="text-xs font-semibold min-w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
+          <button onClick={() => changeZoom(0.1)} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
+          <button onClick={handleReset} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Reset"><RotateCcw className="w-4 h-4" /></button>
+        </div>
       </div>
 
-      <div className="rounded-[1.5rem] bg-white p-3 shadow-sm ring-1 ring-violet-100 sm:p-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
-            Pick a color
-          </p>
-          <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-black text-violet-700">
-            {activeTool === "fill"
-              ? "Tap an area to fill it"
-              : activeTool === "brush"
-                ? "Draw with your finger"
-                : "Erase brush marks"}
-          </span>
-        </div>
-
-        <div className="mt-3 grid grid-cols-6 gap-2 sm:grid-cols-12">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-800/70 p-3 rounded-2xl border border-slate-700">
+        <div className="flex flex-wrap items-center gap-2">
           {PRESET_COLORS.map((color) => (
-            <button
-              key={color}
-              type="button"
-              onClick={() => setSelectedColor(color)}
-              aria-label={`Select color ${color}`}
-              aria-pressed={selectedColor === color}
-              className={`aspect-square min-h-10 rounded-full border-[3px] shadow-sm transition active:scale-95 sm:min-h-11 ${selectedColor === color ? "scale-110 border-violet-600 ring-2 ring-violet-200" : "border-white ring-1 ring-slate-200"}`}
-              style={{ backgroundColor: color }}
-            />
+            <button key={color} type="button" onClick={() => setSelectedColor(color)} aria-label={`Select ${color}`} className={`w-7 h-7 rounded-full border-2 ${selectedColor === color ? "border-white scale-110" : "border-slate-600"}`} style={{ backgroundColor: color }} />
           ))}
-        </div>
-
-        <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
-          <label className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 text-xs font-black text-slate-600">
-            Custom color
-            <input
-              type="color"
-              value={selectedColor}
-              onChange={(event) => setSelectedColor(event.target.value)}
-              className="h-9 w-12 cursor-pointer rounded-lg bg-transparent"
-              aria-label="Choose a custom color"
-            />
-          </label>
-
-          <label className="flex min-h-12 flex-1 items-center gap-3 rounded-2xl bg-slate-50 px-3 text-xs font-black text-slate-600 sm:max-w-sm">
-            Brush size
-            <input
-              type="range"
-              min="4"
-              max="40"
-              value={brushSize}
-              onChange={(event) => setBrushSize(Number(event.target.value))}
-              className="min-w-0 flex-1 accent-violet-600"
-              aria-label="Brush size"
-            />
-            <span className="w-7 text-right text-slate-900">{brushSize}</span>
+          <label className="flex items-center gap-2 text-xs text-slate-300 ml-2">
+            Custom
+            <input type="color" value={selectedColor} onChange={(event) => setSelectedColor(event.target.value)} className="w-8 h-8 rounded cursor-pointer bg-transparent" />
           </label>
         </div>
+        <label className="flex items-center gap-2 text-xs text-slate-300">
+          Brush
+          <input type="range" min="4" max="40" value={brushSize} onChange={(event) => setBrushSize(Number(event.target.value))} />
+          <span className="w-8 text-right">{brushSize}</span>
+        </label>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto rounded-[1.5rem] bg-slate-950 p-2 text-white shadow-lg">
-        <button
-          type="button"
-          onClick={handleUndo}
-          disabled={historyIndex <= 0}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 transition hover:bg-white/20 disabled:opacity-30"
-          aria-label="Undo"
-          title="Undo"
-        >
-          <Undo2 className="h-5 w-5" />
-        </button>
-        <button
-          type="button"
-          onClick={handleRedo}
-          disabled={historyIndex >= history.length - 1}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 transition hover:bg-white/20 disabled:opacity-30"
-          aria-label="Redo"
-          title="Redo"
-        >
-          <Redo2 className="h-5 w-5" />
-        </button>
-
-        <span className="mx-1 h-7 w-px shrink-0 bg-white/15" />
-
-        <button
-          type="button"
-          onClick={() => changeZoom(-0.1)}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 transition hover:bg-white/20"
-          aria-label="Zoom out"
-        >
-          <ZoomOut className="h-5 w-5" />
-        </button>
-        <span className="min-w-12 shrink-0 text-center text-xs font-black">
-          {Math.round(zoomLevel * 100)}%
-        </span>
-        <button
-          type="button"
-          onClick={() => changeZoom(0.1)}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 transition hover:bg-white/20"
-          aria-label="Zoom in"
-        >
-          <ZoomIn className="h-5 w-5" />
-        </button>
-
-        <span className="mx-1 h-7 w-px shrink-0 bg-white/15" />
-
-        <button
-          type="button"
-          onClick={handleReset}
-          className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 text-xs font-black transition hover:bg-white/20"
-        >
-          <RotateCcw className="h-4 w-4" />
-          Reset
-        </button>
-      </div>
-
-      <div className="relative flex min-h-[300px] items-center justify-center overflow-auto rounded-[1.75rem] border-4 border-white bg-white p-2 shadow-xl ring-1 ring-violet-100 sm:min-h-[500px] sm:p-4">
+      <div className="relative rounded-2xl bg-white overflow-auto min-h-[420px] flex items-center justify-center p-4">
         <div
           className="relative w-full max-w-3xl"
-          style={{
-            aspectRatio: String(aspectRatio),
-            transform: `scale(${zoomLevel})`,
-            transformOrigin: "center",
-          }}
+          style={{ aspectRatio: String(aspectRatio), transform: `scale(${zoomLevel})`, transformOrigin: "center" }}
         >
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 block h-full w-full touch-none rounded-xl"
-            style={{
-              cursor:
-                activeTool === "fill"
-                  ? "crosshair"
-                  : activeTool === "brush"
-                    ? "crosshair"
-                    : "cell",
-            }}
+            className="absolute inset-0 w-full h-full touch-none block"
+            style={{ cursor: activeTool === "fill" ? "crosshair" : activeTool === "brush" ? "crosshair" : "cell" }}
             onPointerDown={activeTool === "fill" ? handleFill : startDrawing}
             onPointerMove={draw}
             onPointerUp={stopDrawing}
             onPointerCancel={stopDrawing}
             onPointerLeave={stopDrawing}
-            aria-label={`Interactive coloring area for ${title}`}
+            aria-label={`Coloring area for ${title}`}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-        <button
-          type="button"
-          onClick={handleSaveLocal}
-          className="cc-btn cc-btn-primary w-full px-3 text-xs sm:text-sm"
-        >
-          {savedSuccess ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-          {savedSuccess ? "Saved!" : "Save"}
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button onClick={handleSaveLocal} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-sm">
+          {savedSuccess ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+          {savedSuccess ? "Saved" : "Save"}
         </button>
-
-        <button
-          type="button"
-          onClick={handleDownload}
-          className="cc-btn cc-btn-soft w-full px-3 text-xs sm:text-sm"
-        >
-          <Download className="h-4 w-4" />
-          Download
-        </button>
-
-        <button
-          type="button"
-          onClick={handlePrint}
-          className="cc-btn cc-btn-print w-full px-3 text-xs sm:text-sm"
-        >
-          <Printer className="h-4 w-4" />
-          Print
-        </button>
-
-        <button
-          type="button"
-          onClick={handleReset}
-          className="cc-btn cc-btn-outline w-full px-3 text-xs sm:text-sm"
-        >
-          <Sparkles className="h-4 w-4" />
-          Start over
-        </button>
-
-        <button
-          type="button"
-          onClick={() => document.documentElement.requestFullscreen?.()}
-          className="cc-btn cc-btn-dark col-span-2 w-full px-3 text-xs sm:col-span-1 sm:text-sm"
-        >
-          <Maximize2 className="h-4 w-4" />
-          Fullscreen
-        </button>
+        <button onClick={handleDownload} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Download className="w-4 h-4" />Download PNG</button>
+        <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Printer className="w-4 h-4" />Print</button>
+        <button onClick={handleReset} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Sparkles className="w-4 h-4" />Start Over</button>
+        <button onClick={() => document.documentElement.requestFullscreen?.()} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Maximize2 className="w-4 h-4" />Fullscreen</button>
       </div>
-
-      <p className="px-2 text-center text-[11px] font-bold leading-5 text-slate-500 sm:text-xs">
-        Tip: on phones and tablets, use one finger to color. Save stores your picture on this device.
-      </p>
     </div>
   );
 }
