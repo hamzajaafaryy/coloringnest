@@ -267,7 +267,7 @@ export default async function IndividualColoringPage({
                   page.altText ||
                   page.title
                 }
-                className="w-full h-full object-contain"
+                className="cc-media h-full max-h-full object-contain"
               />
             ) : (
               <div className="text-sm text-slate-400">
@@ -301,7 +301,7 @@ export default async function IndividualColoringPage({
           <div className="space-y-3">
             <Link
               href={`/color-online/${page.slug}/`}
-              className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-base rounded-2xl shadow-md shadow-indigo-200 hover:from-indigo-700 hover:to-purple-700 hover:scale-[1.02] transition-all"
+              className="cc-btn cc-btn-primary w-full min-h-12 px-4 py-3.5 text-sm sm:text-base"
             >
               <Sparkles className="w-5 h-5" />
               Color This Page Online
