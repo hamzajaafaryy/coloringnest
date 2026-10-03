@@ -94,6 +94,7 @@ export default async function PrintableColoringPagesPage() {
             <CategoryCard
               key={cat.id}
               category={cat}
+              variant="printable"
             />
           ))}
         </div>
@@ -107,7 +108,7 @@ export default async function PrintableColoringPagesPage() {
       <section className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Featured Printable Sheets</h2>
-          <p className="mt-1 text-sm text-slate-500">Pick a sheet to print. Want the interactive experience? Open the same design online.</p>
+          <p className="mt-1 text-sm text-slate-500">Choose a printable sheet, download it, and print it at home or in the classroom.</p>
         </div>
 
         <ColoringGrid pages={pages} variant="printable" />
