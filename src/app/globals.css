@@ -1,5 +1,192 @@
 @import "tailwindcss";
 
+:root {
+  --cc-violet: #7c3aed;
+  --cc-fuchsia: #d946ef;
+  --cc-sky: #38bdf8;
+  --cc-orange: #f97316;
+  --cc-yellow: #facc15;
+  --cc-ink: #172033;
+  --cc-muted: #64748b;
+  --cc-border: #e8eaf2;
+  --cc-surface: #ffffff;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
+  background: #fff;
+  color: var(--cc-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgb(124 58 237 / .22);
+  outline-offset: 2px;
+}
+
+input,
+textarea,
+select {
+  max-width: 100%;
+}
+
+@layer components {
+  .cc-btn {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    border-radius: 1rem;
+    padding: .75rem 1.15rem;
+    font-size: .875rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+    transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+
+  .cc-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .cc-btn:active {
+    transform: translateY(0) scale(.98);
+  }
+
+  .cc-btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed 0%, #d946ef 52%, #f97316 100%);
+    box-shadow: 0 12px 28px rgb(124 58 237 / .22);
+  }
+
+  .cc-btn-primary:hover {
+    box-shadow: 0 16px 34px rgb(124 58 237 / .28);
+  }
+
+  .cc-btn-dark {
+    color: #fff;
+    background: #172033;
+    box-shadow: 0 10px 24px rgb(15 23 42 / .14);
+  }
+
+  .cc-btn-dark:hover {
+    background: #6d28d9;
+  }
+
+  .cc-btn-soft {
+    color: #5b21b6;
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+  }
+
+  .cc-btn-soft:hover {
+    background: #ede9fe;
+    border-color: #c4b5fd;
+  }
+
+  .cc-btn-print {
+    color: #c2410c;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+  }
+
+  .cc-btn-print:hover {
+    background: #ffedd5;
+    border-color: #fdba74;
+  }
+
+  .cc-btn-outline {
+    color: #334155;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+  }
+
+  .cc-btn-outline:hover {
+    color: #6d28d9;
+    border-color: #ddd6fe;
+    background: #fafaff;
+  }
+
+  .cc-responsive-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .cc-fluid-heading {
+    font-size: clamp(2rem, 7vw, 4.5rem);
+  }
+
+  .cc-safe-wrap {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .cc-media {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+}
+
+@media (min-width: 640px) {
+  .cc-responsive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cc-responsive-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
 @keyframes cc-float {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
   50% { transform: translate3d(0, -12px, 0) rotate(2deg); }
@@ -21,6 +208,37 @@
 .cc-float-reverse { animation: cc-float-reverse 6s ease-in-out infinite; }
 .cc-bounce-soft { animation: cc-bounce-soft 2.8s ease-in-out infinite; }
 .cc-gradient-flow { background-size: 200% 200%; animation: cc-shimmer 8s ease infinite; }
+
+@media (max-width: 639px) {
+  .cc-float,
+  .cc-float-reverse {
+    animation-duration: 7s;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .cc-float, .cc-float-reverse, .cc-bounce-soft, .cc-gradient-flow { animation: none !important; }
+  html { scroll-behavior: auto; }
+  .cc-float, .cc-float-reverse, .cc-bounce-soft, .cc-gradient-flow {
+    animation: none !important;
+  }
+}
+
+@media print {
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  .print-sheet {
+    width: 100% !important;
+    max-width: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
 }
