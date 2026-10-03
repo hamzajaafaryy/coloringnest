@@ -4,18 +4,34 @@ import { cookies } from "next/headers";
 const COOKIE_NAME = "craftcoloring_admin";
 const SESSION_DAYS = 7;
 
-function getConfig() {
+type AdminConfig = {
+  username: string;
+  password: string;
+  secret: string;
+};
+
+function getConfig(): AdminConfig | null {
   const username = process.env.ADMIN_USERNAME;
   const password = process.env.ADMIN_PASSWORD;
   const secret = process.env.ADMIN_SESSION_SECRET;
 
   if (!username || !password || !secret) {
+    return null;
+  }
+
+  return { username, password, secret };
+}
+
+function getRequiredConfig(): AdminConfig {
+  const config = getConfig();
+
+  if (!config) {
     throw new Error(
       "Admin authentication is not configured. Set ADMIN_USERNAME, ADMIN_PASSWORD, and ADMIN_SESSION_SECRET."
     );
   }
 
-  return { username, password, secret };
+  return config;
 }
 
 function sign(value: string, secret: string) {
@@ -51,6 +67,7 @@ function verifyToken(token: string | undefined, secret: string) {
 
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+
     return (
       typeof data.username === "string" &&
       typeof data.exp === "number" &&
@@ -62,9 +79,16 @@ function verifyToken(token: string | undefined, secret: string) {
 }
 
 export async function isAdminAuthenticated() {
-  const { secret } = getConfig();
+  const config = getConfig();
+
+  // Missing admin env vars should never crash a public-site build.
+  // Treat the admin as logged out until credentials are configured.
+  if (!config) {
+    return false;
+  }
+
   const cookieStore = await cookies();
-  return verifyToken(cookieStore.get(COOKIE_NAME)?.value, secret);
+  return verifyToken(cookieStore.get(COOKIE_NAME)?.value, config.secret);
 }
 
 export async function loginAdmin(username: string, password: string) {
@@ -72,7 +96,7 @@ export async function loginAdmin(username: string, password: string) {
     username: configuredUsername,
     password: configuredPassword,
     secret,
-  } = getConfig();
+  } = getRequiredConfig();
 
   if (username !== configuredUsername || password !== configuredPassword) {
     return false;

@@ -81,6 +81,8 @@ export async function generateMetadata({
       `Color ${page.title} online for free in your browser. Explore the interactive coloring tools and creative features on this page.`,
 
     path: `/coloring-pages/${category}/${slug}/`,
+    image: page.imageUrl || undefined,
+    imageAlt: page.altText || `${page.title} coloring page for kids`,
   });
 }
 
