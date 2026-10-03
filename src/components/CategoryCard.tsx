@@ -8,7 +8,7 @@ interface CategoryCardCategory {
   description?: string | null;
   imageUrl?: string | null;
 }
-interface CategoryCardProps { category: CategoryCardCategory; }
+interface CategoryCardProps { category: CategoryCardCategory; variant?: "coloring" | "printable"; }
 
 const accents = [
   "from-pink-100 via-white to-orange-100",
@@ -17,14 +17,15 @@ const accents = [
   "from-violet-100 via-white to-fuchsia-100",
 ];
 
-export default function CategoryCard({ category }: CategoryCardProps) {
+export default function CategoryCard({ category, variant = "coloring" }: CategoryCardProps) {
   const slug = category.slug ?? "coloring-pages";
+  const categoryUrl = variant === "printable" ? `/printable-coloring-pages/${slug}/` : `/coloring-pages/${slug}/`;
   const description = category.description ?? "";
   const imageUrl = category.imageUrl ?? null;
   const accent = accents[String(category.id).length % accents.length];
 
   return (
-    <Link href={`/coloring-pages/${slug}/`} className="group relative block overflow-hidden rounded-[1.75rem] border border-white bg-white p-2 shadow-[0_12px_35px_rgba(15,23,42,0.07)] transition-all duration-500 hover:-translate-y-2 hover:rotate-[0.4deg] hover:shadow-[0_24px_55px_rgba(124,58,237,0.15)]">
+    <Link href={categoryUrl} className="group relative block overflow-hidden rounded-[1.75rem] border border-white bg-white p-2 shadow-[0_12px_35px_rgba(15,23,42,0.07)] transition-all duration-500 hover:-translate-y-2 hover:rotate-[0.4deg] hover:shadow-[0_24px_55px_rgba(124,58,237,0.15)]">
       <div className={`relative aspect-[4/3] overflow-hidden rounded-[1.4rem] bg-gradient-to-br ${accent}`}>
         <span className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/50 transition-transform duration-500 group-hover:scale-150" />
         <span className="absolute bottom-4 left-4 z-10 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-violet-700 shadow-sm">
