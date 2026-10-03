@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-import { Download, Printer, CheckCircle2, FileImage, Sparkles } from "lucide-react";
+import { Download, CheckCircle2, FileImage, Sparkles } from "lucide-react";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DownloadButton from "@/components/DownloadButton";
@@ -171,13 +171,22 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
           </div>
 
           <div className="mt-5 space-y-3">
-            {safeSvgContent && (
+            {safeSvgContent ? (
               <DownloadButton
                 slug={page.slug!}
                 svgContent={safeSvgContent}
                 title={page.title}
               />
-            )}
+            ) : page.imageUrl ? (
+              <a
+                href={page.imageUrl}
+                download
+                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
+              >
+                <Download className="h-4 w-4" />
+                Download Printable Image
+              </a>
+            ) : null}
 
             <div id="print">
               <PrintButton title={page.title} />
