@@ -85,7 +85,7 @@ export default async function HomePage() {
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link href="/color-online/unicorn-rainbow-coloring-page/" className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-6 py-4 text-sm font-black text-white shadow-xl shadow-fuchsia-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+              <Link href="/color-online/unicorn-rainbow-coloring-page/" className="cc-btn cc-btn-primary w-full px-5 py-3.5 sm:w-auto sm:px-6 sm:py-4">
                 <Wand2 className="h-5 w-5 transition group-hover:rotate-12" />
                 Start Coloring Online
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
@@ -204,7 +204,7 @@ export default async function HomePage() {
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featuredCategories.map((cat, index) => (
-              <div key={cat.id} className={index % 2 === 0 ? "cc-float" : "cc-float-reverse"}>
+              <div key={cat.id} className="">
                 <CategoryCard category={cat} />
               </div>
             ))}
@@ -221,7 +221,7 @@ export default async function HomePage() {
                 <div key={item} className="flex items-center gap-2 rounded-2xl bg-white p-3 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-100"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> {item}</div>
               ))}
             </div>
-            <Link href="/color-online/unicorn-rainbow-coloring-page/" className="mt-7 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-black text-white shadow-lg transition hover:-translate-y-1 hover:bg-violet-700">Try the coloring studio <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/color-online/unicorn-rainbow-coloring-page/" className="cc-btn cc-btn-dark mt-7 w-full px-5 py-3.5 sm:w-auto sm:px-6">Try the coloring studio <ArrowRight className="h-4 w-4" /></Link>
           </div>
 
           <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-yellow-100 via-pink-100 to-violet-200 p-7">
@@ -248,7 +248,7 @@ export default async function HomePage() {
               <h2 className="mt-4 text-3xl font-black text-slate-900">Prefer crayons on paper?</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Explore printable-friendly outlines for home, classrooms and creative afternoons.</p>
             </div>
-            <Link href="/printable-coloring-pages/" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-orange-200 transition hover:-translate-y-1 hover:bg-orange-600">Browse printables <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/printable-coloring-pages/" className="cc-btn w-full shrink-0 bg-orange-500 px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-orange-200 hover:bg-orange-600 sm:w-auto sm:px-6">Browse printables <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </section>
 
