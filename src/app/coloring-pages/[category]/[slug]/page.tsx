@@ -282,17 +282,21 @@ export default async function IndividualColoringPage({
           </figure>
 
           <p className="text-xs text-slate-400 mt-4 text-center">
-            Original crisp vector line art —
-            optimized for standard Letter and
-            A4 printing.
+            Original artwork preview • open the interactive editor to color it your way.
           </p>
         </div>
 
         {/* Action Panel */}
-        <div className="md:col-span-5 space-y-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">
-            Color or Download
+        <div className="md:col-span-5 space-y-5 bg-gradient-to-b from-violet-50 via-white to-fuchsia-50 p-6 rounded-3xl border border-violet-100 shadow-sm">
+          <span className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-violet-700">
+            <Sparkles className="h-3.5 w-3.5" /> Creative Studio
+          </span>
+          <h2 className="text-2xl font-black text-slate-900">
+            Make this page yours
           </h2>
+          <p className="text-sm leading-6 text-slate-600">
+            Choose your colors, experiment, undo, and create a version that is uniquely yours.
+          </p>
 
           <div className="space-y-3">
             <Link
