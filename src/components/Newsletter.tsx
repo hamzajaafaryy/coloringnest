@@ -51,7 +51,7 @@ export default function Newsletter() {
             </div>
             <button
               type="submit"
-              className="px-6 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-xl text-sm shadow-md transition-all shrink-0"
+              className="cc-btn w-full bg-yellow-300 text-slate-950 shadow-md hover:bg-yellow-200 sm:w-auto"
             >
               Subscribe Free
             </button>
