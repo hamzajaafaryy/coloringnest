@@ -181,7 +181,7 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
               <a
                 href={page.imageUrl}
                 download
-                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
+                className="cc-btn cc-btn-dark w-full min-h-12 px-4 py-3.5"
               >
                 <Download className="h-4 w-4" />
                 Download Printable Image
