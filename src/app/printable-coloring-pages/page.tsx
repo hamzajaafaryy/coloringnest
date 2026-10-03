@@ -65,7 +65,7 @@ export default async function PrintableColoringPagesPage() {
       <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-50 via-white to-amber-50 p-8 sm:p-12 shadow-xl ring-1 ring-orange-100">
         <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-orange-200/60 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-16 left-1/3 h-32 w-32 rounded-full bg-yellow-200/70 blur-2xl" />
-        <span className="text-xs font-bold uppercase tracking-wider text-indigo-300 bg-indigo-900/60 px-3 py-1 rounded-full border border-indigo-700">
+        <span className="inline-flex rounded-full border border-orange-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-orange-700 shadow-sm">
           Printable Coloring Hub
         </span>
 
