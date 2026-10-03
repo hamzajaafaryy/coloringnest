@@ -181,7 +181,7 @@ export default function SearchBar({
             }
           }}
           placeholder={placeholder}
-          className={`w-full rounded-full border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${sizeClasses[size]}`}
+          className={`w-full max-w-full rounded-full border border-violet-100 bg-white text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-300 transition-all ${sizeClasses[size]}`}
         />
 
         {query && (
