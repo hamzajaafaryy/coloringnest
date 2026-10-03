@@ -21,7 +21,9 @@ export default function ColoringCard({ page, priority = false, variant = "colori
   const imageUrl = isDbPage ? page.imageUrl : null;
   const altText = isDbPage ? page.altText || page.title : page.altText;
   const difficulty = page.difficulty || null;
-  const pageUrl = `/coloring-pages/${categorySlug}/${pageSlug}/`;
+  const pageUrl = isPrintable
+    ? `/printable-coloring-pages/${categorySlug}/${pageSlug}/`
+    : `/coloring-pages/${categorySlug}/${pageSlug}/`;
   const onlineUrl = `/color-online/${pageSlug}/`;
   const cardLabel = isPrintable ? `Open printable ${page.title}` : `View ${page.title}`;
 
@@ -67,9 +69,6 @@ export default function ColoringCard({ page, priority = false, variant = "colori
             <>
               <Link href={`${pageUrl}#print`} className="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-400 px-3 py-2.5 text-xs font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                 <Printer className="h-3.5 w-3.5" /> Print This Sheet
-              </Link>
-              <Link href={onlineUrl} className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-xl bg-violet-50 px-3 py-2 text-[11px] font-black text-violet-700 transition hover:bg-violet-100">
-                <Sparkles className="h-3.5 w-3.5" /> Want to color online instead?
               </Link>
             </>
           ) : (
