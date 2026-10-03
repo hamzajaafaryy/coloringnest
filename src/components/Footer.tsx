@@ -21,7 +21,7 @@ export default async function Footer() {
                 <h2 className="mt-1 text-xl font-black text-slate-900">Pick a page. Pick a color. Make it yours.</h2>
               </div>
             </div>
-            <Link href="/coloring-pages/" className="mt-5 inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-violet-700 sm:mt-0">
+            <Link href="/coloring-pages/" className="cc-btn cc-btn-dark mt-5 w-full shrink-0 px-4 py-3 text-xs sm:mt-0 sm:w-auto sm:text-sm">
               Explore coloring pages <Sparkles className="h-4 w-4 text-yellow-300" />
             </Link>
           </div>
