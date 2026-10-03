@@ -14,7 +14,7 @@ export default function PrintButton({ title }: PrintButtonProps) {
   return (
     <button
       onClick={handlePrint}
-      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-2xl border border-slate-200 shadow-xs transition-all"
+      className="cc-btn cc-btn-outline w-full min-h-12 px-4 py-3.5"
     >
       <Printer className="w-4 h-4 text-slate-600" />
       <span>Print Coloring Sheet</span>
