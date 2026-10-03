@@ -41,7 +41,7 @@ export default function DownloadButton({ slug, svgContent, title }: DownloadButt
     <button
       onClick={handleDownload}
       disabled={downloading}
-      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-2xl shadow-sm transition-all disabled:opacity-60"
+      className="cc-btn cc-btn-dark w-full min-h-12 px-4 py-3.5 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {completed ? (
         <>
