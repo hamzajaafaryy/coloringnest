@@ -232,6 +232,15 @@ export default async function HomePage() {
       <AdPlaceholder slotName="Homepage Top Banner" format="banner" />
 
       <div className="mx-auto max-w-7xl space-y-16 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:space-y-20">
+        <section className="grid min-w-0 grid-cols-1 items-center gap-5 rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-50 via-pink-50 to-amber-50 p-5 sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto]" aria-labelledby="colorquest-heading">
+          <div>
+            <span className="text-xs font-black uppercase tracking-widest text-violet-600">New · A story made by you</span>
+            <h2 id="colorquest-heading" className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">Color a dragon. Create a storybook.</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Meet a little dragon, choose a friend, and color your way through four magical chapters. Keep your very own book to download or print.</p>
+          </div>
+          <Link href="/colorquest/" className="cc-btn cc-btn-primary w-full lg:w-auto"><Sparkles className="h-5 w-5" />Play ColorQuest<ArrowRight className="h-4 w-4" /></Link>
+        </section>
+
         <section aria-labelledby="popular-heading">
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>

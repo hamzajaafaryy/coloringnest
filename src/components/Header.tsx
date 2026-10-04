@@ -21,6 +21,7 @@ const navLinks = [
   { href: "/coloring-pages/", label: "Coloring Pages", icon: Palette },
   { href: "/color-online/", label: "Color Online", icon: WandSparkles },
   { href: "/printable-coloring-pages/", label: "Printables", icon: Printer },
+  { href: "/colorquest/", label: "ColorQuest", icon: BookOpen },
   { href: "/blog/", label: "Ideas", icon: BookOpen },
 ];
 
