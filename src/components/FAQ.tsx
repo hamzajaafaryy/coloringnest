@@ -28,10 +28,10 @@ export default function FAQ({
   if (!items || items.length === 0) return null;
 
   return (
-    <section className="my-12 py-10 px-6 sm:px-10 bg-slate-50 rounded-3xl border border-slate-200/80">
+    <section className="my-8 py-8 px-4 sm:px-8 bg-[#edf4fb] rounded-3xl border border-[#cfdeeb]">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
             <HelpCircle className="w-5 h-5" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
@@ -52,13 +52,13 @@ export default function FAQ({
               >
                 <button
                   onClick={() => toggle(index)}
-                  className="flex min-h-14 w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-bold text-slate-900 transition-colors hover:text-violet-600 sm:px-6 sm:text-base"
+                  className="flex min-h-14 w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-bold text-slate-900 transition-colors hover:text-blue-600 sm:px-6 sm:text-base"
                   aria-expanded={isOpen}
                 >
                   <span>{item.question}</span>
                   <ChevronDown
                     className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${
-                      isOpen ? "rotate-180 text-indigo-600" : ""
+                      isOpen ? "rotate-180 text-blue-600" : ""
                     }`}
                   />
                 </button>

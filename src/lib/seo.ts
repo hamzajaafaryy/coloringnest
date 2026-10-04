@@ -1,12 +1,13 @@
+import { normalizeBrand } from "@/lib/content-quality";
 import { Metadata } from "next";
 
 export const SITE_CONFIG = {
   name: "CraftColoring",
-  tagline: "Free Online Coloring Pages for Kids and Adults",
+  tagline: "Free Coloring Pages for Kids - Print or Color Online",
   domain: "https://craftcoloring.com",
-  defaultTitle: "Free Coloring Pages for Kids & Adults | CraftColoring",
+  defaultTitle: "Free Coloring Pages for Kids - Print & Color Online | CraftColoring",
   defaultDescription:
-    "Explore free online coloring pages for kids and adults. Color directly in your browser with interactive tools and discover themed collections for learning and creativity.",
+    "Discover free coloring pages for kids to print or color online. Browse fun themes, classroom-friendly printables, and easy browser coloring tools for phones, tablets, and computers.",
   ogImage: "https://craftcoloring.com/opengraph-image",
   twitterHandle: undefined,
 };
@@ -22,6 +23,7 @@ interface MetadataParams {
   description?: string;
   path?: string;
   image?: string;
+  imageAlt?: string;
   noindex?: boolean;
   type?: "website" | "article";
 }
@@ -31,21 +33,35 @@ export function constructMetadata({
   description,
   path = "/",
   image,
+  imageAlt,
   noindex = false,
   type = "website",
 }: MetadataParams = {}): Metadata {
-  const cleanTitle = title?.endsWith(` | ${SITE_CONFIG.name}`) ? title.slice(0, -(` | ${SITE_CONFIG.name}`).length) : title;
+  title = title ? normalizeBrand(title).replace(/\s*\|\s*CraftColoring(?: Blog)?$/i, "") : title;
+  description = description ? normalizeBrand(description) : description;
+  const suffix = ` | ${SITE_CONFIG.name}`;
+  const cleanTitle = title?.endsWith(suffix)
+    ? title.slice(0, -suffix.length)
+    : title;
+
   const metaTitle = cleanTitle
-    ? `${cleanTitle} | ${SITE_CONFIG.name}`
+    ? `${cleanTitle}${suffix}`
     : SITE_CONFIG.defaultTitle;
+
   const metaDescription = description || SITE_CONFIG.defaultDescription;
   const canonical = buildCanonicalUrl(path);
   const imageUrl = image || SITE_CONFIG.ogImage;
+  const preferredImageAlt = imageAlt || cleanTitle || SITE_CONFIG.tagline;
 
   return {
     title: metaTitle,
     description: metaDescription,
     metadataBase: new URL(SITE_CONFIG.domain),
+    applicationName: SITE_CONFIG.name,
+    creator: SITE_CONFIG.name,
+    publisher: SITE_CONFIG.name,
+    authors: [{ name: SITE_CONFIG.name, url: SITE_CONFIG.domain }],
+    category: "Education",
     alternates: {
       canonical,
     },
@@ -53,6 +69,10 @@ export function constructMetadata({
       ? {
           index: false,
           follow: true,
+          googleBot: {
+            index: false,
+            follow: true,
+          },
         }
       : {
           index: true,
@@ -62,6 +82,7 @@ export function constructMetadata({
             follow: true,
             "max-image-preview": "large",
             "max-snippet": -1,
+            "max-video-preview": -1,
           },
         },
     openGraph: {
@@ -74,7 +95,7 @@ export function constructMetadata({
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: metaTitle,
+          alt: preferredImageAlt,
         },
       ],
       type,
@@ -94,8 +115,10 @@ export function generateWebSiteSchema() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_CONFIG.name,
-    alternateName: "CraftColoring",
+    alternateName: "Craft Coloring",
     url: SITE_CONFIG.domain,
+    description: SITE_CONFIG.defaultDescription,
+    inLanguage: "en-US",
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -161,12 +184,14 @@ export function generateImageObjectSchema({
     "@context": "https://schema.org",
     "@type": "ImageObject",
     contentUrl: url,
+    url,
     license: `${SITE_CONFIG.domain}/terms/`,
     acquireLicensePage: `${SITE_CONFIG.domain}/terms/`,
     name: title,
-    caption: description,
-    description,
+    caption: description || title,
+    description: description || title,
     genre: category,
+    representativeOfPage: true,
   };
 }
 

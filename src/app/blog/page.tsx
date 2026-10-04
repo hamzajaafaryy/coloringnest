@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 export const metadata = constructMetadata({
   title: "CraftColoring Blog | Creative Activities & Development Guides",
   description:
-    "Read child development articles, fine motor skill guides, printing tips, and adult coloring mandala techniques on the CraftColoring Blog.",
+    "Read practical coloring activities, home printing tips, and pattern guides from CraftColoring.",
   path: "/blog/",
 });
 
@@ -49,12 +49,11 @@ export default async function BlogIndexPage() {
         </span>
 
         <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
-          Coloring Guides, Tips & Child Development
+          Coloring Ideas & Practical Guides
         </h1>
 
         <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-          Discover insights on early fine motor development, home printing
-          guides, and stress-relieving mindfulness activities.
+          Find simple family activities, home printing tips, and ideas for choosing colors and exploring patterns.
         </p>
       </div>
 

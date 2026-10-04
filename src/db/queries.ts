@@ -1,4 +1,5 @@
-import { and, desc, eq, ne } from "drizzle-orm";
+import { prepareArticle, cleanColoringTags } from "@/lib/content-quality";
+import { and, desc, eq, ne, exists } from "drizzle-orm";
 
 import { db } from "./index";
 
@@ -54,7 +55,7 @@ export async function getColoringPageBySlug(slug: string) {
     )
     .limit(1);
 
-  return result[0] ?? null;
+  return result[0] ? { ...result[0], tags: cleanColoringTags(result[0].tags) } : null;
 }
 
 /**
@@ -102,7 +103,7 @@ export async function getColoringPageByCategoryAndSlug(
     )
     .limit(1);
 
-  return result[0] ?? null;
+  return result[0] ? { ...result[0], tags: cleanColoringTags(result[0].tags) } : null;
 }
 
 /* =========================================================
@@ -317,6 +318,7 @@ export async function getAllPublishedCategories() {
       subcategories: categories.subcategories,
     })
     .from(categories)
+    .where(exists(db.select({ id: coloringPages.id }).from(coloringPages).where(and(eq(coloringPages.categoryId, categories.id), eq(coloringPages.isPublished, true)))))
     .orderBy(categories.name);
 }
 
@@ -422,7 +424,7 @@ export async function getPublishedColoringPagesByCategorySlug(
  * Get all published blog posts
  */
 export async function getAllPublishedBlogPosts() {
-  return db
+  const posts = await db
     .select({
       id: blogPosts.id,
       title: blogPosts.title,
@@ -442,6 +444,7 @@ export async function getAllPublishedBlogPosts() {
     .from(blogPosts)
     .where(eq(blogPosts.isPublished, true))
     .orderBy(desc(blogPosts.publishedAt));
+  return posts.map(prepareArticle);
 }
 
 /**
@@ -476,5 +479,5 @@ export async function getBlogPostBySlugFromDb(
     )
     .limit(1);
 
-  return result[0] ?? null;
+  return result[0] ? prepareArticle(result[0]) : null;
 }

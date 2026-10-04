@@ -16,8 +16,11 @@ export default function ColoringGrid({
 }: ColoringGridProps) {
   if (!pages || pages.length === 0) {
     return (
-      <div className="py-12 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-        <p className="text-slate-500 font-medium text-base">
+      <div className="rounded-3xl border-2 border-dashed border-violet-100 bg-violet-50/60 px-5 py-12 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
+          🎨
+        </div>
+        <p className="text-sm font-bold text-slate-500 sm:text-base">
           {emptyMessage}
         </p>
       </div>
@@ -25,12 +28,12 @@ export default function ColoringGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
       {pages.map((page, index) => (
         <ColoringCard
           key={page.id}
           page={page}
-          priority={index === 0}
+          priority={index < 2}
           variant={variant}
         />
       ))}

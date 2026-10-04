@@ -1,3 +1,4 @@
+import ArticleContent from "@/components/ArticleContent";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -184,45 +185,7 @@ export default async function BlogPostDetailPage({
         format="horizontal"
       />
 
-      <div className="prose prose-indigo max-w-none text-slate-700 leading-relaxed text-base sm:text-lg space-y-6">
-        {(post.content || "")
-          .split("\n\n")
-          .map((paragraph, idx) => {
-            if (paragraph.startsWith("### ")) {
-              return (
-                <h3
-                  key={idx}
-                  className="text-2xl font-bold text-slate-900 mt-6 mb-2"
-                >
-                  {paragraph.replace("### ", "")}
-                </h3>
-              );
-            }
-
-            if (paragraph.startsWith("- ")) {
-              const items = paragraph.split("\n- ");
-
-              return (
-                <ul
-                  key={idx}
-                  className="list-disc pl-6 space-y-2 text-base"
-                >
-                  {items.map((item, i) => (
-                    <li key={i}>
-                      {item.replace("- ", "")}
-                    </li>
-                  ))}
-                </ul>
-              );
-            }
-
-            return (
-              <p key={idx}>
-                {paragraph}
-              </p>
-            );
-          })}
-      </div>
+      <ArticleContent content={post.content || ""} />
 
       <RelatedColoringPages
         pages={recommendedPages}

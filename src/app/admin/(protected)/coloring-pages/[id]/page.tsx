@@ -1,3 +1,4 @@
+import { cleanColoringTags } from "@/lib/content-quality";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
@@ -46,7 +47,7 @@ export default async function EditColoringPage({ params }: { params: Promise<{ i
         <TextArea label="SVG content" name="svgContent" defaultValue={page.svgContent} rows={8} />
 
         <section className="grid gap-5 md:grid-cols-3">
-          <Field label="Tags" name="tags" defaultValue={page.tags?.join(", ")} />
+          <Field label="Tags" name="tags" defaultValue={cleanColoringTags(page.tags).join(", ")} />
           <Field label="Age range" name="ageRange" defaultValue={page.ageRange} />
           <Field label="Difficulty" name="difficulty" defaultValue={page.difficulty} />
         </section>
