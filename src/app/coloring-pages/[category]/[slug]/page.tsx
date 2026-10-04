@@ -5,6 +5,10 @@ import {
   Sparkles,
   ShieldCheck,
   Heart,
+  Palette,
+  Printer,
+  Download,
+  BookOpen,
 } from "lucide-react";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -28,6 +32,25 @@ import {
   generateBreadcrumbSchema,
   generateImageObjectSchema,
 } from "@/lib/seo";
+
+// Preserve authored paragraphs; make legacy single-block descriptions readable.
+function descriptionParagraphs(description: string) {
+  const paragraphs = description.trim().split(/\n\s*\n/).filter(Boolean);
+  if (paragraphs.length !== 1) return paragraphs;
+
+  const sentences = new Intl.Segmenter("en", { granularity: "sentence" }).segment(paragraphs[0]);
+  const result: string[] = [];
+  let paragraph = "";
+  for (const { segment } of sentences) {
+    paragraph += segment;
+    if (paragraph.trim().split(/\s+/).length >= 55) {
+      result.push(paragraph.trim());
+      paragraph = "";
+    }
+  }
+  if (paragraph.trim()) result.push(paragraph.trim());
+  return result;
+}
 
 interface IndividualPageProps {
   params: Promise<{
@@ -348,58 +371,60 @@ export default async function IndividualColoringPage({
         format="horizontal"
       />
 
-      {/* SEO Content */}
-      <section className="prose prose-indigo max-w-none space-y-6 pt-4 text-slate-700 leading-relaxed">
+      {/* Reading content */}
+      <section className="space-y-6 text-slate-700" aria-label="About this coloring page and how to use it">
         {page.description?.trim() && (
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-3">
-              About {page.title}
-            </h2>
-
-            <p className="cc-safe-wrap whitespace-pre-line text-sm sm:text-base leading-relaxed">
-              {page.description}
-            </p>
+          <div className="overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-sm">
+            <div className="flex items-start gap-3 border-b border-blue-100 bg-[#edf5ff] px-5 py-5 sm:px-8">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-700" aria-hidden="true">
+                <BookOpen className="h-5 w-5" />
+              </span>
+              <h2 className="cc-safe-wrap pt-1 text-xl font-black leading-snug text-slate-900 sm:text-2xl">
+                About {page.title}
+              </h2>
+            </div>
+            <div className="mx-auto max-w-3xl space-y-5 px-5 py-6 sm:px-8 sm:py-8">
+              {descriptionParagraphs(page.description).map((paragraph, index) => (
+                <p key={index} className="cc-safe-wrap whitespace-pre-line text-base leading-8 first:font-medium first:text-slate-900">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
           </div>
         )}
 
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">
-            How to Color Online or Print at Home
+        <div className="rounded-3xl border border-amber-100 bg-[#fffcf4] p-5 sm:p-8">
+          <h2 className="text-xl font-black text-slate-900 sm:text-2xl">
+            Ready to start coloring?
           </h2>
-
-          <ol className="list-decimal pl-5 space-y-2 text-sm sm:text-base">
-            <li>
-              <strong>
-                To Color Online:
-              </strong>{" "}
-              Click the{" "}
-              <em>
-                &quot;Color This Page Online&quot;
-              </em>{" "}
-              button to open the interactive
-              browser editor.
+          <p className="mt-2 text-sm leading-6 text-slate-600">Choose the way you want to color.</p>
+          <ol className={`mt-5 grid gap-4 ${safeSvgContent ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+            <li className="min-w-0 rounded-2xl border border-blue-100 bg-white p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <Palette className="h-6 w-6 text-blue-700" aria-hidden="true" />
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-xs font-black text-blue-700" aria-hidden="true">1</span>
+              </div>
+              <h3 className="font-bold text-slate-900">Color online</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Select “Color This Page Online” above to open the coloring tools in your browser.</p>
             </li>
-
-            <li>
-              <strong>
-                To Print:
-              </strong>{" "}
-              Click the{" "}
-              <em>
-                &quot;Print Page&quot;
-              </em>{" "}
-              button to open the
-              printer-friendly dialog.
+            <li className="min-w-0 rounded-2xl border border-orange-100 bg-white p-5">
+              <div className="mb-3 flex items-center justify-between">
+                <Printer className="h-6 w-6 text-orange-700" aria-hidden="true" />
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-50 text-xs font-black text-orange-700" aria-hidden="true">2</span>
+              </div>
+              <h3 className="font-bold text-slate-900">Print at home</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Select “Print Coloring Sheet” above, then choose your printer and paper settings.</p>
             </li>
-
-            <li>
-              <strong>
-                To Download:
-              </strong>{" "}
-              Click the download button to
-              save the coloring artwork to your
-              device.
-            </li>
+            {safeSvgContent && (
+              <li className="min-w-0 rounded-2xl border border-emerald-100 bg-white p-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <Download className="h-6 w-6 text-emerald-700" aria-hidden="true" />
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-black text-emerald-700" aria-hidden="true">3</span>
+                </div>
+                <h3 className="font-bold text-slate-900">Save for later</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Use the download button above to save the artwork to your device.</p>
+              </li>
+            )}
           </ol>
         </div>
       </section>
