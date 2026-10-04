@@ -32,12 +32,24 @@ function slugify(value: string) {
   return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 180);
 }
 
+function revalidateColoringPages() {
+  revalidatePath("/");
+  // Invalidate category lists and detail routes, including old categories/slugs.
+  revalidatePath("/coloring-pages", "layout");
+  revalidatePath("/printable-coloring-pages", "layout");
+  revalidatePath("/color-online", "layout");
+  revalidatePath("/free-coloring-pages");
+  revalidatePath("/search");
+  revalidatePath("/sitemap.xml");
+}
+
 export async function createColoringPage(formData: FormData) {
   await requireAdmin();
   const title = text(formData, "title"); if (!title) return;
   const published = checkbox(formData, "isPublished");
   await db.insert(coloringPages).values({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null });
-  revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
+  revalidateColoringPages();
+  redirect("/admin/coloring-pages/");
 }
 
 export async function updateColoringPage(id: number, formData: FormData) {
@@ -51,11 +63,7 @@ export async function updateColoringPage(id: number, formData: FormData) {
   await db.update(coloringPages).set({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
   if (existing[0]?.imageUrl && existing[0].imageUrl !== nextImageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   if (existing[0]?.svgUrl && existing[0].svgUrl !== nextSvgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
-  revalidatePath("/");
-  revalidatePath("/coloring-pages/");
-  revalidatePath("/coloring-pages/[category]/[slug]", "page");
-  revalidatePath("/color-online/");
-  revalidatePath("/sitemap.xml");
+  revalidateColoringPages();
   redirect("/admin/coloring-pages/");
 }
 
@@ -65,7 +73,8 @@ export async function deleteColoringPage(id: number) {
   await db.delete(coloringPages).where(eq(coloringPages.id, id));
   if (existing[0]?.imageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   if (existing[0]?.svgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
-  revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
+  revalidateColoringPages();
+  redirect("/admin/coloring-pages/");
 }
 
 export async function createCategory(formData: FormData) {
