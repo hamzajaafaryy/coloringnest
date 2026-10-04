@@ -16,7 +16,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   const routes: MetadataRoute.Sitemap = [
-    { url: `${DOMAIN}/colorquest/`, changeFrequency: "monthly", priority: 0.85 },
     {
       url: `${DOMAIN}/`,
       changeFrequency: "daily",

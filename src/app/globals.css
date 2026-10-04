@@ -285,38 +285,3 @@ select {
     box-shadow: none !important;
   }
 }
-
-.cq-art svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 3;
-}
-.cq-interactive-art [data-region] { cursor: pointer; touch-action: manipulation; }
-.cq-interactive-art [data-region]:focus-visible { outline: none; stroke: #7c3aed; stroke-width: 9; }
-.cq-tool {
-  display: flex; min-width: 48px; min-height: 48px;
-  align-items: center; justify-content: center;
-  border: 1px solid #e2e8f0; border-radius: .8rem; color: #475569; background: #fff;
-}
-.cq-tool:disabled { opacity: .35; cursor: not-allowed; }
-.cq-tool:not(:disabled):hover { background: #f5f3ff; color: #7c3aed; }
-.cq-input {
-  display: block; width: 100%; min-width: 0; min-height: 50px;
-  border: 1px solid #cbd5e1; border-radius: 1rem; padding: .75rem 1rem;
-  font-size: 16px; font-weight: 500; background: #fff;
-}
-@media print {
-  @page colorquest { size: A4 portrait; margin: 12mm; }
-  .cq-page { margin: 0 !important; padding: 0 !important; max-width: none !important; }
-  .cq-page-intro, .cq-controls { display: none !important; }
-  .cq-book { max-width: none !important; margin: 0 !important; }
-  .cq-book-page {
-    page: colorquest; break-after: page; break-inside: avoid;
-    border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
-    margin: 0 !important; padding: 0 !important;
-  }
-  .cq-book-page:last-child { break-after: auto; }
-  .cq-book-page .cq-art { max-width: 160mm; margin-left: auto; margin-right: auto; }
-  .cq-book-page p { font-size: 12pt; line-height: 1.6; }
-}
