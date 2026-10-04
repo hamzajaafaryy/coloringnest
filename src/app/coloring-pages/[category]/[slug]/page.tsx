@@ -243,11 +243,6 @@ export default async function IndividualColoringPage({
           {page.title}
         </h1>
 
-        {page.description && (
-          <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-            {page.description}
-          </p>
-        )}
       </header>
 
       {/* Artwork + Actions */}
@@ -355,21 +350,17 @@ export default async function IndividualColoringPage({
 
       {/* SEO Content */}
       <section className="prose prose-indigo max-w-none space-y-6 pt-4 text-slate-700 leading-relaxed">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">
-            About {page.title}
-          </h2>
+        {page.description?.trim() && (
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+              About {page.title}
+            </h2>
 
-          <p className="text-sm sm:text-base leading-relaxed">
-            {page.description} Kids will
-            love coloring the details while
-            practicing fine motor skills and
-            pencil control. You can color this
-            page online in your browser or
-            print it for traditional coloring
-            with crayons, pencils, or markers.
-          </p>
-        </div>
+            <p className="cc-safe-wrap whitespace-pre-line text-sm sm:text-base leading-relaxed">
+              {page.description}
+            </p>
+          </div>
+        )}
 
         <div>
           <h2 className="text-2xl font-bold text-slate-900 mb-3">
