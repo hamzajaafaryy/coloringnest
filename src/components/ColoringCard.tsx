@@ -39,13 +39,13 @@ export default function ColoringCard({
   const onlineUrl = `/color-online/${pageSlug}/`;
 
   return (
-    <article className="cc-coloring-card group relative flex h-full min-w-0 flex-col overflow-hidden rounded-[1.6rem] border border-violet-100 bg-white shadow-[0_10px_30px_rgba(30,41,59,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(124,58,237,0.15)]">
+    <article className="cc-coloring-card cc-art-card group relative flex h-full min-w-0 flex-col overflow-hidden bg-white transition duration-200">
       <Link
         href={pageUrl}
-        className={`relative block w-full shrink-0 aspect-[4/3] overflow-hidden ${isPrintable ? "bg-orange-50" : "bg-violet-50"}`}
+        className={`relative block w-full shrink-0 aspect-[4/3] overflow-hidden ${isPrintable ? "bg-[#fff0e9]" : "bg-[#edf5ff]"}`}
         aria-label={`${isPrintable ? "Open printable" : "View"} ${page.title}`}
       >
-        <div className="cc-card-art absolute inset-3 flex items-center justify-center overflow-hidden rounded-xl bg-white p-3 sm:inset-4 sm:p-4">
+        <div className="cc-card-art absolute inset-3 flex items-center justify-center overflow-hidden rounded-lg bg-white p-2 sm:inset-4 sm:p-3">
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -59,7 +59,7 @@ export default function ColoringCard({
               dangerouslySetInnerHTML={{ __html: svgContent }}
             />
           ) : (
-            <div className="px-4 text-center text-sm font-bold text-slate-400">
+            <div className="px-4 text-center text-sm font-bold text-slate-500">
               Artwork coming soon.
             </div>
           )}
@@ -69,19 +69,19 @@ export default function ColoringCard({
       <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex min-w-0 flex-wrap gap-1.5 text-[10px] font-bold">
-            <span className="cc-safe-wrap rounded-lg bg-violet-50 px-2 py-1 capitalize text-violet-700">
+            <span className="cc-safe-wrap rounded-lg bg-blue-50 px-2 py-1 capitalize text-blue-800">
               {isPrintable ? "Printable" : categoryName}
             </span>
             {difficulty && <span className="cc-safe-wrap rounded-lg bg-yellow-100 px-2 py-1 text-slate-700">{difficulty}</span>}
           </div>
           <Link href={pageUrl} className="block rounded-lg">
-            <h3 className="cc-safe-wrap line-clamp-2 text-sm font-black leading-snug text-slate-950 transition group-hover:text-violet-700 sm:text-base">
+            <h3 className="cc-safe-wrap line-clamp-2 text-sm font-black leading-snug text-slate-950 transition group-hover:text-blue-800 sm:text-base">
               {page.title}
             </h3>
           </Link>
 
           {ageRange && (
-            <p className="mt-1.5 text-[10px] font-black uppercase tracking-wide text-slate-400 sm:text-[11px]">
+            <p className="mt-1.5 text-[10px] font-black uppercase tracking-wide text-slate-500 sm:text-[11px]">
               {ageRange}
             </p>
           )}
@@ -127,7 +127,7 @@ export default function ColoringCard({
         </div>
 
         {!isPrintable && (
-          <div className="mt-2 hidden items-center gap-1 text-[10px] font-black text-violet-500 sm:flex">
+          <div className="mt-2 hidden items-center gap-1 text-[10px] font-black text-blue-700 sm:flex">
             <Sparkles className="h-3 w-3 text-yellow-500" />
             Free • no sign-up
           </div>

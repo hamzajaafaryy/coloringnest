@@ -181,7 +181,7 @@ export default function SearchBar({
             }
           }}
           placeholder={placeholder}
-          className={`min-w-0 w-full max-w-full rounded-full border border-violet-100 bg-white text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-300 transition-all ${sizeClasses[size]}`}
+          className={`min-w-0 w-full max-w-full rounded-2xl border-2 border-[#b8cce2] bg-white text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-300 transition-all ${sizeClasses[size]}`}
         />
 
         {query && (
@@ -222,7 +222,7 @@ export default function SearchBar({
                       key={cat.id}
                       href={`/coloring-pages/${cat.slug}/`}
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition-colors"
+                      className="flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors"
                     >
                       <span className="font-medium">
                         {cat.name}
@@ -252,17 +252,17 @@ export default function SearchBar({
                           : "/coloring-pages/"
                       }
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition-colors group"
+                      className="flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors group"
                     >
                       <div className="flex items-center gap-2 truncate">
-                        <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
+                        <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
 
                         <span className="font-medium truncate">
                           {page.title}
                         </span>
                       </div>
 
-                      <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors shrink-0" />
+                      <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors shrink-0" />
                     </Link>
                   ))}
                 </div>
@@ -273,7 +273,7 @@ export default function SearchBar({
                 <button
                   type="button"
                   onClick={handleSearchSubmit}
-                  className="w-full text-xs font-semibold text-indigo-600 hover:text-indigo-800 py-1 flex items-center justify-center gap-1"
+                  className="w-full text-xs font-semibold text-blue-600 hover:text-blue-800 py-1 flex items-center justify-center gap-1"
                 >
                   View all results for &ldquo;{query}&rdquo;
                   <ArrowRight className="w-3 h-3" />

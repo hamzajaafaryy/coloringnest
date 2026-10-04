@@ -53,13 +53,11 @@ export default async function ColoringPagesDirectoryPage() {
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      <section className="relative overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-50 via-white to-pink-50 p-5 shadow-[0_20px_50px_rgba(76,29,149,0.08)] sm:p-9">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-sky-200/50 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-1/4 h-56 w-56 rounded-full bg-pink-200/40 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-pink-50 p-5 shadow-[0_20px_50px_rgba(76,29,149,0.08)] sm:p-9">
 
         <div className="relative max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-violet-700 shadow-sm">
-            <Sparkles className="h-3.5 w-3.5 text-fuchsia-500" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-blue-700 shadow-sm">
+            <Sparkles className="h-3.5 w-3.5 text-orange-500" />
             Pick something fun
           </span>
 
@@ -81,7 +79,7 @@ export default async function ColoringPagesDirectoryPage() {
 
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-black text-slate-700 shadow-sm ring-1 ring-slate-100">
-              <Palette className="h-3.5 w-3.5 text-violet-500" />
+              <Palette className="h-3.5 w-3.5 text-blue-500" />
               Color online
             </span>
             <span className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-black text-slate-700 shadow-sm ring-1 ring-slate-100">
@@ -118,7 +116,7 @@ export default async function ColoringPagesDirectoryPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl border-2 border-dashed border-violet-100 bg-violet-50/50 py-12 text-center">
+          <div className="rounded-3xl border-2 border-dashed border-blue-100 bg-blue-50/50 py-12 text-center">
             <p className="font-bold text-slate-500">
               New coloring themes are being added.
             </p>
@@ -134,7 +132,7 @@ export default async function ColoringPagesDirectoryPage() {
       <section aria-labelledby="featured-heading">
         <div className="mb-6 flex items-end justify-between gap-3">
           <div>
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-500">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-orange-500">
               Easy place to start
             </span>
             <h2 id="featured-heading" className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">
@@ -144,7 +142,7 @@ export default async function ColoringPagesDirectoryPage() {
 
           <Link
             href="/color-online/"
-            className="hidden min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-black text-violet-600 hover:bg-violet-50 sm:inline-flex"
+            className="hidden min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-black text-blue-600 hover:bg-blue-50 sm:inline-flex"
           >
             Color online
             <ArrowRight className="h-4 w-4" />

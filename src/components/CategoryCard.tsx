@@ -14,14 +14,7 @@ interface CategoryCardProps {
   variant?: "coloring" | "printable";
 }
 
-const accents = [
-  "from-pink-100 via-rose-50 to-orange-100",
-  "from-sky-100 via-cyan-50 to-violet-100",
-  "from-yellow-100 via-amber-50 to-emerald-100",
-  "from-violet-100 via-fuchsia-50 to-pink-100",
-];
-
-
+const accents = ["bg-[#ffe7de]", "bg-[#e1efff]", "bg-[#fff1bd]", "bg-[#e1f2e8]"];
 
 export default function CategoryCard({
   category,
@@ -41,9 +34,9 @@ export default function CategoryCard({
   return (
     <Link
       href={categoryUrl}
-      className="group relative block h-full min-w-0 overflow-hidden rounded-[1.65rem] border border-violet-100 bg-white p-2.5 shadow-[0_10px_28px_rgba(76,29,149,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(76,29,149,0.14)] active:scale-[.99]"
+      className="cc-category-card group relative block h-full min-w-0 overflow-hidden bg-white p-2.5 transition duration-200"
     >
-      <div className={`relative aspect-[4/3] overflow-hidden rounded-[1.3rem] bg-gradient-to-br ${accent}`}>
+      <div className={`relative aspect-[4/3] overflow-hidden rounded-xl ${accent}`}>
         {imageUrl ? (
           <div className="cc-card-art absolute inset-3 flex items-center justify-center overflow-hidden rounded-xl bg-white p-3">
             <img
@@ -54,7 +47,7 @@ export default function CategoryCard({
           </div>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="text-6xl font-black text-violet-300/70">
+            <span className="text-6xl font-black text-blue-800">
               {category.name.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -66,7 +59,7 @@ export default function CategoryCard({
           <h3 className="cc-safe-wrap min-w-0 text-base font-black leading-tight text-slate-950 sm:text-lg">
             {category.name}
           </h3>
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600 transition group-hover:bg-violet-600 group-hover:text-white">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
             <ArrowRight className="h-4 w-4" />
           </span>
         </div>
@@ -76,12 +69,12 @@ export default function CategoryCard({
             {description}
           </p>
         ) : (
-          <p className="mt-1.5 text-xs font-bold text-violet-500">
+          <p className="mt-1.5 text-xs font-bold text-blue-500">
             Pick a page and start coloring.
           </p>
         )}
 
-        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-black text-violet-600">
+        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-black text-blue-600">
           <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
           {variant === "printable" ? "Ready to print" : "Free coloring fun"}
         </span>

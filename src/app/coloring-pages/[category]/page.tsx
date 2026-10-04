@@ -132,14 +132,12 @@ export default async function CategoryDetailPage({
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      <section className="relative overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-50 via-white to-sky-50 p-5 shadow-[0_20px_50px_rgba(76,29,149,0.08)] sm:p-9 lg:p-11">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full bg-pink-200/50 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-1/4 h-48 w-48 rounded-full bg-sky-200/50 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-blue-100 bg-[#edf4fb] p-5 shadow-[0_20px_50px_rgba(76,29,149,0.08)] sm:p-9 lg:p-11">
 
         <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-violet-700 shadow-sm">
-              <Sparkles className="h-3.5 w-3.5 text-fuchsia-500" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-blue-700 shadow-sm">
+              <Sparkles className="h-3.5 w-3.5 text-orange-500" />
               Free kids coloring collection
             </span>
 
@@ -153,11 +151,11 @@ export default async function CategoryDetailPage({
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2 text-xs font-black">
-              <span className="rounded-full bg-white px-3 py-2 text-violet-700 shadow-sm ring-1 ring-violet-100">
+              <span className="rounded-full bg-white px-3 py-2 text-blue-700 shadow-sm ring-1 ring-blue-100">
                 {categoryPages.length} {categoryPages.length === 1 ? "page" : "pages"}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-slate-700 shadow-sm ring-1 ring-slate-100">
-                <Palette className="h-3.5 w-3.5 text-fuchsia-500" />
+                <Palette className="h-3.5 w-3.5 text-orange-500" />
                 Color online
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-slate-700 shadow-sm ring-1 ring-slate-100">
@@ -177,7 +175,7 @@ export default async function CategoryDetailPage({
         </div>
 
         {cat.subcategories && cat.subcategories.length > 0 && (
-          <div className="relative mt-6 border-t border-violet-100 pt-5">
+          <div className="relative mt-6 border-t border-blue-100 pt-5">
             <p className="mb-2 text-xs font-black uppercase tracking-wider text-slate-500">
               Popular ideas
             </p>
@@ -209,7 +207,7 @@ export default async function CategoryDetailPage({
 
       <section aria-labelledby="category-pages-heading">
         <div className="mb-6">
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-violet-500">
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-blue-500">
             Pick your favorite
           </span>
           <h2
@@ -234,7 +232,7 @@ export default async function CategoryDetailPage({
       )}
 
       {relatedCategories.length > 0 && (
-        <section className="border-t border-violet-100 pt-8">
+        <section className="border-t border-blue-100 pt-8">
           <div className="mb-5">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-sky-500">
               Keep exploring
@@ -249,12 +247,12 @@ export default async function CategoryDetailPage({
               <Link
                 key={relatedCategory.slug ?? relatedCategory.id}
                 href={`/coloring-pages/${relatedCategory.slug}/`}
-                className="group flex min-h-24 flex-col justify-between rounded-2xl border border-violet-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-violet-200 hover:bg-violet-50 hover:shadow-md"
+                className="group flex min-h-24 flex-col justify-between rounded-2xl border border-blue-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:shadow-md"
               >
-                <span className="text-sm font-black leading-tight text-slate-900 group-hover:text-violet-700">
+                <span className="text-sm font-black leading-tight text-slate-900 group-hover:text-blue-700">
                   {relatedCategory.name.replace(/Coloring Pages/gi, "").trim()}
                 </span>
-                <span className="mt-3 inline-flex items-center gap-1 text-xs font-black text-violet-600">
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-black text-blue-600">
                   Explore
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>

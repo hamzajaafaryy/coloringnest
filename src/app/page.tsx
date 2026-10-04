@@ -2,20 +2,17 @@ import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
-  Heart,
   Palette,
   Printer,
   Sparkles,
   Star,
-  Wand2,
-  Zap,
 } from "lucide-react";
 
 import SearchBar from "@/components/SearchBar";
 import ColoringGrid from "@/components/ColoringGrid";
 import CategoryCard from "@/components/CategoryCard";
 import FAQ from "@/components/FAQ";
-import Newsletter from "@/components/Newsletter";
+import CreativePlayground from "@/components/CreativePlayground";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import {
   getAllPublishedCategories,
@@ -53,15 +50,6 @@ const HOMEPAGE_FAQS = [
   },
 ];
 
-const QUICK_THEMES = [
-  { emoji: "🦄", label: "Unicorns", href: "/coloring-pages/unicorn/" },
-  { emoji: "🦖", label: "Dinosaurs", href: "/coloring-pages/dinosaurs/" },
-  { emoji: "🐶", label: "Animals", href: "/coloring-pages/animals/" },
-  { emoji: "👑", label: "Princesses", href: "/coloring-pages/princesses/" },
-  { emoji: "🎄", label: "Christmas", href: "/coloring-pages/christmas/" },
-  { emoji: "🎃", label: "Halloween", href: "/coloring-pages/halloween/" },
-];
-
 export default async function HomePage() {
   const [allPages, allCategories] = await Promise.all([
     getAllPublishedColoringPagesWithCategory(),
@@ -72,7 +60,7 @@ export default async function HomePage() {
   const popularPages = (popular.length ? popular : allPages).slice(0, 8);
 
   const preferredCategories = allCategories.filter(
-    (category) => category.featured || category.popular
+    (category) => category.featured || category.popular,
   );
   const featuredCategories = (
     preferredCategories.length ? preferredCategories : allCategories
@@ -82,203 +70,144 @@ export default async function HomePage() {
     .sort(
       (a, b) =>
         new Date(b.publishedAt ?? 0).getTime() -
-        new Date(a.publishedAt ?? 0).getTime()
+        new Date(a.publishedAt ?? 0).getTime(),
     )
     .slice(0, 4);
 
-  const pageCountLabel =
-    allPages.length > 0 ? `${allPages.length}+ pages to explore` : "New pages added often";
+  const quickCategories = featuredCategories
+    .filter((category) => category.slug)
+    .slice(0, 6);
 
   return (
-    <div className="overflow-hidden">
+    <div className="cc-home">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(generateFAQSchema(HOMEPAGE_FAQS)),
         }}
       />
-
-      <section className="relative overflow-hidden bg-[#fffaf3]">
-        <div className="pointer-events-none absolute -left-24 top-10 h-64 w-64 rounded-full bg-fuchsia-200/45 blur-3xl cc-float" />
-        <div className="pointer-events-none absolute -right-24 top-0 h-80 w-80 rounded-full bg-sky-200/55 blur-3xl cc-float-reverse" />
-        <div className="pointer-events-none absolute left-[16%] top-24 h-5 w-5 rotate-12 rounded-lg bg-yellow-300 cc-bounce-soft" />
-        <div className="pointer-events-none absolute right-[12%] top-32 h-4 w-4 rounded-full bg-pink-400 cc-float" />
-
-        <div className="relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-10 px-4 py-10 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,1.06fr)_minmax(0,.94fr)] lg:px-8 lg:py-20">
-          <div className="min-w-0 max-w-2xl">
-            <div className="inline-flex max-w-full items-center gap-2 rounded-2xl border border-violet-200 bg-white px-3.5 py-2 text-xs font-black text-violet-700 shadow-sm sm:px-4">
-              <Sparkles className="h-4 w-4 shrink-0 text-fuchsia-500" />
-              <span>Free creative fun for kids, families & classrooms</span>
-            </div>
-
-            <h1 className="cc-safe-wrap mt-5 text-[clamp(2rem,8vw,2.55rem)] font-black leading-[1.03] tracking-[-0.04em] text-slate-950 sm:text-6xl lg:text-[4.45rem]">
-              Free coloring pages
-              <span className="block bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent cc-gradient-flow">
-                for kids to print or color online
-              </span>
+      <section className="cc-hero">
+        <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-6 px-4 pb-10 pt-8 sm:px-6 sm:py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] lg:gap-10 lg:px-8 lg:py-16">
+          <div className="min-w-0">
+            <span className="cc-eyebrow">
+              <Star className="h-4 w-4 fill-amber-300 text-amber-700" /> BIG
+              IDEAS FOR LITTLE ARTISTS
+            </span>
+            <h1 className="cc-hero-title mt-5">
+              A happy place
+              <br />
+              to <span className="cc-word-blue">color</span>,{" "}
+              <span className="cc-word-coral">play</span>
+              <br />
+              &amp; imagine.
             </h1>
-
-            <p className="mt-5 max-w-xl text-base font-semibold leading-7 text-slate-600 sm:text-lg">
-              Pick a fun design, color it right in your browser, or print a clean
-              page for crayons and markers. No app and no sign-up needed.
+            <p className="mt-5 max-w-lg text-base font-medium leading-7 text-slate-600 sm:text-lg">
+              Free coloring pages for kids, with a world of possibilities. Pick
+              a favorite, grab your colors, and make it yours!
             </p>
-
-            <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap">
-              <Link
-                href="/color-online/"
-                className="cc-btn cc-btn-primary w-full px-6 sm:w-auto"
-              >
-                <Wand2 className="h-5 w-5" />
-                Start coloring
-                <ArrowRight className="h-4 w-4" />
+            <div className="mt-6 flex flex-col gap-3 min-[480px]:flex-row">
+              <Link href="/coloring-pages/" className="cc-btn cc-btn-primary">
+                <Palette className="h-5 w-5 shrink-0" />
+                Let’s color!
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
               <Link
                 href="/printable-coloring-pages/"
-                className="cc-btn cc-btn-outline w-full px-6 sm:w-auto"
+                className="cc-btn cc-btn-print"
               >
-                <Printer className="h-5 w-5 text-orange-500" />
-                Print coloring pages
+                <Printer className="h-5 w-5 shrink-0" />
+                Find printables
               </Link>
             </div>
-
-            <div className="mt-6 max-w-xl">
-              <SearchBar
-                placeholder="Search unicorns, dinosaurs, cats..."
-                size="lg"
-              />
-            </div>
-
-            <div className="mt-4 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
-              {QUICK_THEMES.map((theme) => (
-                <Link
-                  key={theme.label}
-                  href={theme.href}
-                  className="flex min-h-12 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-2 text-center text-xs font-black text-slate-700 shadow-sm transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700 sm:px-3"
-                >
-                  <span aria-hidden="true">{theme.emoji}</span>
-                  <span>{theme.label}</span>
-                </Link>
-              ))}
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-black text-slate-500">
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                Free to use
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Zap className="h-4 w-4 text-yellow-500" />
-                Works on mobile
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Heart className="h-4 w-4 text-pink-500" />
-                {pageCountLabel}
-              </span>
+            <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-xs font-bold text-slate-600">
+              {["Always free", "No sign-up", "Made for little hands"].map(
+                (text) => (
+                  <span key={text} className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-700" />
+                    {text}
+                  </span>
+                ),
+              )}
             </div>
           </div>
-
-          <div className="relative mx-auto w-full min-w-0 max-w-xl">
-            <div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-violet-200/60 via-pink-100/70 to-sky-200/70 blur-2xl" />
-            <div className="relative rounded-[2.35rem] border border-white bg-white/90 p-3 shadow-2xl backdrop-blur sm:p-5">
-              <div className="rounded-[1.9rem] bg-gradient-to-br from-violet-100 via-pink-50 to-sky-100 p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-violet-600 shadow-sm">
-                    My coloring studio
-                  </span>
-                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700">
-                    Ready!
-                  </span>
-                </div>
-
-                <div className="mt-4 flex aspect-[4/3] items-center justify-center rounded-[1.6rem] bg-white shadow-lg ring-1 ring-violet-100">
-                  <div className="relative h-44 w-44 sm:h-60 sm:w-60 cc-bounce-soft">
-                    <div className="absolute left-8 top-8 h-28 w-28 rounded-[45%_55%_45%_55%] border-[5px] border-slate-800 bg-yellow-200 sm:h-36 sm:w-36" />
-                    <div className="absolute left-20 top-2 h-10 w-10 -rotate-12 rounded-full border-4 border-slate-800 bg-pink-300" />
-                    <div className="absolute left-4 top-20 h-10 w-10 rotate-12 rounded-full border-4 border-slate-800 bg-sky-300" />
-                    <div className="absolute left-[52%] top-[42%] h-3 w-3 rounded-full bg-slate-800" />
-                    <div className="absolute left-[68%] top-[42%] h-3 w-3 rounded-full bg-slate-800" />
-                    <div className="absolute left-[55%] top-[58%] h-5 w-10 rounded-b-full border-b-4 border-slate-800" />
-                    <Sparkles className="absolute right-1 top-6 h-8 w-8 text-fuchsia-400" />
-                    <Star className="absolute bottom-5 left-0 h-7 w-7 fill-yellow-200 text-orange-400" />
-                  </div>
-                </div>
-
-                <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-                  <div className="grid min-w-0 grid-cols-6 place-items-center gap-1 rounded-2xl bg-white px-2 py-3 shadow-sm">
-                    {[
-                      "bg-pink-400",
-                      "bg-orange-300",
-                      "bg-yellow-300",
-                      "bg-emerald-300",
-                      "bg-sky-400",
-                      "bg-violet-400",
-                    ].map((color) => (
-                      <span
-                        key={color}
-                        className={`h-7 w-7 rounded-full ${color} ring-2 ring-white shadow-sm sm:h-8 sm:w-8`}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex min-h-12 items-center justify-center rounded-2xl bg-violet-600 px-3 text-xs font-black text-white">
-                    COLOR
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <CreativePlayground />
         </div>
       </section>
 
-      <AdPlaceholder slotName="Homepage Top Banner" format="banner" />
+      <div className="mx-auto max-w-7xl space-y-12 px-4 py-8 sm:space-y-16 sm:px-6 sm:py-12 lg:px-8">
+        <section className="cc-discovery" aria-label="Find a coloring page">
+          <div className="min-w-0">
+            <span className="cc-eyebrow text-blue-700">
+              WHAT WILL YOU CREATE TODAY?
+            </span>
+            <h2 className="mt-2 text-xl font-black text-slate-800 sm:text-2xl">
+              Find your next little masterpiece.
+            </h2>
+          </div>
+          <div className="min-w-0 w-full">
+            <SearchBar
+              placeholder="Search animals, unicorns, dinosaurs…"
+              size="lg"
+            />
+          </div>
+        </section>
+        {quickCategories.length > 0 && (
+          <div
+            className="flex flex-wrap justify-center gap-2 sm:gap-3"
+            aria-label="Quick themes"
+          >
+            {quickCategories.map((category, i) => (
+              <Link
+                key={category.id}
+                href={`/coloring-pages/${category.slug}/`}
+                className={`cc-theme-chip cc-theme-${i % 4}`}
+              >
+                <span aria-hidden="true">{["✦", "●", "♥", "★"][i % 4]}</span>
+                {category.name}
+              </Link>
+            ))}
+          </div>
+        )}
 
-      <div className="mx-auto max-w-7xl space-y-16 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:space-y-20">
         <section aria-labelledby="popular-heading">
-          <div className="mb-6 flex items-end justify-between gap-4">
+          <div className="cc-section-heading">
             <div>
-              <span className="text-xs font-black uppercase tracking-[0.18em] text-fuchsia-500">
-                Kids love these
+              <span className="cc-eyebrow text-orange-700">
+                A FEW LITTLE FAVORITES
               </span>
-              <h2 id="popular-heading" className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                Popular coloring pages
+              <h2 id="popular-heading" className="mt-2">
+                Ready, set, color!
               </h2>
-              <p className="mt-2 max-w-2xl text-sm font-medium text-slate-500">
-                Tap a picture to open it, then color online or print it.
-              </p>
+              <p>Find a picture you love. The colors are up to you.</p>
             </div>
-            <Link
-              href="/coloring-pages/"
-              className="hidden min-h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-black text-violet-600 hover:bg-violet-50 sm:inline-flex"
-            >
-              See all <ArrowRight className="h-4 w-4" />
+            <Link href="/coloring-pages/" className="cc-text-link">
+              All coloring pages
+              <ArrowRight className="h-4 w-4 shrink-0" />
             </Link>
           </div>
-
-          <div className="rounded-[2rem] bg-gradient-to-br from-violet-50 via-white to-pink-50 p-2.5 sm:p-5">
-            <ColoringGrid pages={popularPages} />
-          </div>
-
-          <Link
-            href="/coloring-pages/"
-            className="cc-btn cc-btn-soft mt-4 w-full sm:hidden"
-          >
-            See all coloring pages
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+          <ColoringGrid pages={popularPages} />
         </section>
 
-        <section aria-labelledby="categories-heading">
-          <div className="mb-7 text-center">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-sky-500">
-              Find a favorite
+        <section
+          className="cc-theme-section"
+          aria-labelledby="categories-heading"
+        >
+          <div className="cc-section-heading">
+            <div>
+              <span className="cc-eyebrow text-blue-700">
+                A WORLD TO EXPLORE
+              </span>
+              <h2 id="categories-heading" className="mt-2">
+                Follow your imagination.
+              </h2>
+              <p>
+                Big dinosaurs, magical creatures, and everything in between.
+              </p>
+            </div>
+            <span className="cc-star-doodle" aria-hidden="true">
+              ✦
             </span>
-            <h2 id="categories-heading" className="mt-1 text-2xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Browse coloring pages by theme
-            </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
-              Animals, fantasy, holidays, learning themes and more — easy to browse on phones and tablets.
-            </p>
           </div>
-
           <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
             {featuredCategories.map((cat) => (
               <CategoryCard key={cat.id} category={cat} />
@@ -286,95 +215,86 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-400 p-5 text-white shadow-2xl shadow-violet-200 sm:p-9">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/15 blur-3xl" />
-          <div className="relative grid gap-6 lg:grid-cols-[.85fr_1.15fr] lg:items-center">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-black uppercase tracking-wider ring-1 ring-white/20">
-                <Palette className="h-4 w-4" />
-                Easy for little hands
-              </span>
-              <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
-                Pick. Color. Save. Smile.
-              </h2>
-              <p className="mt-3 max-w-xl text-sm font-semibold leading-6 text-white/85 sm:text-base">
-                The browser coloring studio has big touch-friendly controls, simple colors, undo and zoom so kids can focus on creating.
-              </p>
-              <Link
-                href="/color-online/"
-                className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-black text-violet-700 shadow-lg transition hover:-translate-y-0.5 sm:w-auto"
-              >
-                Try color online
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            <div className="grid gap-3 min-[420px]:grid-cols-3">
-              {[
-                ["1", "Choose a page", "Pick a theme that looks fun.", "🖼️"],
-                ["2", "Add colors", "Tap, fill or use the brush.", "🖍️"],
-                ["3", "Keep it", "Save it or print another page.", "🌟"],
-              ].map(([step, title, text, emoji]) => (
-                <div key={step} className="rounded-3xl bg-white/15 p-4 ring-1 ring-white/20 backdrop-blur">
-                  <div className="flex items-center justify-between">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-black text-violet-700">
-                      {step}
-                    </span>
-                    <span className="text-2xl" aria-hidden="true">{emoji}</span>
-                  </div>
-                  <h3 className="mt-4 font-black">{title}</h3>
-                  <p className="mt-1.5 text-xs font-semibold leading-5 text-white/80">{text}</p>
-                </div>
-              ))}
-            </div>
+        <section className="cc-create-banner">
+          <div className="min-w-0">
+            <span className="cc-eyebrow text-blue-800">
+              TWO WAYS TO MAKE SOMETHING HAPPY
+            </span>
+            <h2 className="mt-3 text-2xl font-black leading-tight text-slate-800 sm:text-4xl">
+              Tiny hands.
+              <br />
+              Endless possibilities.
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-7 text-slate-600">
+              A quiet afternoon, a classroom activity, or a little creative
+              break. There’s a coloring page for every kind of day.
+            </p>
           </div>
-        </section>
-
-        <section className="rounded-[2rem] border border-orange-100 bg-[#fff6e8] p-5 sm:p-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black text-orange-600 shadow-sm">
-                <Printer className="h-4 w-4" />
-                For home & classroom
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+            <Link href="/color-online/" className="cc-create-option">
+              <span className="cc-option-icon bg-[#dcecff] text-blue-700">
+                <Palette className="h-7 w-7" />
               </span>
-              <h2 className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">
-                Want paper and crayons instead?
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-600">
-                Browse printable coloring pages for quiet time, classroom activities, rainy days and creative breaks.
-              </p>
-            </div>
+              <h3>Color on screen</h3>
+              <p>Tap, fill, and try a new color. No crayons needed.</p>
+              <span className="cc-text-link">
+                Start coloring
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
             <Link
               href="/printable-coloring-pages/"
-              className="cc-btn w-full shrink-0 bg-orange-500 px-6 text-white shadow-lg shadow-orange-200 hover:bg-orange-600 sm:w-auto"
+              className="cc-create-option"
             >
-              Browse printables
-              <ArrowRight className="h-4 w-4" />
+              <span className="cc-option-icon bg-[#ffdfd5] text-orange-800">
+                <Printer className="h-7 w-7" />
+              </span>
+              <h3>Print &amp; get creative</h3>
+              <p>Bring out the pencils, crayons, and your favorite colors.</p>
+              <span className="cc-text-link">
+                Pick a printable
+                <ArrowRight className="h-4 w-4" />
+              </span>
             </Link>
           </div>
         </section>
 
         {newPages.length > 0 && (
           <section aria-labelledby="new-heading">
-            <div className="mb-6 flex items-end justify-between gap-3">
+            <div className="cc-section-heading">
               <div>
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-emerald-500">
-                  Fresh from the studio
+                <span className="cc-eyebrow text-emerald-700">
+                  FRESH FROM THE DRAWING TABLE
                 </span>
-                <h2 id="new-heading" className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl">
-                  New coloring pages
+                <h2 id="new-heading" className="mt-2">
+                  Something new to love.
                 </h2>
               </div>
-              <Link href="/coloring-pages/" className="text-sm font-black text-violet-600">
-                See all →
+              <Link href="/coloring-pages/" className="cc-text-link">
+                Explore more
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
             <ColoringGrid pages={newPages} />
           </section>
         )}
-
-        <FAQ items={HOMEPAGE_FAQS} title="Coloring Page Questions" />
-        <Newsletter />
+        <AdPlaceholder slotName="Homepage Banner" format="banner" />
+        <FAQ items={HOMEPAGE_FAQS} title="A little help for grown-ups" />
+        <section className="cc-last-call">
+          <Sparkles className="h-8 w-8 shrink-0 text-orange-700" />
+          <div className="min-w-0">
+            <h2 className="text-xl font-black text-slate-800 sm:text-2xl">
+              The best color? Your favorite.
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              There’s no wrong way to make something yours.
+            </p>
+          </div>
+          <Link href="/coloring-pages/" className="cc-btn cc-btn-primary">
+            Find my picture
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </section>
       </div>
     </div>
   );
