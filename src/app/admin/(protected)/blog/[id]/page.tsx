@@ -1,3 +1,4 @@
+import { prepareArticle } from "@/lib/content-quality";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
@@ -11,7 +12,8 @@ export const dynamic = "force-dynamic";
 
 export default async function EditBlogPost({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params; const postId = Number(id); if (!Number.isFinite(postId)) notFound();
-  const [post] = await db.select().from(blogPosts).where(eq(blogPosts.id, postId)).limit(1); if (!post) notFound();
+  const [storedPost] = await db.select().from(blogPosts).where(eq(blogPosts.id, postId)).limit(1); if (!storedPost) notFound();
+  const post = prepareArticle(storedPost);
   const update = updateBlogPost.bind(null, postId); const remove = deleteBlogPost.bind(null, postId);
   return <AdminShell title="Edit Article" description={post.title}><form action={update} className="space-y-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
     <section className="grid gap-5 md:grid-cols-2">

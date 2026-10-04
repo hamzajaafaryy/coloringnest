@@ -6,7 +6,9 @@ import {
   getAllPublishedBlogPosts,
 } from "@/db/queries";
 
-const DOMAIN = "https://craftcoloring.com";
+import { SITE_CONFIG } from "@/lib/seo";
+
+const DOMAIN = SITE_CONFIG.domain;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [pages, categories, blogPosts] = await Promise.all([
@@ -111,7 +113,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...(post.publishedAt ? { lastModified: post.publishedAt } : {}),
       changeFrequency: "monthly",
       priority: 0.7,
-      ...(post.featuredImage ? { images: [post.featuredImage] } : {}),
+      ...(post.featuredImage ? { images: [new URL(post.featuredImage, DOMAIN).href] } : {}),
     });
   });
 

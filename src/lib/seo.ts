@@ -1,3 +1,4 @@
+import { normalizeBrand } from "@/lib/content-quality";
 import { Metadata } from "next";
 
 export const SITE_CONFIG = {
@@ -36,6 +37,8 @@ export function constructMetadata({
   noindex = false,
   type = "website",
 }: MetadataParams = {}): Metadata {
+  title = title ? normalizeBrand(title).replace(/\s*\|\s*CraftColoring(?: Blog)?$/i, "") : title;
+  description = description ? normalizeBrand(description) : description;
   const suffix = ` | ${SITE_CONFIG.name}`;
   const cleanTitle = title?.endsWith(suffix)
     ? title.slice(0, -suffix.length)

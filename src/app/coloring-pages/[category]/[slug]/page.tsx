@@ -458,7 +458,7 @@ export default async function IndividualColoringPage({
       {/* Related Pages */}
       <RelatedColoringPages
         pages={relatedPages}
-        title={`More ${categoryName}`}
+        title={relatedPages.every(item => item.categorySlug === categorySlug) ? `More ${categoryName}` : "More Coloring Pages to Explore"}
       />
     </article>
   );

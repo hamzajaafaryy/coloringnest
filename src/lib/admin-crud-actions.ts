@@ -1,5 +1,6 @@
 "use server";
 
+import { normalizeBrand, cleanColoringTags } from "@/lib/content-quality";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -16,7 +17,7 @@ async function requireAdmin() {
 
 function text(formData: FormData, name: string) {
   const value = String(formData.get(name) ?? "").trim();
-  return value || null;
+  return value ? normalizeBrand(value) : null;
 }
 
 function checkbox(formData: FormData, name: string) {
@@ -47,7 +48,7 @@ export async function createColoringPage(formData: FormData) {
   await requireAdmin();
   const title = text(formData, "title"); if (!title) return;
   const published = checkbox(formData, "isPublished");
-  await db.insert(coloringPages).values({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null });
+  await db.insert(coloringPages).values({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: cleanColoringTags(list(formData, "tags")), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null });
   revalidateColoringPages();
   redirect("/admin/coloring-pages/");
 }
@@ -60,7 +61,7 @@ export async function updateColoringPage(id: number, formData: FormData) {
   const publishedAt = published ? existing[0]?.publishedAt ?? new Date() : existing[0]?.publishedAt ?? null;
   const nextImageUrl = text(formData, "imageUrl");
   const nextSvgUrl = text(formData, "svgUrl");
-  await db.update(coloringPages).set({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
+  await db.update(coloringPages).set({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: cleanColoringTags(list(formData, "tags")), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
   if (existing[0]?.imageUrl && existing[0].imageUrl !== nextImageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   if (existing[0]?.svgUrl && existing[0].svgUrl !== nextSvgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
   revalidateColoringPages();

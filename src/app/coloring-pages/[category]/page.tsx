@@ -50,6 +50,7 @@ export async function generateMetadata({ params }: CategoryPageProps) {
     });
   }
 
+  const pages = await getPublishedColoringPagesByCategorySlug(slug);
   const categoryName = displayCategoryName(cat.name);
 
   return constructMetadata({
@@ -63,6 +64,7 @@ export async function generateMetadata({ params }: CategoryPageProps) {
     path: `/coloring-pages/${cat.slug}/`,
     image: cat.imageUrl || undefined,
     imageAlt: `${categoryName} for kids`,
+    noindex: pages.length === 0,
   });
 }
 
