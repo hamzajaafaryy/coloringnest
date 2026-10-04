@@ -87,7 +87,7 @@ export default function ColoringCard({
           )}
 
           {description && (
-            <p className="mt-2 hidden line-clamp-2 text-xs font-medium leading-5 text-slate-500 sm:block">
+            <p className="cc-safe-wrap mt-2 hidden text-xs font-medium leading-5 text-slate-500 sm:line-clamp-2">
               {description}
             </p>
           )}
