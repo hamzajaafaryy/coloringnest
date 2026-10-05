@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ColoringEditor from "@/components/ColoringEditor";
+import { resolveColoringSvg } from "@/lib/coloring/resolveSvg";
 import RelatedColoringPages from "@/components/RelatedColoringPages";
 
 import {
@@ -68,6 +69,8 @@ export default async function ColorOnlinePage({
     notFound();
   }
 
+  const svgContent = await resolveColoringSvg(page);
+
   const relatedPages = await getRelatedColoringPages(
     page.id,
     page.categoryId,
@@ -127,11 +130,13 @@ export default async function ColorOnlinePage({
         </div>
       </div>
 
-      <ColoringEditor
-        slug={page.slug}
-        title={page.title}
-        svgContent={page.svgContent || ""}
-      />
+      {svgContent ? (
+        <ColoringEditor slug={page.slug} title={page.title} svgContent={svgContent} />
+      ) : (
+        <p role="status" className="rounded-2xl bg-amber-50 p-6 text-amber-900">
+          Online coloring is not available for this artwork yet. You can use the print and download page above.
+        </p>
+      )}
 
       <RelatedColoringPages
         pages={relatedPages}

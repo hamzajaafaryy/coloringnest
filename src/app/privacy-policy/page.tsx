@@ -23,8 +23,8 @@ export default function PrivacyPolicyPage() {
       </header>
 
       <p>
-        This Privacy Policy explains how CraftColoring ("CraftColoring", "we",
-        "us", or "our") handles information when you visit and use
+        This Privacy Policy explains how CraftColoring (&quot;CraftColoring&quot;, &quot;we&quot;,
+        &quot;us&quot;, or &quot;our&quot;) handles information when you visit and use
         craftcoloring.com. We aim to keep the service simple, useful, and
         privacy-conscious for children, families, teachers, and adult users.
       </p>
@@ -74,7 +74,7 @@ export default function PrivacyPolicyPage() {
       </p>
       <p>
         Third-party vendors, including Google, may use advertising cookies to
-        serve ads based on a user's prior visits to this website or other
+        serve ads based on a user&apos;s prior visits to this website or other
         websites. Users can manage personalized advertising choices through
         Google Ads Settings and can learn about some third-party opt-out
         choices through AboutAds.
@@ -100,7 +100,7 @@ export default function PrivacyPolicyPage() {
         services and are governed by their own privacy policies.
       </p>
 
-      <h2>7. Children's Privacy</h2>
+      <h2>7. Children&apos;s Privacy</h2>
       <p>
         CraftColoring is designed for general audiences and families. We do not
         knowingly require children to create accounts or submit personal
@@ -115,7 +115,7 @@ export default function PrivacyPolicyPage() {
         correction, deletion, objection, or restriction of personal information.
         You can also control cookies through your browser and applicable
         consent tools. Advertising choices may also be available through the
-        advertising provider's settings.
+        advertising provider&apos;s settings.
       </p>
 
       <h2>9. Data Retention and Security</h2>
@@ -129,7 +129,7 @@ export default function PrivacyPolicyPage() {
       <h2>10. Changes to This Policy</h2>
       <p>
         We may update this Privacy Policy when our services, technologies, or
-        legal obligations change. The "Last updated" date at the top will show
+        legal obligations change. The &quot;Last updated&quot; date at the top will show
         when the policy was most recently revised.
       </p>
 
