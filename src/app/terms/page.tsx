@@ -39,7 +39,7 @@ export default function TermsPage() {
 
       <h2>2. Coloring Artwork and Website Content</h2>
       <p>
-        Unless a page states otherwise, CraftColoring's original artwork,
+        Unless a page states otherwise, CraftColoring&apos;s original artwork,
         website design, branding, text, and software are protected by
         applicable intellectual-property laws. You may use the coloring
         materials for permitted personal and educational activities, but you

@@ -14,7 +14,7 @@ import FAQ from "@/components/FAQ";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import DownloadButton from "@/components/DownloadButton";
 import PrintButton from "@/components/PrintButton";
-import { sanitizeSvg } from "@/lib/sanitize-svg";
+import { resolveColoringSvg } from "@/lib/coloring/resolveSvg";
 
 import {
   getAllPublishedColoringPagesWithCategory,
@@ -162,15 +162,7 @@ export default async function IndividualColoringPage({
       breadcrumbItems
     );
 
-  const safeSvgContent = page.svgContent
-    ? (() => {
-        try {
-          return sanitizeSvg(page.svgContent);
-        } catch {
-          return "";
-        }
-      })()
-    : "";
+  const safeSvgContent = await resolveColoringSvg(page);
 
   const imageUrl =
     page.imageUrl ||
@@ -252,7 +244,7 @@ export default async function IndividualColoringPage({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         {/* Artwork */}
         <div className="md:col-span-7 bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-          <figure className="w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center overflow-hidden">
+          <figure id="coloring-artwork" className="w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center overflow-hidden">
             {safeSvgContent ? (
               <div
                 className="w-full h-full flex items-center justify-center select-none overflow-hidden [&>svg]:block [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-full [&>svg]:h-full"

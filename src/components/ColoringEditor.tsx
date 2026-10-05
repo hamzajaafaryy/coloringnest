@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { printArtwork } from "@/lib/coloring/printArtwork";
 import {
   PaintBucket,
   Brush,
@@ -199,10 +200,13 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const aspectRatio = useMemo(() => getSvgAspectRatio(svgContent), [svgContent]);
-  const preparedSvgContent = useMemo(() => prepareColoringSvg(svgContent), [svgContent]);
-  const svgVersion = useMemo(() => getSvgVersion(preparedSvgContent), [preparedSvgContent]);
-  const storageKey = useMemo(() => `craftcoloring_canvas_${slug}_${svgVersion}`, [slug, svgVersion]);
+  const [aspectRatio, setAspectRatio] = useState(4 / 3);
+  const [editorError, setEditorError] = useState("");
+  const [printError, setPrintError] = useState("");
+  // Preserve existing saved drawings; compute the DOM-dependent key only in browser callbacks.
+  const getStorageKey = useCallback(() =>
+    `craftcoloring_canvas_${slug}_${getSvgVersion(prepareColoringSvg(svgContent))}`,
+  [slug, svgContent]);
 
   const saveCanvasState = useCallback(() => {
     const canvas = canvasRef.current;
@@ -235,8 +239,12 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // DOM parsing runs after mount, never during server rendering.
+    const preparedSvgContent = prepareColoringSvg(svgContent);
+    const ratio = getSvgAspectRatio(svgContent);
+    setAspectRatio(ratio);
     const width = 1600;
-    const height = Math.max(900, Math.round(width / aspectRatio));
+    const height = Math.max(1, Math.round(width / ratio));
     canvas.width = width;
     canvas.height = height;
 
@@ -265,7 +273,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     } finally {
       URL.revokeObjectURL(url);
     }
-  }, [aspectRatio, preparedSvgContent]);
+  }, [svgContent]);
 
   useEffect(() => {
     let cancelled = false;
@@ -276,7 +284,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
 
       let saved = "";
       try {
-        saved = localStorage.getItem(storageKey) || "";
+        saved = localStorage.getItem(getStorageKey()) || "";
       } catch {}
 
       if (saved) await restoreCanvasState(saved);
@@ -287,9 +295,11 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
       setHistoryIndex(0);
     };
 
-    init();
+    init().catch(() => {
+      if (!cancelled) setEditorError("The artwork could not be loaded. Please try reloading this page.");
+    });
     return () => { cancelled = true; };
-  }, [renderSvgToCanvas, restoreCanvasState, saveCanvasState, storageKey]);
+  }, [renderSvgToCanvas, restoreCanvasState, saveCanvasState, getStorageKey]);
 
   const pushHistory = useCallback(() => {
     const current = saveCanvasState();
@@ -382,7 +392,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   };
 
   const handleReset = async () => {
-    try { localStorage.removeItem(storageKey); } catch {}
+    try { localStorage.removeItem(getStorageKey()); } catch {}
     await renderSvgToCanvas();
     const current = saveCanvasState();
     setHistory([current]);
@@ -392,7 +402,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const handleSaveLocal = () => {
     const current = saveCanvasState();
     if (!current) return;
-    try { localStorage.setItem(storageKey, current); } catch {}
+    try { localStorage.setItem(getStorageKey(), current); } catch {}
     setSavedSuccess(true);
     window.setTimeout(() => setSavedSuccess(false), 2000);
   };
@@ -406,12 +416,19 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     link.click();
   };
 
-  const handlePrint = () => window.print();
+  const handlePrint = async () => {
+    setPrintError("");
+    try { await printArtwork(canvasRef.current, title); }
+    catch { setPrintError("Could not prepare the print preview. Please try again."); }
+  };
   const changeZoom = (amount: number) =>
     setZoomLevel((value) => Math.min(2, Math.max(0.5, value + amount)));
 
+  if (editorError) return <p role="alert" className="rounded-2xl bg-amber-50 p-6 text-amber-900">{editorError}</p>;
+
   return (
     <div className="bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
+      {printError && <p role="alert" className="text-sm text-amber-200">{printError}</p>}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
         <div className="flex items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60">
           {(["fill", "brush", "eraser"] as Tool[]).map((tool) => {
