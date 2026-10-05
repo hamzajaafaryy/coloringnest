@@ -12,6 +12,9 @@ import {
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { logoutAdmin } from "@/lib/admin-actions";
 
+// Admin pages depend on the request's session and must never be prerendered.
+export const dynamic = "force-dynamic";
+
 export default async function AdminProtectedLayout({
   children,
 }: Readonly<{

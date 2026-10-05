@@ -163,3 +163,44 @@ test('printing isolates artwork, waits for images and cleans up the print frame'
     if (previous.image === undefined) delete globalThis.HTMLImageElement; else globalThis.HTMLImageElement = previous.image;
   }
 });
+
+test('missing admin settings deny access; valid, invalid and expired sessions are checked', async () => {
+  const { createHmac } = await import('node:crypto');
+  const names = ['ADMIN_USERNAME', 'ADMIN_PASSWORD', 'ADMIN_SESSION_SECRET'];
+  const previous = Object.fromEntries(names.map(name => [name, process.env[name]]));
+  let token;
+  const auth = loadSource('src/lib/admin-auth.ts', {
+    'next/headers': { cookies: async () => ({ get: () => token ? { value: token } : undefined }) },
+  });
+  const configure = () => {
+    process.env.ADMIN_USERNAME = 'test-admin';
+    process.env.ADMIN_PASSWORD = 'test-only-password';
+    process.env.ADMIN_SESSION_SECRET = 'test-only-signing-secret';
+  };
+  const signed = (expires) => {
+    const payload = Buffer.from(JSON.stringify({ username: 'test-admin', exp: expires })).toString('base64url');
+    return `${payload}.${createHmac('sha256', process.env.ADMIN_SESSION_SECRET).update(payload).digest('hex')}`;
+  };
+  try {
+    configure();
+    token = signed(Date.now() + 60_000);
+    assert.equal(await auth.isAdminAuthenticated(), true);
+    for (const missing of names) {
+      configure();
+      delete process.env[missing];
+      assert.equal(await auth.isAdminAuthenticated(), false, `${missing} must deny access`);
+      await assert.rejects(auth.loginAdmin('test-admin', 'test-only-password'), /not configured/);
+    }
+    configure();
+    token = signed(Date.now() - 60_000);
+    assert.equal(await auth.isAdminAuthenticated(), false);
+    token = `${signed(Date.now() + 60_000)}tampered`;
+    assert.equal(await auth.isAdminAuthenticated(), false);
+    token = undefined;
+    assert.equal(await auth.isAdminAuthenticated(), false);
+  } finally {
+    for (const name of names) {
+      if (previous[name] === undefined) delete process.env[name]; else process.env[name] = previous[name];
+    }
+  }
+});

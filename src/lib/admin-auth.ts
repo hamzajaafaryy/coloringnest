@@ -62,6 +62,11 @@ function verifyToken(token: string | undefined, secret: string) {
 }
 
 export async function isAdminAuthenticated() {
+  // Missing deployment credentials must deny access, not crash page generation.
+  // Login still reports the configuration error through getConfig().
+  if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) {
+    return false;
+  }
   const { secret } = getConfig();
   const cookieStore = await cookies();
   return verifyToken(cookieStore.get(COOKIE_NAME)?.value, secret);
