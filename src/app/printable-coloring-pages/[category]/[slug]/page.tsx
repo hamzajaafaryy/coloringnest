@@ -8,7 +8,7 @@ import DownloadButton from "@/components/DownloadButton";
 import PrintButton from "@/components/PrintButton";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import SocialShare from "@/components/SocialShare";
-import { sanitizeSvg } from "@/lib/sanitize-svg";
+import { resolveColoringSvg } from "@/lib/coloring/resolveSvg";
 
 import {
   getAllPublishedColoringPagesWithCategory,
@@ -66,15 +66,7 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
   const categoryName = page.categoryName || category;
   const categorySlug = page.categorySlug || category;
 
-  const safeSvgContent = page.svgContent
-    ? (() => {
-        try {
-          return sanitizeSvg(page.svgContent);
-        } catch {
-          return "";
-        }
-      })()
-    : "";
+  const safeSvgContent = await resolveColoringSvg(page);
 
   const imageUrl = page.imageUrl || `https://craftcoloring.com/images/${page.slug}.png`;
 
@@ -131,7 +123,7 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
 
       <div className="mt-10 grid items-start gap-8 lg:grid-cols-12">
         <div className="lg:col-span-7 rounded-[2rem] border border-orange-100 bg-[#f7f4ee] p-5 shadow-[0_20px_60px_rgba(234,88,12,0.08)] sm:p-8">
-          <figure className="rounded-2xl border border-slate-200 bg-white p-4 shadow-inner sm:p-7">
+          <figure id="coloring-artwork" className="rounded-2xl border border-slate-200 bg-white p-4 shadow-inner sm:p-7">
             {safeSvgContent ? (
               <div
                 className="flex aspect-[8.5/11] w-full items-center justify-center overflow-hidden [&>svg]:h-full [&>svg]:w-full [&>svg]:max-h-full [&>svg]:max-w-full"

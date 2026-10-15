@@ -1,3 +1,4 @@
+import ColoringLearningGuide from "@/components/ColoringLearningGuide";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -14,7 +15,7 @@ import FAQ from "@/components/FAQ";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import DownloadButton from "@/components/DownloadButton";
 import PrintButton from "@/components/PrintButton";
-import { sanitizeSvg } from "@/lib/sanitize-svg";
+import { resolveColoringSvg } from "@/lib/coloring/resolveSvg";
 
 import {
   getAllPublishedColoringPagesWithCategory,
@@ -162,15 +163,7 @@ export default async function IndividualColoringPage({
       breadcrumbItems
     );
 
-  const safeSvgContent = page.svgContent
-    ? (() => {
-        try {
-          return sanitizeSvg(page.svgContent);
-        } catch {
-          return "";
-        }
-      })()
-    : "";
+  const safeSvgContent = await resolveColoringSvg(page);
 
   const imageUrl =
     page.imageUrl ||
@@ -241,18 +234,16 @@ export default async function IndividualColoringPage({
           {page.title}
         </h1>
 
-        {page.description && (
-          <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-            {page.description}
-          </p>
-        )}
+        <p className="max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+          Pick your favorite colors and make this picture your own. Scroll down for coloring ideas and little learning activities.
+        </p>
       </header>
 
       {/* Artwork + Actions */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         {/* Artwork */}
         <div className="md:col-span-7 bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-          <figure className="w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center overflow-hidden">
+          <figure id="coloring-artwork" className="w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center overflow-hidden">
             {safeSvgContent ? (
               <div
                 className="w-full h-full flex items-center justify-center select-none overflow-hidden [&>svg]:block [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-full [&>svg]:h-full"
@@ -351,65 +342,11 @@ export default async function IndividualColoringPage({
         format="horizontal"
       />
 
-      {/* SEO Content */}
-      <section className="prose prose-indigo max-w-none space-y-6 pt-4 text-slate-700 leading-relaxed">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">
-            About {page.title}
-          </h2>
-
-          <p className="text-sm sm:text-base leading-relaxed">
-            {page.description} Kids will
-            love coloring the details while
-            practicing fine motor skills and
-            pencil control. You can color this
-            page online in your browser or
-            print it for traditional coloring
-            with crayons, pencils, or markers.
-          </p>
-        </div>
-
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">
-            How to Color Online or Print at Home
-          </h2>
-
-          <ol className="list-decimal pl-5 space-y-2 text-sm sm:text-base">
-            <li>
-              <strong>
-                To Color Online:
-              </strong>{" "}
-              Click the{" "}
-              <em>
-                &quot;Color This Page Online&quot;
-              </em>{" "}
-              button to open the interactive
-              browser editor.
-            </li>
-
-            <li>
-              <strong>
-                To Print:
-              </strong>{" "}
-              Click the{" "}
-              <em>
-                &quot;Print Page&quot;
-              </em>{" "}
-              button to open the
-              printer-friendly dialog.
-            </li>
-
-            <li>
-              <strong>
-                To Download:
-              </strong>{" "}
-              Click the download button to
-              save the coloring artwork to your
-              device.
-            </li>
-          </ol>
-        </div>
-      </section>
+      <ColoringLearningGuide
+        title={page.title}
+        description={page.description}
+        onlineAvailable={Boolean(safeSvgContent)}
+      />
 
       {/* Tags */}
       {page.tags &&
