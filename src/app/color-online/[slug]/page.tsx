@@ -144,7 +144,7 @@ export default async function ColorOnlinePage({
             View printable artwork
           </Link>
         </div>
-      )
+      )}
 
       <RelatedColoringPages
         pages={relatedPages}
