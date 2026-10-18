@@ -56,7 +56,7 @@ export default function Header() {
             <button type="button" aria-controls="header-search-panel" aria-expanded={mobileSearchOpen} onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Search">
               <Search className="h-5 w-5" />
             </button>
-            <button type="button" aria-controls="mobile-site-navigation" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="xl:hidden "rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Menu">
+            <button type="button" aria-controls="mobile-site-navigation" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="xl:hidden rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Menu">
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
