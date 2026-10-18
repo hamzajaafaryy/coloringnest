@@ -325,8 +325,8 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     const { x, y } = getCanvasCoordinates(event);
     setIsDrawing(true);
 
-    ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
-    ctx.fillStyle = activeTool === "eraser" ? "#000000" : selectedColor;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = activeTool === "eraser" ? "#ffffff" : selectedColor;
     ctx.beginPath();
     ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
     ctx.fill();
@@ -342,7 +342,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     event.preventDefault();
     const { x, y } = getCanvasCoordinates(event);
     ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
-    ctx.strokeStyle = selectedColor;
+    ctx.strokeStyle = activeTool === "eraser" ? "#ffffff" : selectedColor;
     ctx.lineWidth = brushSize;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -378,6 +378,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   };
 
   const handleReset = async () => {
+    if (!window.confirm("Start this coloring page again? Unsaved changes will be lost.")) return;
     try { localStorage.removeItem(storageKey); } catch {}
     await renderSvgToCanvas();
     const current = saveCanvasState();
@@ -411,14 +412,14 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     setZoomLevel((value) => Math.min(2, Math.max(0.5, value + amount)));
 
   return (
-    <div className="cc-editor bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
+    <div className="cc-editor min-w-0 bg-[#241b45] rounded-3xl p-3 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
       {editorError && <p role="alert" className="rounded-xl border border-amber-500/40 bg-amber-950 p-4 text-sm text-amber-100">{editorError}</p>}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
-        <div className="flex items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+        <div className="flex min-w-0 items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60">
           {(["fill", "brush", "eraser"] as Tool[]).map((tool) => {
             const Icon = tool === "fill" ? PaintBucket : tool === "brush" ? Brush : Eraser;
             return (
-              <button key={tool} onClick={() => setActiveTool(tool)} className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm ${activeTool === tool ? "bg-indigo-600 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"}`}>
+              <button key={tool} onClick={() => setActiveTool(tool)} aria-label={`Use ${tool} tool`} aria-pressed={activeTool === tool} className={`flex min-h-11 items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm ${activeTool === tool ? "bg-indigo-600 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"}`}>
                 <Icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tool === "fill" ? "Fill Bucket" : tool === "brush" ? "Brush" : "Eraser"}</span>
               </button>
@@ -427,19 +428,19 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" title="Undo"><Undo2 className="w-4 h-4" /></button>
-          <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" title="Redo"><Redo2 className="w-4 h-4" /></button>
-          <button onClick={() => changeZoom(-0.1)} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
+          <button onClick={handleUndo} disabled={historyIndex <= 0} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" aria-label="Undo" title="Undo"><Undo2 className="w-4 h-4" /></button>
+          <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" aria-label="Redo" title="Redo"><Redo2 className="w-4 h-4" /></button>
+          <button onClick={() => changeZoom(-0.1)} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Zoom out" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
           <span className="text-xs font-semibold min-w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
-          <button onClick={() => changeZoom(0.1)} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
-          <button onClick={handleReset} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Reset"><RotateCcw className="w-4 h-4" /></button>
+          <button onClick={() => changeZoom(0.1)} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Zoom in" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
+          <button onClick={handleReset} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Reset" title="Reset"><RotateCcw className="w-4 h-4" /></button>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-800/70 p-3 rounded-2xl border border-slate-700">
         <div className="flex flex-wrap items-center gap-2">
           {PRESET_COLORS.map((color) => (
-            <button key={color} type="button" onClick={() => setSelectedColor(color)} aria-label={`Select ${color}`} className={`w-7 h-7 rounded-full border-2 ${selectedColor === color ? "border-white scale-110" : "border-slate-600"}`} style={{ backgroundColor: color }} />
+            <button key={color} type="button" onClick={() => setSelectedColor(color)} aria-label={`Select ${color}`} className={`h-10 w-10 rounded-full border-2 ${selectedColor === color ? "border-white scale-110" : "border-slate-600"}`} style={{ backgroundColor: color }} />
           ))}
           <label className="flex items-center gap-2 text-xs text-slate-300 ml-2">
             Custom
@@ -453,9 +454,9 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
         </label>
       </div>
 
-      <div className="printable-artwork relative rounded-2xl bg-white overflow-auto min-h-[420px] flex items-center justify-center p-4">
+      <div className="printable-artwork relative min-h-[320px] min-w-0 overflow-auto rounded-2xl bg-white p-2 shadow-inner sm:min-h-[420px] sm:p-4">
         <div
-          className="relative w-full max-w-3xl"
+          className="relative mx-auto w-full max-w-3xl"
           style={{ aspectRatio: String(aspectRatio), transform: `scale(${zoomLevel})`, transformOrigin: "center" }}
         >
           <canvas
