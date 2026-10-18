@@ -107,7 +107,7 @@ export default function DoodleStudio({ onAward }: { onAward: (amount: number) =>
     earnedRef.current = false;
     setNotice("");
     if (tool === "stamp") {
-      setStrokes((list) => [...list, { kind: "stamp", points: [point], color, size: 25, stamp: sticker }].slice(-160));
+      setStrokes((list) => [...list, { kind: "stamp" as const, points: [point], color, size: 25, stamp: sticker }].slice(-160));
       return;
     }
     currentRef.current = { kind: "line", points: [point], color: tool === "eraser" ? PAPER : color, size: tool === "eraser" ? size * 2.4 : size };

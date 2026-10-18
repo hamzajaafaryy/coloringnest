@@ -21,6 +21,11 @@ export default function KidsPlayZone() {
   const [spark, setSpark] = useState(false);
 
   useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash === "colors" || hash === "memory" || hash === "doodle") setActive(hash);
+  }, []);
+
+  useEffect(() => {
     try {
       const raw = localStorage.getItem(STARS_KEY);
       const saved = raw === null ? 0 : Number(raw);

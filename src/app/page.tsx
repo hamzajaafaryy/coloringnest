@@ -7,6 +7,8 @@ import {
   Printer,
   Shuffle,
   Sparkles,
+  Gamepad2,
+  Rocket,
   Star,
   Wand2,
   Zap,
@@ -15,6 +17,8 @@ import {
 export const dynamic = "force-dynamic";
 
 import SearchBar from "@/components/SearchBar";
+import HeroArtwork from "@/components/home/HeroArtwork";
+import HomePlayGames from "@/components/home/HomePlayGames";
 import ColoringGrid from "@/components/ColoringGrid";
 import CategoryCard from "@/components/CategoryCard";
 import FAQ from "@/components/FAQ";
@@ -66,107 +70,70 @@ export default async function HomePage() {
     <div className="overflow-hidden">
       <script dangerouslySetInnerHTML={{ __html: JSON.stringify(generateFAQSchema(HOMEPAGE_FAQS)) }} />
 
-      <section className="relative overflow-hidden bg-[#fff9f2]">
-        <div className="absolute -left-24 top-10 h-64 w-64 rounded-full bg-fuchsia-200/50 blur-3xl cc-float" />
-        <div className="absolute -right-24 top-0 h-80 w-80 rounded-full bg-sky-200/60 blur-3xl cc-float-reverse" />
-        <div className="absolute left-[18%] top-24 h-5 w-5 rotate-12 rounded-lg bg-yellow-300 cc-bounce-soft" />
-        <div className="absolute right-[18%] top-36 h-4 w-4 rounded-full bg-pink-400 cc-float" />
-        <div className="absolute bottom-12 left-[9%] h-6 w-6 rotate-45 rounded-md bg-violet-300 cc-float-reverse" />
-
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:py-24">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-4 py-2 text-xs font-extrabold text-violet-700 shadow-sm">
-              <Sparkles className="h-4 w-4 text-fuchsia-500" />
-              A happy place to create & color
+      <section className="relative isolate overflow-hidden border-b border-amber-100 bg-[#fffaf2]">
+        <div className="pointer-events-none absolute -left-28 top-10 h-80 w-80 rounded-full bg-pink-200/60 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-20 h-96 w-96 rounded-full bg-sky-200/70 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-[40%] h-48 w-80 rounded-full bg-yellow-200/50 blur-3xl" />
+        <div className="absolute left-5 top-24 hidden text-3xl text-violet-400 cc-float sm:block" aria-hidden="true">✦</div>
+        <div className="absolute right-[8%] top-12 text-4xl cc-float-reverse" aria-hidden="true">🌟</div>
+        <div className="relative mx-auto grid max-w-7xl items-center gap-7 px-4 pb-12 pt-11 sm:px-6 sm:pb-20 sm:pt-16 lg:grid-cols-[1.03fr_.97fr] lg:gap-6 lg:px-8 lg:py-20">
+          <div className="relative z-10 max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border-2 border-yellow-200 bg-yellow-100 px-4 py-2 text-xs font-black uppercase tracking-[.12em] text-amber-900 shadow-sm">
+              <span aria-hidden="true">🌈</span> A whole world of creative fun!
             </div>
 
-            <h1 className="mt-5 text-5xl font-black leading-[1.02] tracking-[-0.045em] text-slate-900 sm:text-6xl lg:text-7xl">
-              Big imagination.
-              <span className="block bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent cc-gradient-flow">
-                Bright colors.
-              </span>
+            <h1 className="mt-6 text-[clamp(2.9rem,5.4vw,5.4rem)] font-black leading-[1.02] tracking-[-.055em] text-[#231747]">
+              Little hands.<br />
+              <span className="bg-gradient-to-r from-[#ff5a87] via-[#a249d9] to-[#5b4ff6] bg-clip-text text-transparent">BIG magic.</span><span className="ml-2 inline-block rotate-12 text-[.64em]">✨</span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-base font-medium leading-7 text-slate-600 sm:text-lg">
-              Discover playful coloring pages for kids, families, teachers and creative adults — then color them right in your browser.
+            <p className="mt-5 max-w-lg text-base font-semibold leading-8 text-slate-600 sm:text-lg">
+              A colorful playground where kids can <span className="font-black text-violet-700">draw, play games, earn stars</span> and bring their wildest ideas to life. Every adventure starts with a little imagination!
             </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link href="/color-online/" className="cc-btn cc-btn-primary w-full px-5 py-3.5 sm:w-auto sm:px-6 sm:py-4">
-                <Wand2 className="h-5 w-5 transition group-hover:rotate-12" />
-                Start Coloring Online
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link href="/play/" className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.2rem] bg-[#7143e9] px-7 py-4 text-base font-black text-white shadow-[0_14px_32px_rgba(109,40,217,.28)] transition duration-200 hover:-translate-y-1 hover:bg-[#5726c7] hover:shadow-xl">
+                <Gamepad2 className="h-5 w-5" /> Let&apos;s Play! <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
               </Link>
-              <Link href="/coloring-pages/" className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-6 py-4 text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:text-violet-700">
-                <Palette className="h-5 w-5 text-violet-500" />
-                Explore Pages
-              </Link>
-              <Link href="/surprise-me/" className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-pink-200 bg-pink-50 px-5 py-4 text-sm font-black text-pink-800 shadow-sm transition hover:-translate-y-1 hover:bg-pink-100">
-                <Shuffle className="h-5 w-5" />
-                Surprise Me
+              <Link href="/color-online/" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.2rem] border-2 border-[#231747] bg-white px-6 py-4 text-base font-black text-[#231747] transition hover:-translate-y-1 hover:bg-yellow-100">
+                <Palette className="h-5 w-5 text-pink-500" /> Color a Picture
               </Link>
             </div>
 
-            <div className="mt-7 max-w-xl">
-              <SearchBar placeholder="What do you want to color today? ✨" size="lg" />
+            <div className="mt-8 grid max-w-lg grid-cols-3 gap-2 sm:gap-3">
+              {[
+                ["🎨", "Free art", "Create anything"],
+                ["🧩", "Fun games", "Learn by playing"],
+                ["⭐", "Earn stars", "Celebrate every win"],
+              ].map(([emoji, title, subtitle]) => (
+                <div key={title} className="rounded-2xl border border-white bg-white/80 px-3 py-3 shadow-sm backdrop-blur">
+                  <span className="text-2xl" aria-hidden="true">{emoji}</span>
+                  <p className="mt-1 text-xs font-black text-slate-900 sm:text-sm">{title}</p>
+                  <p className="mt-0.5 text-[10px] font-semibold leading-4 text-slate-500 sm:text-xs">{subtitle}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-7 max-w-lg">
+              <SearchBar placeholder="Find unicorns, cats, dinosaurs..." size="lg" />
               <div className="mt-3 flex flex-wrap gap-2">
-                {exampleSearches.map(([label, href]) => (
-                  <Link key={label} href={href} className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:bg-violet-50 hover:text-violet-700 hover:ring-violet-200">
+                {exampleSearches.slice(0, 4).map(([label, href]) => (
+                  <Link key={label} href={href} className="rounded-full border border-violet-100 bg-white px-3.5 py-1.5 text-xs font-bold text-violet-700 transition hover:bg-violet-100">
                     {label}
                   </Link>
                 ))}
+                <Link href="/surprise-me/" className="rounded-full border border-amber-200 bg-amber-100 px-3.5 py-1.5 text-xs font-bold text-amber-900 transition hover:bg-amber-200">✨ Surprise me</Link>
               </div>
-            </div>
-
-            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-slate-500">
-              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Free to explore</span>
-              <span className="inline-flex items-center gap-1.5"><Zap className="h-4 w-4 text-yellow-500" /> Instant browser coloring</span>
-              <span className="inline-flex items-center gap-1.5"><Heart className="h-4 w-4 text-pink-500" /> Made for creativity</span>
             </div>
           </div>
-
-          <div className="relative mx-auto w-full max-w-xl lg:pl-8">
-            <div className="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-violet-200/60 via-pink-100/70 to-sky-200/70 blur-2xl" />
-            <div className="relative rotate-1 rounded-[2.5rem] border border-white bg-white/80 p-4 shadow-2xl backdrop-blur sm:p-5">
-              <div className="rounded-[2rem] bg-gradient-to-br from-violet-100 via-pink-50 to-sky-100 p-5 sm:p-7">
-                <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-violet-600 shadow-sm">Color studio</span>
-                  <span className="flex gap-1">
-                    <i className="h-3 w-3 rounded-full bg-pink-400" />
-                    <i className="h-3 w-3 rounded-full bg-yellow-300" />
-                    <i className="h-3 w-3 rounded-full bg-sky-400" />
-                  </span>
-                </div>
-                <div className="mt-5 flex aspect-[4/3] items-center justify-center rounded-[1.7rem] bg-white shadow-lg">
-                  <div className="relative h-48 w-48 sm:h-60 sm:w-60 cc-bounce-soft">
-                    <div className="absolute left-8 top-8 h-32 w-32 rounded-[45%_55%_45%_55%] border-[5px] border-slate-800 bg-yellow-200" />
-                    <div className="absolute left-20 top-2 h-10 w-10 -rotate-12 rounded-full border-4 border-slate-800 bg-pink-300" />
-                    <div className="absolute left-4 top-20 h-10 w-10 rotate-12 rounded-full border-4 border-slate-800 bg-sky-300" />
-                    <div className="absolute left-[52%] top-[42%] h-3 w-3 rounded-full bg-slate-800" />
-                    <div className="absolute left-[68%] top-[42%] h-3 w-3 rounded-full bg-slate-800" />
-                    <div className="absolute left-[55%] top-[58%] h-5 w-10 rounded-b-full border-b-4 border-slate-800" />
-                    <Sparkles className="absolute right-1 top-6 h-8 w-8 text-fuchsia-400" />
-                    <Star className="absolute bottom-5 left-0 h-7 w-7 text-orange-400" />
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center gap-2 rounded-2xl bg-white p-3 shadow-sm">
-                  {["bg-pink-400", "bg-orange-300", "bg-yellow-300", "bg-emerald-300", "bg-sky-400", "bg-violet-400"].map((color) => (
-                    <span key={color} className={`h-8 w-8 rounded-full ${color} ring-2 ring-white shadow-sm`} />
-                  ))}
-                  <span className="ml-auto rounded-xl bg-violet-600 px-3 py-2 text-[10px] font-black text-white">COLOR!</span>
-                </div>
-              </div>
-            </div>
-            <div className="absolute -left-4 bottom-8 hidden rounded-2xl bg-white px-4 py-3 shadow-xl sm:block cc-float">
-              <p className="text-[10px] font-black uppercase tracking-wider text-violet-500">Creative time</p>
-              <p className="mt-1 text-sm font-black text-slate-800">Make something colorful ✨</p>
-            </div>
-            <div className="absolute -right-3 top-8 hidden rounded-2xl bg-yellow-300 px-4 py-3 shadow-lg sm:block cc-float-reverse">
-              <p className="text-xs font-black text-slate-900">100% fun</p>
-            </div>
+          <div className="relative min-w-0">
+            <HeroArtwork />
           </div>
         </div>
+        <div className="pointer-events-none absolute bottom-[-1px] left-0 right-0 h-3 bg-gradient-to-r from-rose-300 via-yellow-300 via-green-300 to-violet-400" />
       </section>
+
+      <div className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 lg:px-8"><HomePlayGames /></div>
 
       <AdPlaceholder slotName="Homepage Top Banner" format="banner" />
 

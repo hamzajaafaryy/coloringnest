@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Palette, Search, Menu, X, Sparkles, Wand2, Heart } from "lucide-react";
+import { Palette, Search, Menu, X, Sparkles, Wand2, Heart, Gamepad2 } from "lucide-react";
 import SearchBar from "./SearchBar";
 
 export default function Header() {
@@ -13,6 +13,7 @@ export default function Header() {
 
   const navLinks = [
     { href: "/", label: "Home" },
+    { href: "/play/", label: "Kids Play" },
     { href: "/coloring-pages/", label: "Coloring Pages" },
     { href: "/printable-coloring-pages/", label: "Printables" },
     { href: "/favorites/", label: "Favorites" },
@@ -32,14 +33,14 @@ export default function Header() {
             </span>
             <span className="min-w-0">
               <span className="block truncate text-lg font-black tracking-tight text-slate-900 sm:text-2xl">Craft<span className="text-violet-600">Coloring</span></span>
-              <span className="hidden text-[10px] font-bold uppercase tracking-[0.16em] text-violet-400 sm:block">Create • Color • Smile</span>
+              <span className="hidden text-[10px] font-bold uppercase tracking-[0.16em] text-violet-400 sm:block">Play • Create • Color • Smile</span>
             </span>
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${isActive(link.href) ? "bg-violet-100 text-violet-700 shadow-sm" : "text-slate-600 hover:-translate-y-0.5 hover:bg-violet-50 hover:text-violet-700"}`}>
-                {link.href === "/favorites/" && <Heart className="h-4 w-4" aria-hidden="true" />}{link.label}
+              <Link key={link.href} href={link.href} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${isActive(link.href) ? "bg-violet-100 text-violet-700 shadow-sm" : link.href === "/play/" ? "bg-yellow-200 text-violet-900 shadow-sm hover:-translate-y-0.5 hover:bg-yellow-300" : "text-slate-600 hover:-translate-y-0.5 hover:bg-violet-50 hover:text-violet-700"}`}>
+                {link.href === "/play/" && <Gamepad2 className="h-4 w-4" aria-hidden="true" />}{link.href === "/favorites/" && <Heart className="h-4 w-4" aria-hidden="true" />}{link.label}
               </Link>
             ))}
           </nav>
