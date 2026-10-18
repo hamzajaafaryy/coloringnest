@@ -26,9 +26,42 @@ const ART: Artwork[] = [
     ],
     rows: ["0000000000","0001111000","0012222100","0123333210","1234444321","1234004321","1234004321","0123003210","0012002100","0001001000"],
   },
+  {
+    name: "Pixel Kitty",
+    icon: "🐱",
+    colors: [
+      { name: "Golden", hex: "#fbbf24" },
+      { name: "Peach", hex: "#fb923c" },
+      { name: "Pink", hex: "#fda4af" },
+      { name: "Purple", hex: "#7c3aed" },
+    ],
+    rows: ["0000000000","0110000110","0121001210","0111111110","1121112111","1131113111","0111441110","0011111100","0001111000","0000110000"],
+  },
+  {
+    name: "Dino Buddy",
+    icon: "🦕",
+    colors: [
+      { name: "Mint", hex: "#4adeb2" },
+      { name: "Green", hex: "#22c55e" },
+      { name: "Orange", hex: "#fb923c" },
+      { name: "Sky", hex: "#60a5fa" },
+    ],
+    rows: ["0000110000","0001221000","0001111100","0001111300","0001111000","0011111000","0112111100","0111111110","0010101010","0010303010"],
+  },
+  {
+    name: "Magic Star",
+    icon: "⭐",
+    colors: [
+      { name: "Sunny", hex: "#facc15" },
+      { name: "Orange", hex: "#fb923c" },
+      { name: "Pink", hex: "#f472b6" },
+      { name: "Blue", hex: "#60a5fa" },
+    ],
+    rows: ["0000110000","0001111000","0011111100","1111111111","0111111110","0011221100","0012222100","0122002210","0120000210","0000000000"],
+  },
 ];
 
-export default function ColorByNumber({ onAward }: { onAward: (amount: number) => void }) {
+export default function ColorByNumber({ onAward, onFeedback }: { onAward: (amount: number) => void; onFeedback?: (success: boolean) => void }) {
   const [design, setDesign] = useState(0);
   const [selected, setSelected] = useState("1");
   const [painted, setPainted] = useState<number[]>([]);
@@ -51,11 +84,13 @@ export default function ColorByNumber({ onAward }: { onAward: (amount: number) =
     if (finished || found.has(index) || pixels[index] === "0") return;
     if (pixels[index] !== selected) {
       setHint(`Try picking color number ${pixels[index]} first! You can do it! 💜`);
+      onFeedback?.(false);
       return;
     }
     const next = [...painted, index];
     setPainted(next);
     setHint("Great color choice! ✨");
+    onFeedback?.(true);
     if (next.length === total) {
       setFinished(true);
       setHint("Amazing! You revealed the whole picture!");
@@ -85,7 +120,7 @@ export default function ColorByNumber({ onAward }: { onAward: (amount: number) =
           {item.icon} {item.name}
         </button>)}
       </div>
-      <div className="grid items-start gap-6 lg:grid-cols-[.7fr_1.3fr]">
+      <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[.7fr_1.3fr]">
         <div className="space-y-4 rounded-[1.7rem] bg-gradient-to-br from-sky-50 via-pink-50 to-yellow-50 p-5">
           <h4 className="text-lg font-black text-slate-900">1. Pick a paint number</h4>
           <div className="grid grid-cols-2 gap-3">
@@ -109,7 +144,7 @@ export default function ColorByNumber({ onAward }: { onAward: (amount: number) =
           </div>
         </div>
         <div className="rounded-[2rem] border-4 border-white bg-gradient-to-br from-[#d4f1ff] via-[#faf5ff] to-[#ffe7cf] p-3 shadow-inner sm:p-6">
-          <div className="mx-auto grid w-full max-w-[510px] grid-cols-10 gap-1 rounded-2xl bg-white/60 p-2 shadow-sm sm:gap-1.5 sm:p-3">
+          <div className="mx-auto grid w-full max-w-[510px] grid-cols-10 gap-[3px] rounded-2xl bg-white/60 p-2 shadow-sm sm:gap-1.5 sm:p-3">
             {pixels.map((digit, index) => {
               const empty = digit === "0";
               const done = found.has(index);

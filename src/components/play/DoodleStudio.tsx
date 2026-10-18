@@ -45,7 +45,7 @@ function drawStroke(ctx: CanvasRenderingContext2D, stroke: Stroke) {
   ctx.restore();
 }
 
-export default function DoodleStudio({ onAward }: { onAward: (amount: number) => void }) {
+export default function DoodleStudio({ onAward, onFeedback }: { onAward: (amount: number) => void; onFeedback?: (success: boolean) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const currentRef = useRef<Stroke | null>(null);
   const earnedRef = useRef(false);
@@ -106,6 +106,7 @@ export default function DoodleStudio({ onAward }: { onAward: (amount: number) =>
     const point = pointFromEvent(event);
     earnedRef.current = false;
     setNotice("");
+    onFeedback?.(true);
     if (tool === "stamp") {
       setStrokes((list) => [...list, { kind: "stamp" as const, points: [point], color, size: 25, stamp: sticker }].slice(-160));
       return;

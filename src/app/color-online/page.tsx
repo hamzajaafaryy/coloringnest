@@ -50,8 +50,8 @@ export default async function ColorOnlineDirectoryPage() {
         <div className="relative flex flex-wrap items-center justify-between gap-5">
           <div>
             <p className="text-xs font-black uppercase tracking-widest text-yellow-200">Need a warm-up?</p>
-            <h2 className="mt-2 text-2xl font-black sm:text-3xl">Try three creative mini-games first!</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-violet-50">Spot the colors, flip memory cards, and draw your own doodles before you start coloring.</p>
+            <h2 className="mt-2 text-2xl font-black sm:text-3xl">Meet our five creative art adventures!</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-violet-50">Paint original cartoon animals, explore color challenges, find matching friends and draw your own art.</p>
           </div>
           <Link href="/play/" className="cc-btn bg-yellow-300 text-violet-950 shadow-lg hover:bg-yellow-200">🎮 Play kids games →</Link>
         </div>

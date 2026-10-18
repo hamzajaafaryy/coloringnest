@@ -14,23 +14,47 @@ const COLORS = [
   { name: "Pink", hex: "#ec4899" },
   { name: "Brown", hex: "#a16207" },
 ];
-const QUESTIONS: Prompt[] = [
-  { clue: "Find the color of a strawberry!", icon: "🍓", answer: "Red" },
-  { clue: "What color is a sunny day?", icon: "☀️", answer: "Yellow" },
-  { clue: "What color is the clear sky?", icon: "☁️", answer: "Blue" },
-  { clue: "What color is fresh grass?", icon: "🌱", answer: "Green" },
-  { clue: "What color is a carrot?", icon: "🥕", answer: "Orange" },
-  { clue: "Pick the color of a grape!", icon: "🍇", answer: "Purple" },
-  { clue: "Find the color of a pink flower!", icon: "🌸", answer: "Pink" },
-  { clue: "What color is a teddy bear?", icon: "🧸", answer: "Brown" },
+const CHAPTERS: { name: string; description: string; questions: Prompt[] }[] = [
+  { name:"Rainbow Basics", description:"Learn the colors around you", questions:[
+    { clue:"Find the color of a strawberry!", icon:"🍓", answer:"Red" },
+    { clue:"What color is a sunny day?", icon:"☀️", answer:"Yellow" },
+    { clue:"What color is the clear sky?", icon:"☁️", answer:"Blue" },
+    { clue:"What color is fresh grass?", icon:"🌱", answer:"Green" },
+    { clue:"What color is a carrot?", icon:"🥕", answer:"Orange" },
+    { clue:"Pick the color of a grape!", icon:"🍇", answer:"Purple" },
+    { clue:"Find the color of a flower!", icon:"🌸", answer:"Pink" },
+    { clue:"What color is a teddy bear?", icon:"🧸", answer:"Brown" },
+  ] },
+  { name:"Nature Explorer", description:"Adventure through colorful nature", questions:[
+    { clue:"What color is a ladybug?", icon:"🐞", answer:"Red" },
+    { clue:"Pick the color of the ocean!", icon:"🌊", answer:"Blue" },
+    { clue:"What color are ripe lemons?", icon:"🍋", answer:"Yellow" },
+    { clue:"Find the color of a tree leaf!", icon:"🍃", answer:"Green" },
+    { clue:"What color is a flamingo?", icon:"🦩", answer:"Pink" },
+    { clue:"Pick the color of a pumpkin!", icon:"🎃", answer:"Orange" },
+    { clue:"What color is an acorn?", icon:"🌰", answer:"Brown" },
+    { clue:"Find the color of lavender!", icon:"💜", answer:"Purple" },
+  ] },
+  { name:"Cartoon Color Master", description:"Solve the ultimate cartoon color puzzles", questions:[
+    { clue:"What color is a fire engine?", icon:"🚒", answer:"Red" },
+    { clue:"Pick the color of a banana!", icon:"🍌", answer:"Yellow" },
+    { clue:"What color are blueberries?", icon:"🫐", answer:"Blue" },
+    { clue:"Find the color of broccoli!", icon:"🥦", answer:"Green" },
+    { clue:"Pick the color of a basketball!", icon:"🏀", answer:"Orange" },
+    { clue:"What color is an amethyst?", icon:"💎", answer:"Purple" },
+    { clue:"Find the color of cotton candy!", icon:"🍬", answer:"Pink" },
+    { clue:"What color is chocolate?", icon:"🍫", answer:"Brown" },
+  ] },
 ];
 
 export default function ColorQuest({ onAward, onFeedback }: { onAward: (amount: number) => void; onFeedback?: (success: boolean) => void }) {
+  const [chapter, setChapter] = useState(0);
   const [round, setRound] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [mistake, setMistake] = useState<string | null>(null);
   const [complete, setComplete] = useState(false);
-  const prompt = QUESTIONS[round];
+  const questions = CHAPTERS[chapter].questions;
+  const prompt = questions[round];
 
   function choose(name: string) {
     if (selected || complete) return;
@@ -44,7 +68,7 @@ export default function ColorQuest({ onAward, onFeedback }: { onAward: (amount: 
 
   function next() {
     if (!selected) return;
-    if (round === QUESTIONS.length - 1) {
+    if (round === questions.length - 1) {
       setComplete(true);
       onAward(6);
     } else {
@@ -62,19 +86,26 @@ export default function ColorQuest({ onAward, onFeedback }: { onAward: (amount: 
     <div className="flex min-h-96 flex-col items-center justify-center gap-4 rounded-[1.7rem] bg-gradient-to-br from-yellow-50 to-pink-100 p-8 text-center">
       <div className="cc-bounce-soft text-8xl" role="img" aria-label="Celebration">🏆</div>
       <h3 className="text-3xl font-black text-slate-900">You&apos;re a Color Champion!</h3>
-      <p className="max-w-md text-base text-slate-600">You found all eight colors and unlocked six bonus stars. Amazing work!</p>
-      <button onClick={restart} className="cc-btn cc-btn-primary mt-3"><RefreshCcw className="h-5 w-5" /> Play again</button>
+      <p className="max-w-md text-base text-slate-600">You completed this chapter and earned six bonus stars. Three chapters await in our rainbow world!</p>
+      <div className="flex flex-wrap justify-center gap-2"><button onClick={restart} className="cc-btn cc-btn-outline mt-3"><RefreshCcw className="h-5 w-5" /> Play again</button>{chapter < CHAPTERS.length - 1 && <button onClick={() => { setChapter(c => c + 1); restart(); }} className="cc-btn cc-btn-primary mt-3">Next chapter <ArrowRight className="h-5 w-5"/></button>}</div>
     </div>
   );
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><span className="text-xs font-black uppercase tracking-widest text-rose-500">Game 01 · Color detective</span><h3 className="mt-1 text-2xl font-black text-slate-900 sm:text-3xl">Find the right color! 🔍</h3></div>
-        <div className="rounded-full bg-violet-100 px-4 py-2 text-sm font-black text-violet-700">Round {round + 1} of {QUESTIONS.length}</div>
+        <div><span className="text-xs font-black uppercase tracking-widest text-rose-500">Game 01 · Color detective</span><h3 className="mt-1 text-2xl font-black text-slate-900 sm:text-3xl">Rainbow Quest: {CHAPTERS[chapter].name}</h3></div>
+        <div className="rounded-full bg-violet-100 px-4 py-2 text-sm font-black text-violet-700">Chapter {chapter+1} · {round + 1}/{questions.length}</div>
       </div>
-      <div role="progressbar" aria-label="Color Quest progress" aria-valuenow={round} aria-valuemin={0} aria-valuemax={QUESTIONS.length} className="h-3 overflow-hidden rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-gradient-to-r from-pink-400 via-yellow-400 to-purple-500 transition-all duration-500" style={{ width: `${(round / QUESTIONS.length) * 100}%` }} />
+      <div role="group" aria-label="Rainbow Quest chapters" className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-3">
+        {CHAPTERS.map((world, index) => <button key={world.name} type="button" aria-pressed={chapter===index} onClick={() => { setChapter(index); restart(); }} className={`min-w-0 rounded-xl border-2 px-3 py-3 text-left transition ${chapter===index?"border-violet-500 bg-violet-100":"border-slate-100 bg-white hover:border-violet-200"}`}>
+          <span className="block text-[10px] font-black uppercase tracking-wide text-violet-600">World {index+1}</span>
+          <span className="mt-1 block text-sm font-black text-slate-900">{world.name}</span>
+          <span className="block text-[11px] leading-tight text-slate-500">{world.description}</span>
+        </button>)}
+      </div>
+      <div role="progressbar" aria-label="Color Quest progress" aria-valuenow={round} aria-valuemin={0} aria-valuemax={questions.length} className="h-3 overflow-hidden rounded-full bg-slate-100">
+        <div className="h-full rounded-full bg-gradient-to-r from-pink-400 via-yellow-400 to-purple-500 transition-all duration-500" style={{ width: `${(round / questions.length) * 100}%` }} />
       </div>
 
       <div className="grid items-center gap-7 lg:grid-cols-[.7fr_1.3fr]">
@@ -106,7 +137,7 @@ export default function ColorQuest({ onAward, onFeedback }: { onAward: (amount: 
               : <p className="text-sm font-semibold text-slate-500">You can try as many times as you like.</p>}
           </div>
           <button type="button" disabled={!selected} onClick={next} className="cc-btn cc-btn-primary mt-3 w-full py-4 text-base disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto">
-            {round === QUESTIONS.length - 1 ? "Finish quest!" : "Next color"} <ArrowRight className="h-5 w-5" />
+            {round === questions.length - 1 ? "Finish quest!" : "Next color"} <ArrowRight className="h-5 w-5" />
           </button>
         </div>
       </div>

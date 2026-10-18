@@ -19,7 +19,7 @@ function makeCards(shuffle: boolean, pairs = 6): Card[] {
   return deck;
 }
 
-export default function MemoryGarden({ onAward }: { onAward: (amount: number) => void }) {
+export default function MemoryGarden({ onAward, onFeedback }: { onAward: (amount: number) => void; onFeedback?: (success: boolean) => void }) {
   const [level, setLevel] = useState(6);
   const [cards, setCards] = useState<Card[]>(() => makeCards(false));
   const [opened, setOpened] = useState<number[]>([]);
@@ -37,11 +37,12 @@ export default function MemoryGarden({ onAward }: { onAward: (amount: number) =>
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
     setCards(makeCards(true, level)); setOpened([]); setMatched([]); setMoves(0); setBusy(false);
+    onFeedback?.(true);
   }
 
   function flip(card: Card) {
     if (busy || opened.includes(card.id) || matched.includes(card.pair) || matched.length === level) return;
-    if (opened.length === 0) { setOpened([card.id]); return; }
+    if (opened.length === 0) { setOpened([card.id]); onFeedback?.(true); return; }
     setMoves((n) => n + 1);
     const first = cards.find((entry) => entry.id === opened[0]);
     if (first?.pair === card.pair) {
@@ -51,7 +52,7 @@ export default function MemoryGarden({ onAward }: { onAward: (amount: number) =>
       onAward(3);
       if (newMatched.length === level) onAward(8);
     } else {
-      setOpened([opened[0], card.id]); setBusy(true);
+      setOpened([opened[0], card.id]); setBusy(true); onFeedback?.(false);
       timer.current = setTimeout(() => { setOpened([]); setBusy(false); timer.current = null; }, 900);
     }
   }
@@ -65,7 +66,7 @@ export default function MemoryGarden({ onAward }: { onAward: (amount: number) =>
       </div>
       <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-violet-50 p-3" role="group" aria-label="Memory game difficulty">
         <span className="w-full text-xs font-black uppercase tracking-wider text-violet-700 sm:w-auto sm:mr-2">Choose your level</span>
-        {([{pairs:4,name:"Easy · 8 cards"},{pairs:6,name:"Medium · 12 cards"},{pairs:12,name:"Expert · 24 cards"}] as const).map(option => <button key={option.pairs} type="button" aria-pressed={level===option.pairs} onClick={() => { setLevel(option.pairs); setOpened([]); setMatched([]); setMoves(0); setBusy(false); if(timer.current)clearTimeout(timer.current); }} className={`min-h-11 flex-1 rounded-xl px-3 py-2 text-xs font-black transition sm:flex-none ${level===option.pairs ? "bg-violet-700 text-white shadow-md" : "bg-white text-violet-800 hover:bg-violet-100"}`}>{option.name}</button>)}
+        {([{pairs:4,name:"Easy · 8 cards"},{pairs:6,name:"Medium · 12 cards"},{pairs:12,name:"Expert · 24 cards"}] as const).map(option => <button key={option.pairs} type="button" aria-pressed={level===option.pairs} onClick={() => { setLevel(option.pairs); setOpened([]); setMatched([]); setMoves(0); setBusy(false); if(timer.current)clearTimeout(timer.current); onFeedback?.(true); }} className={`min-h-11 flex-1 rounded-xl px-3 py-2 text-xs font-black transition sm:flex-none ${level===option.pairs ? "bg-violet-700 text-white shadow-md" : "bg-white text-violet-800 hover:bg-violet-100"}`}>{option.name}</button>)}
       </div>
       <div className="flex flex-wrap gap-3">
         <span className="rounded-full bg-sky-50 px-4 py-2 text-sm font-black text-sky-800">🔎 {moves} tries</span>
