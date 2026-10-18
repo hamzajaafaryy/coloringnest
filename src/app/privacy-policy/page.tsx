@@ -65,12 +65,14 @@ export default function PrivacyPolicyPage() {
         referral information according to their own policies.
       </p>
 
-      <h2>5. Advertising and Google AdSense</h2>
+      <h2>5. Third-Party Advertising</h2>
       <p>
-        CraftColoring may display advertising from Google AdSense and other
-        advertising partners. Advertising providers may use cookies or similar
-        technologies to show and measure ads and, where permitted and based on
-        applicable consent choices, personalize advertising.
+        CraftColoring may display third-party advertising, including native
+        banner placements from Adsterra. On blog pages intended for parents
+        and teachers, advertising may also open a popunder browser tab or window.
+        Advertising providers may use cookies or similar technologies to show
+        and measure ads and, where permitted and based on applicable consent
+        choices, personalize advertising.
       </p>
       <p>
         Third-party vendors, including Google, may use advertising cookies to

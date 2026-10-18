@@ -17,6 +17,7 @@ import {
 export const dynamic = "force-dynamic";
 
 import SearchBar from "@/components/SearchBar";
+import AdsterraNativeBanner from "@/components/ads/AdsterraNativeBanner";
 import HeroArtwork from "@/components/home/HeroArtwork";
 import HomePlayGames from "@/components/home/HomePlayGames";
 import ColoringGrid from "@/components/ColoringGrid";
@@ -135,7 +136,7 @@ export default async function HomePage() {
 
       <div className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 lg:px-8"><HomePlayGames /></div>
 
-      <AdPlaceholder slotName="Homepage Top Banner" format="banner" />
+      <AdsterraNativeBanner />
 
       <div className="mx-auto max-w-7xl space-y-20 px-4 py-12 sm:px-6 lg:px-8">
         <section>
