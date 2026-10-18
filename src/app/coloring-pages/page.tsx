@@ -4,6 +4,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import SearchBar from "@/components/SearchBar";
 import AdPlaceholder from "@/components/AdPlaceholder";
 
+export const dynamic = "force-dynamic";
+
 import {
   getAllPublishedCategories,
   getAllPublishedColoringPagesWithCategory,

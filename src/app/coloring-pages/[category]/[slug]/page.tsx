@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 import {
   Sparkles,
   ShieldCheck,
@@ -37,21 +39,7 @@ interface IndividualPageProps {
   }>;
 }
 
-export async function generateStaticParams() {
-  const pages =
-    await getAllPublishedColoringPagesWithCategory();
 
-  return pages
-    .filter(
-      (page) =>
-        page.categorySlug &&
-        page.slug
-    )
-    .map((page) => ({
-      category: page.categorySlug!,
-      slug: page.slug!,
-    }));
-}
 
 export async function generateMetadata({
   params,

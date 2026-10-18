@@ -3,6 +3,8 @@ import { getAllPublishedColoringPagesWithCategory } from "@/db/queries";
 import FavoritesCollection from "@/components/FavoritesCollection";
 import { constructMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = constructMetadata({
   title: "My Favorite Coloring Pages",
   description: "Find the coloring pages you saved to your favorites on this device.",

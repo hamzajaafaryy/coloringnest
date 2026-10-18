@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 import { Download, CheckCircle2, FileImage, Sparkles } from "lucide-react";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -26,16 +28,7 @@ interface PrintablePageProps {
   params: Promise<{ category: string; slug: string }>;
 }
 
-export async function generateStaticParams() {
-  const pages = await getAllPublishedColoringPagesWithCategory();
 
-  return pages
-    .filter((page) => page.categorySlug && page.slug)
-    .map((page) => ({
-      category: page.categorySlug!,
-      slug: page.slug!,
-    }));
-}
 
 export async function generateMetadata({ params }: PrintablePageProps) {
   const { category, slug } = await params;

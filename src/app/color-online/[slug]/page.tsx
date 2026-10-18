@@ -23,15 +23,7 @@ interface ColorOnlinePageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  const pages = await getAllPublishedColoringPages();
 
-  return pages
-    .filter((page) => page.slug)
-    .map((page) => ({
-      slug: page.slug as string,
-    }));
-}
 
 export async function generateMetadata({
   params,

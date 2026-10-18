@@ -25,15 +25,7 @@ interface BlogPostPageProps {
 
 export const dynamic = "force-dynamic";
 
-export async function generateStaticParams() {
-  const posts = await getAllPublishedBlogPosts();
 
-  return posts
-    .filter((post) => post.slug)
-    .map((post) => ({
-      slug: post.slug as string,
-    }));
-}
 
 export async function generateMetadata({
   params,

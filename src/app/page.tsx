@@ -12,6 +12,8 @@ import {
   Zap,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 import SearchBar from "@/components/SearchBar";
 import ColoringGrid from "@/components/ColoringGrid";
 import CategoryCard from "@/components/CategoryCard";

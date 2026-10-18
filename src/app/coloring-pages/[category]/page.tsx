@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 
 import ColoringGrid from "@/components/ColoringGrid";
@@ -29,16 +31,7 @@ interface CategoryPageProps {
    STATIC PARAMS
    ========================================================= */
 
-export async function generateStaticParams() {
-  const categories =
-    await getAllPublishedCategories();
 
-  return categories
-    .filter((category) => category.slug)
-    .map((category) => ({
-      category: category.slug!,
-    }));
-}
 
 /* =========================================================
    METADATA
