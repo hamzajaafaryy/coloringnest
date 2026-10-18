@@ -23,7 +23,7 @@ export default function TermsPage() {
       </header>
 
       <p>
-        These Terms of Service govern your use of craftcoloring.com and its
+        These Terms of Service govern your use of the CraftColoring website and its
         coloring pages, online coloring tools, articles, and related features.
         By using the website, you agree to use it lawfully and respectfully.
       </p>

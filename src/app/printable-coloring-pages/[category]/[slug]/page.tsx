@@ -70,7 +70,7 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
       })()
     : await loadColoringSvg(page.svgUrl);
 
-  const imageUrl = page.imageUrl || `https://craftcoloring.com/images/${page.slug}.png`;
+  const imageUrl = page.imageUrl || (page.svgUrl?.startsWith("https://") ? page.svgUrl : null);
 
   const breadcrumbItems = [
     { label: "Printable Pages", href: "/printable-coloring-pages/" },
@@ -85,13 +85,13 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
   ];
 
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems);
-  const imageSchema = generateImageObjectSchema({
+  const imageSchema = imageUrl ? generateImageObjectSchema({
     title: `Printable ${page.title} Coloring Sheet`,
     description:
       `Free printable ${page.title.toLowerCase()} coloring sheet for kids and adults.`,
     url: imageUrl,
     category: categoryName,
-  });
+  }) : null;
 
   return (
     <article className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -99,10 +99,7 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(imageSchema) }}
-      />
+      {imageSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(imageSchema) }} />}
 
       <Breadcrumbs items={breadcrumbItems} />
 
@@ -214,7 +211,7 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
       </div>
 
       <div className="mt-10">
-        <SocialShare title={`Printable ${page.title} Coloring Sheet`} imageUrl={imageUrl} />
+        <SocialShare title={`Printable ${page.title} Coloring Sheet`} imageUrl={imageUrl || undefined} />
       </div>
 
       <AdPlaceholder slotName="Printable Detail Banner" format="horizontal" />

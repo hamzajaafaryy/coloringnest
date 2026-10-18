@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
       <p>
         This Privacy Policy explains how CraftColoring ("CraftColoring", "we",
         "us", or "our") handles information when you visit and use
-        craftcoloring.com. We aim to keep the service simple, useful, and
+        the CraftColoring website. We aim to keep the service simple, useful, and
         privacy-conscious for children, families, teachers, and adult users.
       </p>
 

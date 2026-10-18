@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { SITE_CONFIG } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,7 @@ import {
   getAllPublishedBlogPosts,
 } from "@/db/queries";
 
-const DOMAIN = "https://craftcoloring.com";
+const DOMAIN = SITE_CONFIG.domain;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [pages, categories, blogPosts] = await Promise.all([
@@ -37,6 +38,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${DOMAIN}/color-online/`,
       changeFrequency: "daily",
       priority: 0.85,
+    },
+    {
+      url: `${DOMAIN}/play/`,
+      changeFrequency: "weekly",
+      priority: 0.9,
     },
     {
       url: `${DOMAIN}/blog/`,
@@ -94,6 +100,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.9,
       ...(page.imageUrl ? { images: [page.imageUrl] } : {}),
+    });
+
+    routes.push({
+      url: `${DOMAIN}/printable-coloring-pages/${page.categorySlug}/${page.slug}/`,
+      ...(lastModified ? { lastModified } : {}),
+      changeFrequency: "monthly",
+      priority: 0.8,
     });
 
     routes.push({

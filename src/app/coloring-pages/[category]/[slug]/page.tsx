@@ -161,18 +161,15 @@ export default async function IndividualColoringPage({
       })()
     : await loadColoringSvg(page.svgUrl);
 
-  const imageUrl =
-    page.imageUrl ||
-    `https://craftcoloring.com/images/${page.slug}.png`;
+  const imageUrl = page.imageUrl || (page.svgUrl?.startsWith("https://") ? page.svgUrl : null);
 
-  const imageSchema =
-    generateImageObjectSchema({
+  const imageSchema = imageUrl ? generateImageObjectSchema({
       title: page.title,
       description:
         page.description || "",
       url: imageUrl,
       category: categoryName,
-    });
+    }) : null;
 
   return (
     <article className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
@@ -187,16 +184,7 @@ export default async function IndividualColoringPage({
         }}
       />
 
-      {/* Image JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html:
-            JSON.stringify(
-              imageSchema
-            ),
-        }}
-      />
+      {imageSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(imageSchema) }} />}
 
 
       <Breadcrumbs
@@ -332,7 +320,7 @@ export default async function IndividualColoringPage({
       {/* Social Share */}
       <SocialShare
         title={page.title}
-        imageUrl={imageUrl}
+        imageUrl={imageUrl || undefined}
       />
 
       <AdPlaceholder
