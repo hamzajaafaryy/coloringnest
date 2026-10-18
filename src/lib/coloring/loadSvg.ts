@@ -1,4 +1,3 @@
-import "server-only";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
 
 const MAX_SVG_BYTES = 2 * 1024 * 1024;

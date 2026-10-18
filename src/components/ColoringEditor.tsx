@@ -24,6 +24,8 @@ interface ColoringEditorProps {
   svgContent: string;
 }
 
+const MAX_HISTORY_STATES = 16;
+
 const PRESET_COLORS = [
   "#111827", "#FFFFFF", "#EF4444", "#F97316", "#EAB308", "#10B981",
   "#06B6D4", "#3B82F6", "#8B5CF6", "#EC4899", "#8D4925", "#6B7280",
@@ -183,6 +185,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const [brushSize, setBrushSize] = useState(12);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [editorError, setEditorError] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -259,20 +262,25 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     let cancelled = false;
 
     const init = async () => {
-      await renderSvgToCanvas();
-      if (cancelled) return;
-
-      let saved = "";
       try {
-        saved = localStorage.getItem(storageKey) || "";
-      } catch {}
+        await renderSvgToCanvas();
+        if (cancelled) return;
 
-      if (saved) await restoreCanvasState(saved);
+        let saved = "";
+        try {
+          saved = localStorage.getItem(storageKey) || "";
+        } catch {}
 
-      if (cancelled) return;
-      const current = saveCanvasState();
-      setHistory([current]);
-      setHistoryIndex(0);
+        if (saved) await restoreCanvasState(saved);
+
+        if (cancelled) return;
+        const current = saveCanvasState();
+        setHistory([current]);
+        setHistoryIndex(0);
+      } catch (error) {
+        console.error("Could not prepare coloring artwork:", error);
+        if (!cancelled) setEditorError("This image could not be opened for coloring. Please try another page.");
+      }
     };
 
     init();
@@ -283,7 +291,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     const current = saveCanvasState();
     if (!current) return;
     setHistory((previous) => {
-      const next = [...previous.slice(0, historyIndex + 1), current];
+      const next = [...previous.slice(0, historyIndex + 1), current].slice(-MAX_HISTORY_STATES);
       setHistoryIndex(next.length - 1);
       return next;
     });
@@ -380,9 +388,13 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const handleSaveLocal = () => {
     const current = saveCanvasState();
     if (!current) return;
-    try { localStorage.setItem(storageKey, current); } catch {}
-    setSavedSuccess(true);
-    window.setTimeout(() => setSavedSuccess(false), 2000);
+    try {
+      localStorage.setItem(storageKey, current);
+      setSavedSuccess(true);
+      window.setTimeout(() => setSavedSuccess(false), 2000);
+    } catch {
+      setEditorError("Could not save progress. Your browser storage may be disabled or full.");
+    }
   };
 
   const handleDownload = () => {
@@ -399,7 +411,8 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     setZoomLevel((value) => Math.min(2, Math.max(0.5, value + amount)));
 
   return (
-    <div className="bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
+    <div className="cc-editor bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
+      {editorError && <p role="alert" className="rounded-xl border border-amber-500/40 bg-amber-950 p-4 text-sm text-amber-100">{editorError}</p>}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
         <div className="flex items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60">
           {(["fill", "brush", "eraser"] as Tool[]).map((tool) => {
@@ -467,7 +480,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
         <button onClick={handleDownload} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Download className="w-4 h-4" />Download PNG</button>
         <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Printer className="w-4 h-4" />Print</button>
         <button onClick={handleReset} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Sparkles className="w-4 h-4" />Start Over</button>
-        <button onClick={() => document.documentElement.requestFullscreen?.()} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Maximize2 className="w-4 h-4" />Fullscreen</button>
+        <button onClick={() => { const editor = canvasRef.current?.closest(".cc-editor"); void editor?.requestFullscreen?.().catch(() => {}); }} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Maximize2 className="w-4 h-4" />Fullscreen</button>
       </div>
     </div>
   );
