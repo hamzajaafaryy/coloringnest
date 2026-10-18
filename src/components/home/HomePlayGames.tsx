@@ -29,6 +29,15 @@ const games = [
     gradient: "from-[#ffe382] via-[#b9efaa] to-[#79ded6]",
     dark: "text-emerald-950",
   },
+  {
+    emoji: "🔢",
+    title: "Color by Number",
+    description: "Match numbers with colors and watch secret pixel art pictures appear!",
+    detail: "2 surprise pictures",
+    href: "/play/#numbers",
+    gradient: "from-[#8cdafb] via-[#c1b1ff] to-[#ffa3cf]",
+    dark: "text-indigo-950",
+  },
 ];
 
 export default function HomePlayGames() {
@@ -40,11 +49,11 @@ export default function HomePlayGames() {
         <div>
           <span className="inline-flex items-center gap-2 rounded-full bg-yellow-300 px-4 py-2 text-xs font-black uppercase tracking-[.14em] text-slate-950"><Sparkles className="h-4 w-4" /> New • Kids Play Zone</span>
           <h2 id="playzone-home-title" className="mt-5 max-w-xl text-3xl font-black leading-tight tracking-tight sm:text-5xl">Play, giggle &amp; <span className="text-yellow-300">grow your imagination!</span></h2>
-          <p className="mt-3 max-w-xl text-sm leading-7 text-indigo-100 sm:text-base">More than coloring pages. Real free mini-games where every little artist can learn, create, and shine!</p>
+          <p className="mt-3 max-w-xl text-sm leading-7 text-indigo-100 sm:text-base">More than coloring pages. Four real free mini-games where every little artist can learn, create, and shine!</p>
         </div>
         <Link href="/play/" className="cc-btn border border-white/30 bg-white px-5 py-3 font-black text-violet-800 hover:bg-yellow-100">All kids games <ArrowRight className="h-5 w-5" /></Link>
       </div>
-      <div className="relative grid gap-4 md:grid-cols-3">
+      <div className="relative grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {games.map((game, index) => <Link key={game.href} href={game.href}
           className={`group relative flex min-h-72 flex-col justify-between overflow-hidden rounded-[1.8rem] bg-gradient-to-br ${game.gradient} p-6 shadow-[0_18px_30px_rgba(0,0,0,.08)] transition duration-300 hover:-translate-y-2 hover:rotate-[-1deg] hover:shadow-xl ${game.dark}`}>
           <span className="absolute right-4 top-4 rounded-full border border-white/60 bg-white/50 px-3 py-1.5 text-[11px] font-black tracking-wide">GAME 0{index + 1}</span>

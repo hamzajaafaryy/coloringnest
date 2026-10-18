@@ -5,13 +5,15 @@ import { ArrowRight, Brush, Brain, CheckCircle2, Gamepad2, Medal, Palette, Spark
 import ColorQuest from "./ColorQuest";
 import MemoryGarden from "./MemoryGarden";
 import DoodleStudio from "./DoodleStudio";
+import ColorByNumber from "./ColorByNumber";
 
-type Game = "colors" | "memory" | "doodle";
+type Game = "colors" | "memory" | "doodle" | "numbers";
 const STARS_KEY = "craftcoloring_kids_stars_v1";
 const TABS: { id: Game; title: string; subtitle: string; emoji: string; color: string }[] = [
   { id: "colors", title: "Color Quest", subtitle: "Discover colors", emoji: "🌈", color: "from-pink-100 to-orange-100" },
   { id: "memory", title: "Memory Garden", subtitle: "Find the pairs", emoji: "🦋", color: "from-violet-100 to-sky-100" },
   { id: "doodle", title: "Doodle Studio", subtitle: "Make your own art", emoji: "🎨", color: "from-yellow-100 to-emerald-100" },
+  { id: "numbers", title: "Color by Number", subtitle: "Reveal pixel art", emoji: "🔢", color: "from-sky-100 to-pink-100" },
 ];
 
 export default function KidsPlayZone() {
@@ -22,7 +24,7 @@ export default function KidsPlayZone() {
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
-    if (hash === "colors" || hash === "memory" || hash === "doodle") setActive(hash);
+    if (hash === "colors" || hash === "memory" || hash === "doodle" || hash === "numbers") setActive(hash);
   }, []);
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export default function KidsPlayZone() {
               Ready, set, <span className="bg-gradient-to-r from-yellow-300 via-pink-300 to-sky-300 bg-clip-text text-transparent">PLAY!</span>
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-indigo-100 sm:text-lg">
-              Three magical little adventures: discover colors, train your memory, and create your own masterpiece. Every game is free and made for little hands.
+              Four magical little adventures: discover colors, train your memory, draw your own masterpiece, and reveal pixel art. Every game is free and made for little hands.
             </p>
             <div className="mt-6 flex flex-wrap gap-2 text-xs font-bold text-white/85">
               <span className="rounded-full bg-white/15 px-3 py-2">✨ No sign-up</span>
@@ -99,7 +101,7 @@ export default function KidsPlayZone() {
           </div>
           <span className="text-sm font-bold text-slate-500">Pick a card to start <ArrowRight className="inline h-4 w-4" aria-hidden="true" /></span>
         </div>
-        <div role="tablist" aria-label="Creative games" className="grid gap-3 sm:grid-cols-3">
+        <div role="tablist" aria-label="Creative games" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {TABS.map((game) => (
             <button
               type="button"
@@ -108,7 +110,7 @@ export default function KidsPlayZone() {
               aria-controls="kids-active-game"
               key={game.id}
               onClick={() => { setActive(game.id); setSpark(false); }}
-              className={`group relative flex min-h-32 items-center gap-4 overflow-hidden rounded-[1.7rem] border-2 bg-gradient-to-br ${game.color} px-5 py-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-violet-600 sm:flex-col sm:items-start lg:flex-row lg:items-center ${active === game.id ? "border-violet-500 ring-4 ring-violet-100" : "border-white"}`}
+              className={`group relative flex min-h-32 items-center gap-4 overflow-hidden rounded-[1.7rem] border-2 bg-gradient-to-br ${game.color} px-5 py-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-violet-600 sm:flex-row sm:items-center lg:flex-col lg:items-start 2xl:flex-row 2xl:items-center ${active === game.id ? "border-violet-500 ring-4 ring-violet-100" : "border-white"}`}
             >
               <span className="text-5xl transition duration-300 group-hover:rotate-12 group-hover:scale-110" aria-hidden="true">{game.emoji}</span>
               <span className="min-w-0">
@@ -125,6 +127,7 @@ export default function KidsPlayZone() {
         {active === "colors" && <ColorQuest onAward={awardStars} />}
         {active === "memory" && <MemoryGarden onAward={awardStars} />}
         {active === "doodle" && <DoodleStudio onAward={awardStars} />}
+        {active === "numbers" && <ColorByNumber onAward={awardStars} />}
       </section>
 
       <div className="grid gap-4 rounded-[2rem] bg-gradient-to-r from-amber-50 via-pink-50 to-violet-50 p-6 sm:grid-cols-3 sm:p-8">
