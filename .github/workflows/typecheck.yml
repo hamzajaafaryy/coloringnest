@@ -1,4 +1,4 @@
-name: TypeScript checks
+name: Build and typecheck
 
 on:
   pull_request:
@@ -8,10 +8,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  typecheck:
+  verify:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d app_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/app_db
+      ADMIN_USERNAME: ci-admin
+      ADMIN_PASSWORD: ci-password
+      ADMIN_SESSION_SECRET: ci-only-not-for-production-use
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,8 +38,8 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
+      - name: Push schema to disposable CI PostgreSQL
+        run: npx drizzle-kit push --config drizzle.config.json --force
       - run: npm run typecheck
-      - name: Compile Next.js routes (without live database)
-        run: npm run build -- --experimental-build-mode compile
-        env:
-          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+      - name: Build app against disposable CI PostgreSQL
+        run: npm run build
