@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Heart, Palette, Sparkles } from "lucide-react";
-import { getAllPublishedCategories } from "@/db/queries";
+import { CATEGORIES } from "@/lib/data/categories";
 
-export default async function Footer() {
-  const categories = await getAllPublishedCategories();
-  const topCategories = categories.filter((category) => category.featured || category.popular).slice(0, 8);
+export default function Footer() {
+  // The root layout is rendered during static page builds, including 404 pages.
+  // Avoid a database query here so builds stay independent of live DB access.
+  const topCategories = CATEGORIES.filter((category) => category.featured || category.popular).slice(0, 8);
 
   return (
     <footer className="relative mt-10 overflow-hidden border-t border-violet-100 bg-[#fbf8ff]">
