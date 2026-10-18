@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Brush, Brain, CheckCircle2, Gamepad2, Medal, Palette, Sparkles, Star, Trophy } from "lucide-react";
 import ColorQuest from "./ColorQuest";
 import MemoryGarden from "./MemoryGarden";
@@ -21,6 +21,32 @@ export default function KidsPlayZone() {
   const [stars, setStars] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [spark, setSpark] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
+  const audioRef = useRef<AudioContext | null>(null);
+
+  const playSound = useCallback((success: boolean) => {
+    if (!soundOn || typeof window === "undefined") return;
+    try {
+      const ctx = audioRef.current ?? new AudioContext();
+      audioRef.current = ctx;
+      if (ctx.state === "suspended") void ctx.resume();
+      const now = ctx.currentTime;
+      for (const [i, frequency] of (success ? [523, 659, 784] : [330, 262]).entries()) {
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.value = frequency;
+        gain.gain.setValueAtTime(0.0001, now + i * 0.095);
+        gain.gain.exponentialRampToValueAtTime(0.08, now + i * 0.095 + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.095 + 0.16);
+        oscillator.connect(gain).connect(ctx.destination);
+        oscillator.start(now + i * 0.095);
+        oscillator.stop(now + i * 0.095 + 0.17);
+      }
+    } catch {}
+  }, [soundOn]);
+
+  useEffect(() => () => { if (audioRef.current) void audioRef.current.close(); }, []);
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -45,11 +71,12 @@ export default function KidsPlayZone() {
     if (!Number.isFinite(amount) || amount <= 0) return;
     setStars((count) => Math.min(999999, count + amount));
     setSpark(true);
-  }, []);
+    playSound(true);
+  }, [playSound]);
 
   const rank = stars >= 100 ? "Super Star Artist" : stars >= 40 ? "Rainbow Explorer" : stars >= 15 ? "Creative Adventurer" : "Little Explorer";
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full min-w-0 max-w-7xl space-y-8 overflow-x-clip px-3 pb-16 pt-8 sm:px-6 lg:px-8">
       <section className="relative isolate overflow-hidden rounded-[2rem] bg-[#241b58] px-5 py-10 text-white shadow-[0_22px_70px_rgba(68,35,137,.22)] sm:rounded-[3rem] sm:px-10 sm:py-14 lg:px-14">
         <div className="absolute -right-20 -top-32 h-80 w-80 rounded-full bg-pink-400/30 blur-3xl" aria-hidden="true" />
         <div className="absolute bottom-0 left-10 h-48 w-96 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true" />
@@ -87,6 +114,7 @@ export default function KidsPlayZone() {
             <p className="text-base font-black text-slate-900">{rank}</p>
           </div>
         </div>
+        <button type="button" aria-pressed={soundOn} onClick={() => setSoundOn(v => !v)} className="min-h-11 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-black text-violet-800">{soundOn ? "🔊 Sound ON" : "🔇 Sound OFF"}</button>
         <div aria-live="polite" className="flex items-center gap-2 rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-2 text-lg font-black text-amber-800">
           <Star className="h-6 w-6 fill-yellow-400 text-amber-500" aria-hidden="true" /> {loaded ? stars : "—"} stars
           {spark && <span className="text-xs font-black text-emerald-700" aria-label="Stars earned">+!</span>}
@@ -123,7 +151,7 @@ export default function KidsPlayZone() {
         </div>
       </section>
 
-      <section id="kids-active-game" role="tabpanel" aria-label={TABS.find(g => g.id === active)?.title} className="overflow-hidden rounded-[2rem] border border-violet-100 bg-white p-4 shadow-[0_20px_70px_rgba(50,37,114,.07)] sm:p-7 lg:p-10">
+      <section id="kids-active-game" role="tabpanel" aria-label={TABS.find(g => g.id === active)?.title} className="min-w-0 overflow-hidden rounded-[2rem] border border-violet-100 bg-white p-3 shadow-[0_20px_70px_rgba(50,37,114,.07)] sm:p-7 lg:p-10">
         {active === "colors" && <ColorQuest onAward={awardStars} />}
         {active === "memory" && <MemoryGarden onAward={awardStars} />}
         {active === "doodle" && <DoodleStudio onAward={awardStars} />}
