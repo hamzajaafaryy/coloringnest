@@ -4,6 +4,8 @@ import CategoryCard from "@/components/CategoryCard";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import FAQ from "@/components/FAQ";
 
+export const dynamic = "force-dynamic";
+
 import {
   getAllPublishedCategories,
   getAllPublishedColoringPagesWithCategory,

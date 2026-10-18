@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Heart, Palette, Sparkles } from "lucide-react";
-import { getAllPublishedCategories } from "@/db/queries";
+import { CATEGORIES } from "@/lib/data/categories";
 
-export default async function Footer() {
-  const categories = await getAllPublishedCategories();
-  const topCategories = categories.filter((category) => category.featured || category.popular).slice(0, 8);
+export default function Footer() {
+  // The root layout is rendered during static page builds, including 404 pages.
+  // Avoid a database query here so builds stay independent of live DB access.
+  const topCategories = CATEGORIES.filter((category) => category.featured || category.popular).slice(0, 8);
 
   return (
     <footer className="relative mt-10 overflow-hidden border-t border-violet-100 bg-[#fbf8ff]">
@@ -51,7 +52,9 @@ export default async function Footer() {
             <h2 className="mb-4 text-xs font-black uppercase tracking-[0.18em] text-sky-600">Create</h2>
             <ul className="space-y-2.5">
               <li><Link href="/coloring-pages/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Coloring Pages</Link></li>
+              <li><Link href="/play/" className="text-sm font-black text-violet-700 hover:text-pink-600">🌈 Kids Play Zone</Link></li>
               <li><Link href="/color-online/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Color Online</Link></li>
+              <li><Link href="/favorites/" className="text-sm font-medium text-slate-600 hover:text-violet-700">My Favorites</Link></li>
               <li><Link href="/printable-coloring-pages/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Printable Pages</Link></li>
               <li><Link href="/blog/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Creative Blog</Link></li>
             </ul>

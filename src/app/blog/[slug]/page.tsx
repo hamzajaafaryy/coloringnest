@@ -17,6 +17,7 @@ import {
   constructMetadata,
   generateBreadcrumbSchema,
   generateArticleSchema,
+  SITE_CONFIG,
 } from "@/lib/seo";
 
 interface BlogPostPageProps {
@@ -25,15 +26,7 @@ interface BlogPostPageProps {
 
 export const dynamic = "force-dynamic";
 
-export async function generateStaticParams() {
-  const posts = await getAllPublishedBlogPosts();
 
-  return posts
-    .filter((post) => post.slug)
-    .map((post) => ({
-      slug: post.slug as string,
-    }));
-}
 
 export async function generateMetadata({
   params,
@@ -94,13 +87,13 @@ export default async function BlogPostDetailPage({
   const articleImage = post.featuredImage
     ? post.featuredImage.startsWith("http")
       ? post.featuredImage
-      : `https://craftcoloring.com${post.featuredImage}`
-    : "https://craftcoloring.com/opengraph-image";
+      : `${SITE_CONFIG.domain}${post.featuredImage}`
+    : SITE_CONFIG.ogImage;
 
   const articleSchema = generateArticleSchema({
     title: post.title,
     description: post.excerpt || "",
-    url: `https://craftcoloring.com/blog/${slug}/`,
+    url: `${SITE_CONFIG.domain}/blog/${slug}/`,
     datePublished: publishedDate,
     authorName: post.author || "CraftColoring",
     image: articleImage,

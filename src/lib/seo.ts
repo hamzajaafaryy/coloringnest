@@ -1,13 +1,16 @@
 import { Metadata } from "next";
 
+const configuredSite = process.env.NEXT_PUBLIC_SITE_URL || "https://coloringnest.vercel.app";
+const SITE_ROOT = configuredSite.endsWith("/") ? configuredSite.slice(0, -1) : configuredSite;
+
 export const SITE_CONFIG = {
   name: "CraftColoring",
   tagline: "Free Online Coloring Pages for Kids and Adults",
-  domain: "https://craftcoloring.com",
+  domain: SITE_ROOT,
   defaultTitle: "Free Coloring Pages for Kids & Adults | CraftColoring",
   defaultDescription:
     "Explore free online coloring pages for kids and adults. Color directly in your browser with interactive tools and discover themed collections for learning and creativity.",
-  ogImage: "https://craftcoloring.com/opengraph-image",
+  ogImage: `${SITE_ROOT}/opengraph-image`,
   twitterHandle: undefined,
 };
 

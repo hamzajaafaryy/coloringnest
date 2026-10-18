@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 import ColoringGrid from "@/components/ColoringGrid";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import AdPlaceholder from "@/components/AdPlaceholder";
@@ -23,16 +25,7 @@ interface PrintableCategoryPageProps {
    STATIC PARAMS
    ========================================================= */
 
-export async function generateStaticParams() {
-  const categories =
-    await getAllPublishedCategories();
 
-  return categories
-    .filter((category) => category.slug)
-    .map((category) => ({
-      category: category.slug!,
-    }));
-}
 
 /* =========================================================
    METADATA

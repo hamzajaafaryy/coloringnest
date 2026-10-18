@@ -162,19 +162,25 @@ export default function SearchBar({
     >
       <form
         onSubmit={handleSearchSubmit}
-        className="relative w-full"
+        className="relative w-full min-w-0"
       >
         <Search
           className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${iconSizes[size]}`}
         />
 
         <input
-          type="text"
+          type="search"
+          aria-label="Search coloring pages"
+          aria-autocomplete="list"
+          aria-expanded={isOpen && Boolean(query.trim())}
+          autoComplete="off"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
+            setResults({ categories: [], pages: [] });
             setIsOpen(true);
           }}
+          onKeyDown={event => { if (event.key === "Escape") setIsOpen(false); }}
           onFocus={() => {
             if (query.trim()) {
               setIsOpen(true);
@@ -198,7 +204,7 @@ export default function SearchBar({
 
       {/* Auto-suggestions dropdown */}
       {isOpen && query.trim().length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute left-0 right-0 top-full mt-2 max-h-[min(60vh,420px)] overflow-y-auto overscroll-contain bg-white rounded-2xl shadow-xl border border-slate-100 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
           {isLoading ? (
             <div className="p-4 text-center text-sm text-slate-500">
               Searching...

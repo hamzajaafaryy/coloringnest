@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { SITE_CONFIG } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/admin/"],
     },
-    sitemap: "https://craftcoloring.com/sitemap.xml",
+    sitemap: `${SITE_CONFIG.domain}/sitemap.xml`,
   };
 }

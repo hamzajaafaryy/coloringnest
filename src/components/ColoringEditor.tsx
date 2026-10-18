@@ -24,6 +24,8 @@ interface ColoringEditorProps {
   svgContent: string;
 }
 
+const MAX_HISTORY_STATES = 16;
+
 const PRESET_COLORS = [
   "#111827", "#FFFFFF", "#EF4444", "#F97316", "#EAB308", "#10B981",
   "#06B6D4", "#3B82F6", "#8B5CF6", "#EC4899", "#8D4925", "#6B7280",
@@ -31,23 +33,11 @@ const PRESET_COLORS = [
 
 type Tool = "fill" | "brush" | "eraser";
 
+// Keep SVG preparation browser-independent: Client Components can also render on the server.
 function prepareColoringSvg(svgContent: string) {
-  const template = document.createElement("template");
-  template.innerHTML = svgContent.trim();
-  const svg = template.content.querySelector("svg");
-  if (!svg) return svgContent;
-
-  // IMPORTANT: preserve the source SVG exactly.
-  // The artwork shown on the site must match the uploaded SVG 1:1.
-  // Do not rewrite path fills, strokes, widths, opacity, <use>, <defs>, etc.
-  // Those changes alter the artwork and make the online version different
-  // from the original SVG.
-  svg.style.setProperty("background", "#ffffff", "important");
-  svg.removeAttribute("width");
-  svg.removeAttribute("height");
-
-  return svg.outerHTML;
+  return svgContent.trim();
 }
+
 function getSvgVersion(svg: string) {
   let hash = 2166136261;
   for (let i = 0; i < svg.length; i += 1) {
@@ -58,19 +48,19 @@ function getSvgVersion(svg: string) {
 }
 
 function getSvgAspectRatio(svgContent: string) {
-  const template = document.createElement("template");
-  template.innerHTML = svgContent.trim();
-  const svg = template.content.querySelector("svg");
-  if (!svg) return 4 / 3;
-
-  const viewBox = svg.getAttribute("viewBox")?.trim().split(/\s+/).map(Number);
-  if (viewBox && viewBox.length === 4 && viewBox[2] > 0 && viewBox[3] > 0) {
-    return viewBox[2] / viewBox[3];
+  const viewBox = svgContent.match(/\bviewBox\s*=\s*["']([^"']+)["']/i);
+  if (viewBox) {
+    const values = viewBox[1].trim().split(/[\s,]+/).map(Number);
+    if (values.length === 4 && values[2] > 0 && values[3] > 0) {
+      return values[2] / values[3];
+    }
   }
 
-  const width = parseFloat(svg.getAttribute("width") || "");
-  const height = parseFloat(svg.getAttribute("height") || "");
-  if (width > 0 && height > 0) return width / height;
+  const width = svgContent.match(/\bwidth\s*=\s*["']([\d.]+)/i);
+  const height = svgContent.match(/\bheight\s*=\s*["']([\d.]+)/i);
+  if (width && height && Number(width[1]) > 0 && Number(height[1]) > 0) {
+    return Number(width[1]) / Number(height[1]);
+  }
 
   return 4 / 3;
 }
@@ -195,6 +185,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const [brushSize, setBrushSize] = useState(12);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [editorError, setEditorError] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -271,20 +262,25 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     let cancelled = false;
 
     const init = async () => {
-      await renderSvgToCanvas();
-      if (cancelled) return;
-
-      let saved = "";
       try {
-        saved = localStorage.getItem(storageKey) || "";
-      } catch {}
+        await renderSvgToCanvas();
+        if (cancelled) return;
 
-      if (saved) await restoreCanvasState(saved);
+        let saved = "";
+        try {
+          saved = localStorage.getItem(storageKey) || "";
+        } catch {}
 
-      if (cancelled) return;
-      const current = saveCanvasState();
-      setHistory([current]);
-      setHistoryIndex(0);
+        if (saved) await restoreCanvasState(saved);
+
+        if (cancelled) return;
+        const current = saveCanvasState();
+        setHistory([current]);
+        setHistoryIndex(0);
+      } catch (error) {
+        console.error("Could not prepare coloring artwork:", error);
+        if (!cancelled) setEditorError("This image could not be opened for coloring. Please try another page.");
+      }
     };
 
     init();
@@ -295,7 +291,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     const current = saveCanvasState();
     if (!current) return;
     setHistory((previous) => {
-      const next = [...previous.slice(0, historyIndex + 1), current];
+      const next = [...previous.slice(0, historyIndex + 1), current].slice(-MAX_HISTORY_STATES);
       setHistoryIndex(next.length - 1);
       return next;
     });
@@ -329,8 +325,8 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     const { x, y } = getCanvasCoordinates(event);
     setIsDrawing(true);
 
-    ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
-    ctx.fillStyle = activeTool === "eraser" ? "#000000" : selectedColor;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.fillStyle = activeTool === "eraser" ? "#ffffff" : selectedColor;
     ctx.beginPath();
     ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
     ctx.fill();
@@ -346,7 +342,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     event.preventDefault();
     const { x, y } = getCanvasCoordinates(event);
     ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
-    ctx.strokeStyle = selectedColor;
+    ctx.strokeStyle = activeTool === "eraser" ? "#ffffff" : selectedColor;
     ctx.lineWidth = brushSize;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -382,6 +378,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   };
 
   const handleReset = async () => {
+    if (!window.confirm("Start this coloring page again? Unsaved changes will be lost.")) return;
     try { localStorage.removeItem(storageKey); } catch {}
     await renderSvgToCanvas();
     const current = saveCanvasState();
@@ -392,9 +389,13 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const handleSaveLocal = () => {
     const current = saveCanvasState();
     if (!current) return;
-    try { localStorage.setItem(storageKey, current); } catch {}
-    setSavedSuccess(true);
-    window.setTimeout(() => setSavedSuccess(false), 2000);
+    try {
+      localStorage.setItem(storageKey, current);
+      setSavedSuccess(true);
+      window.setTimeout(() => setSavedSuccess(false), 2000);
+    } catch {
+      setEditorError("Could not save progress. Your browser storage may be disabled or full.");
+    }
   };
 
   const handleDownload = () => {
@@ -411,13 +412,14 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     setZoomLevel((value) => Math.min(2, Math.max(0.5, value + amount)));
 
   return (
-    <div className="bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
-        <div className="flex items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60">
+    <div className="cc-editor min-w-0 bg-[#241b45] rounded-3xl p-3 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
+      {editorError && <p role="alert" className="rounded-xl border border-amber-500/40 bg-amber-950 p-4 text-sm text-amber-100">{editorError}</p>}
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
+        <div className="flex min-w-0 items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60">
           {(["fill", "brush", "eraser"] as Tool[]).map((tool) => {
             const Icon = tool === "fill" ? PaintBucket : tool === "brush" ? Brush : Eraser;
             return (
-              <button key={tool} onClick={() => setActiveTool(tool)} className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm ${activeTool === tool ? "bg-indigo-600 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"}`}>
+              <button key={tool} onClick={() => setActiveTool(tool)} aria-label={`Use ${tool} tool`} aria-pressed={activeTool === tool} className={`flex min-h-11 items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm ${activeTool === tool ? "bg-indigo-600 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"}`}>
                 <Icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tool === "fill" ? "Fill Bucket" : tool === "brush" ? "Brush" : "Eraser"}</span>
               </button>
@@ -426,19 +428,19 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button onClick={handleUndo} disabled={historyIndex <= 0} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" title="Undo"><Undo2 className="w-4 h-4" /></button>
-          <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" title="Redo"><Redo2 className="w-4 h-4" /></button>
-          <button onClick={() => changeZoom(-0.1)} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
+          <button onClick={handleUndo} disabled={historyIndex <= 0} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" aria-label="Undo" title="Undo"><Undo2 className="w-4 h-4" /></button>
+          <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" aria-label="Redo" title="Redo"><Redo2 className="w-4 h-4" /></button>
+          <button onClick={() => changeZoom(-0.1)} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Zoom out" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
           <span className="text-xs font-semibold min-w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
-          <button onClick={() => changeZoom(0.1)} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
-          <button onClick={handleReset} className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700" title="Reset"><RotateCcw className="w-4 h-4" /></button>
+          <button onClick={() => changeZoom(0.1)} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Zoom in" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
+          <button onClick={handleReset} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Reset" title="Reset"><RotateCcw className="w-4 h-4" /></button>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-800/70 p-3 rounded-2xl border border-slate-700">
         <div className="flex flex-wrap items-center gap-2">
           {PRESET_COLORS.map((color) => (
-            <button key={color} type="button" onClick={() => setSelectedColor(color)} aria-label={`Select ${color}`} className={`w-7 h-7 rounded-full border-2 ${selectedColor === color ? "border-white scale-110" : "border-slate-600"}`} style={{ backgroundColor: color }} />
+            <button key={color} type="button" onClick={() => setSelectedColor(color)} aria-label={`Select ${color}`} className={`h-10 w-10 rounded-full border-2 ${selectedColor === color ? "border-white scale-110" : "border-slate-600"}`} style={{ backgroundColor: color }} />
           ))}
           <label className="flex items-center gap-2 text-xs text-slate-300 ml-2">
             Custom
@@ -452,9 +454,9 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
         </label>
       </div>
 
-      <div className="relative rounded-2xl bg-white overflow-auto min-h-[420px] flex items-center justify-center p-4">
+      <div className="printable-artwork relative min-h-[320px] min-w-0 overflow-auto rounded-2xl bg-white p-2 shadow-inner sm:min-h-[420px] sm:p-4">
         <div
-          className="relative w-full max-w-3xl"
+          className="relative mx-auto w-full max-w-3xl"
           style={{ aspectRatio: String(aspectRatio), transform: `scale(${zoomLevel})`, transformOrigin: "center" }}
         >
           <canvas
@@ -479,7 +481,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
         <button onClick={handleDownload} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Download className="w-4 h-4" />Download PNG</button>
         <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Printer className="w-4 h-4" />Print</button>
         <button onClick={handleReset} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Sparkles className="w-4 h-4" />Start Over</button>
-        <button onClick={() => document.documentElement.requestFullscreen?.()} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Maximize2 className="w-4 h-4" />Fullscreen</button>
+        <button onClick={() => { const editor = canvasRef.current?.closest(".cc-editor"); void editor?.requestFullscreen?.().catch(() => {}); }} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Maximize2 className="w-4 h-4" />Fullscreen</button>
       </div>
     </div>
   );

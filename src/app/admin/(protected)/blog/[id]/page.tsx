@@ -6,6 +6,7 @@ import { blogPosts } from "@/db/schema";
 import { deleteBlogPost, updateBlogPost } from "@/lib/admin-crud-actions";
 import { AdminShell, Check, Field, Submit, TextArea } from "@/components/admin/AdminForm";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import DeleteConfirmButton from "@/components/admin/DeleteConfirmButton";
 
 export const dynamic = "force-dynamic";
 
@@ -28,5 +29,5 @@ export default async function EditBlogPost({ params }: { params: Promise<{ id: s
     <section className="grid gap-5 md:grid-cols-2"><Field label="SEO title" name="seoTitle" defaultValue={post.seoTitle} /><Field label="SEO description" name="seoDescription" defaultValue={post.seoDescription} /></section>
     <Check label="Published" name="isPublished" defaultChecked={post.isPublished ?? false} />
     <div className="flex gap-3"><Submit label="Save changes" /><Link href="/admin/blog/" className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700">Cancel</Link></div>
-  </form><form action={remove} className="mt-6"><button type="submit" className="rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-600">Delete article</button></form></AdminShell>;
+  </form><form action={remove} className="mt-6"><DeleteConfirmButton label="Delete article" name={post.title} /></form></AdminShell>;
 }

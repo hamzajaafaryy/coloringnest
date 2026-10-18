@@ -242,3 +242,41 @@ select {
     box-shadow: none !important;
   }
 }
+
+/* Print only the artwork, not site navigation, ad spaces, toolbars, or copy. */
+@media print {
+  @page { margin: 12mm; }
+  body:has(.printable-artwork) * {
+    visibility: hidden !important;
+  }
+  body:has(.printable-artwork) .printable-artwork,
+  body:has(.printable-artwork) .printable-artwork * {
+    visibility: visible !important;
+  }
+  body:has(.printable-artwork) .printable-artwork {
+    position: fixed !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    transform: none !important;
+  }
+  .printable-artwork img,
+  .printable-artwork svg,
+  .printable-artwork canvas {
+    display: block !important;
+    object-fit: contain !important;
+    max-height: 95vh !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+  }
+}

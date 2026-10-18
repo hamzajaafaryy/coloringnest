@@ -6,6 +6,7 @@ import { categories, coloringPages } from "@/db/schema";
 import { deleteColoringPage, updateColoringPage } from "@/lib/admin-crud-actions";
 import { AdminShell, Check, Field, Submit, TextArea } from "@/components/admin/AdminForm";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import DeleteConfirmButton from "@/components/admin/DeleteConfirmButton";
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +70,7 @@ export default async function EditColoringPage({ params }: { params: Promise<{ i
       </form>
 
       <form action={remove} className="mt-6">
-        <button type="submit" className="rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-600">Delete this page</button>
+        <DeleteConfirmButton label="Delete this page" name={page.title} />
       </form>
     </AdminShell>
   );

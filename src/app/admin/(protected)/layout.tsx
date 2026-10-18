@@ -12,6 +12,9 @@ import {
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { logoutAdmin } from "@/lib/admin-actions";
 
+// Admin pages require cookies and must never be prerendered during deployment.
+export const dynamic = "force-dynamic";
+
 export default async function AdminProtectedLayout({
   children,
 }: Readonly<{

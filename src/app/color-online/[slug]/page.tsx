@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ColoringEditor from "@/components/ColoringEditor";
+import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 import RelatedColoringPages from "@/components/RelatedColoringPages";
 
 import {
@@ -22,15 +23,7 @@ interface ColorOnlinePageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  const pages = await getAllPublishedColoringPages();
 
-  return pages
-    .filter((page) => page.slug)
-    .map((page) => ({
-      slug: page.slug as string,
-    }));
-}
 
 export async function generateMetadata({
   params,
@@ -67,6 +60,8 @@ export default async function ColorOnlinePage({
   if (!page.slug || !page.categorySlug) {
     notFound();
   }
+
+  const svgContent = page.svgContent || await loadColoringSvg(page.svgUrl);
 
   const relatedPages = await getRelatedColoringPages(
     page.id,
@@ -127,11 +122,21 @@ export default async function ColorOnlinePage({
         </div>
       </div>
 
-      <ColoringEditor
-        slug={page.slug}
-        title={page.title}
-        svgContent={page.svgContent || ""}
-      />
+      {svgContent ? (
+        <ColoringEditor
+          slug={page.slug}
+          title={page.title}
+          svgContent={svgContent}
+        />
+      ) : (
+        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center">
+          <h2 className="text-xl font-extrabold text-amber-950">Online coloring is not available for this design yet</h2>
+          <p className="mt-2 text-sm text-amber-900">This artwork needs an SVG file. You can still view or print the coloring page.</p>
+          <Link className="cc-btn cc-btn-dark mt-5" href={`/coloring-pages/${page.categorySlug}/${page.slug}/`}>
+            View printable artwork
+          </Link>
+        </div>
+      )}
 
       <RelatedColoringPages
         pages={relatedPages}

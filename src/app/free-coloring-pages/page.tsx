@@ -3,6 +3,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import CategoryCard from "@/components/CategoryCard";
 import AdPlaceholder from "@/components/AdPlaceholder";
 
+export const dynamic = "force-dynamic";
+
 import {
   getAllPublishedCategories,
   getAllPublishedColoringPagesWithCategory,

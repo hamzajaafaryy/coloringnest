@@ -45,6 +45,18 @@ export default async function ColorOnlineDirectoryPage() {
         </p>
       </header>
 
+      <section className="relative overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-rose-400 p-6 text-white shadow-xl sm:p-8">
+        <div className="absolute -right-6 -top-6 text-8xl opacity-40" aria-hidden="true">🌈</div>
+        <div className="relative flex flex-wrap items-center justify-between gap-5">
+          <div>
+            <p className="text-xs font-black uppercase tracking-widest text-yellow-200">Need a warm-up?</p>
+            <h2 className="mt-2 text-2xl font-black sm:text-3xl">Meet our five creative art adventures!</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-violet-50">Paint original cartoon animals, explore color challenges, find matching friends and draw your own art.</p>
+          </div>
+          <Link href="/play/" className="cc-btn bg-yellow-300 text-violet-950 shadow-lg hover:bg-yellow-200">🎮 Play kids games →</Link>
+        </div>
+      </section>
+
       <section className="space-y-6">
         <h2 className="text-2xl font-bold text-slate-900">
           Choose a Coloring Page
