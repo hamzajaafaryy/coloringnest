@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 
-const SITE_ROOT = (process.env.NEXT_PUBLIC_SITE_URL || "https://coloringnest.vercel.app").replace(/\\/+$/, "");
+const configuredSite = process.env.NEXT_PUBLIC_SITE_URL || "https://coloringnest.vercel.app";
+const SITE_ROOT = configuredSite.endsWith("/") ? configuredSite.slice(0, -1) : configuredSite;
 
 export const SITE_CONFIG = {
   name: "CraftColoring",
