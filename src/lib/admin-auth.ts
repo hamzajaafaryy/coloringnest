@@ -62,6 +62,11 @@ function verifyToken(token: string | undefined, secret: string) {
 }
 
 export async function isAdminAuthenticated() {
+  // Preview deployments can intentionally omit admin credentials.
+  // An unconfigured admin is locked out, not a build-time crash.
+  if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) {
+    return false;
+  }
   const { secret } = getConfig();
   const cookieStore = await cookies();
   return verifyToken(cookieStore.get(COOKIE_NAME)?.value, secret);
