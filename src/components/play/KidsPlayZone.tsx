@@ -21,11 +21,12 @@ export default function KidsPlayZone() {
   const [stars, setStars] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [spark, setSpark] = useState(false);
-  const [soundOn, setSoundOn] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   const audioRef = useRef<AudioContext | null>(null);
+  const soundEnabled = useRef(true);
 
   const playSound = useCallback((success: boolean) => {
-    if (!soundOn || typeof window === "undefined") return;
+    if (!soundEnabled.current || typeof window === "undefined") return;
     try {
       const ctx = audioRef.current ?? new AudioContext();
       audioRef.current = ctx;
@@ -44,7 +45,7 @@ export default function KidsPlayZone() {
         oscillator.stop(now + i * 0.095 + 0.17);
       }
     } catch {}
-  }, [soundOn]);
+  }, []);
 
   useEffect(() => () => { if (audioRef.current) void audioRef.current.close(); }, []);
 
@@ -114,7 +115,7 @@ export default function KidsPlayZone() {
             <p className="text-base font-black text-slate-900">{rank}</p>
           </div>
         </div>
-        <button type="button" aria-pressed={soundOn} onClick={() => setSoundOn(v => !v)} className="min-h-11 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-black text-violet-800">{soundOn ? "🔊 Sound ON" : "🔇 Sound OFF"}</button>
+        <button type="button" aria-pressed={soundOn} onClick={() => { soundEnabled.current = !soundOn; setSoundOn(!soundOn); if (!soundOn) playSound(true); }} className="min-h-11 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-black text-violet-800">{soundOn ? "🔊 Sound ON" : "🔇 Sound OFF"}</button>
         <div aria-live="polite" className="flex items-center gap-2 rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-2 text-lg font-black text-amber-800">
           <Star className="h-6 w-6 fill-yellow-400 text-amber-500" aria-hidden="true" /> {loaded ? stars : "—"} stars
           {spark && <span className="text-xs font-black text-emerald-700" aria-label="Stars earned">+!</span>}
@@ -152,7 +153,7 @@ export default function KidsPlayZone() {
       </section>
 
       <section id="kids-active-game" role="tabpanel" aria-label={TABS.find(g => g.id === active)?.title} className="min-w-0 overflow-hidden rounded-[2rem] border border-violet-100 bg-white p-3 shadow-[0_20px_70px_rgba(50,37,114,.07)] sm:p-7 lg:p-10">
-        {active === "colors" && <ColorQuest onAward={awardStars} />}
+        {active === "colors" && <ColorQuest onAward={awardStars} onFeedback={playSound} />}
         {active === "memory" && <MemoryGarden onAward={awardStars} />}
         {active === "doodle" && <DoodleStudio onAward={awardStars} />}
         {active === "numbers" && <ColorByNumber onAward={awardStars} />}
