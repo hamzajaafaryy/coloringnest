@@ -43,3 +43,10 @@ jobs:
       - run: npm run typecheck
       - name: Build app against disposable CI PostgreSQL
         run: npm run build
+      - name: Verify Preview build does not require database access or admin secrets
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://invalid:invalid@127.0.0.1:5432/unavailable
+          ADMIN_USERNAME: ""
+          ADMIN_PASSWORD: ""
+          ADMIN_SESSION_SECRET: ""
