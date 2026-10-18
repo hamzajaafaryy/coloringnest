@@ -37,7 +37,7 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden min-w-0 items-center gap-0.5 xl:flex">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${isActive(link.href) ? "bg-violet-100 text-violet-700 shadow-sm" : link.href === "/play/" ? "bg-yellow-200 text-violet-900 shadow-sm hover:-translate-y-0.5 hover:bg-yellow-300" : "text-slate-600 hover:-translate-y-0.5 hover:bg-violet-50 hover:text-violet-700"}`}>
                 {link.href === "/play/" && <Gamepad2 className="h-4 w-4" aria-hidden="true" />}{link.href === "/favorites/" && <Heart className="h-4 w-4" aria-hidden="true" />}{link.label}
@@ -45,28 +45,28 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="hidden min-w-0 items-center gap-2 xl:flex xl:w-[16rem] 2xl:w-[22rem]">
+          <div className="hidden min-w-0 items-center gap-2 2xl:flex 2xl:w-[19rem]">
             <div className="min-w-0 flex-1"><SearchBar size="sm" /></div>
             <Link href="/color-online/" className="cc-btn cc-btn-primary shrink-0 px-4 py-2.5 text-xs">
               <Wand2 className="h-4 w-4" /> Color
             </Link>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1 lg:hidden">
-            <button onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Search">
+          <div className="flex shrink-0 items-center gap-1 2xl:hidden">
+            <button type="button" aria-controls="header-search-panel" aria-expanded={mobileSearchOpen} onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Search">
               <Search className="h-5 w-5" />
             </button>
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Menu">
+            <button type="button" aria-controls="mobile-site-navigation" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="xl:hidden "rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Menu">
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
 
-        {mobileSearchOpen && <div className="border-t border-violet-100 py-3 lg:hidden"><SearchBar size="md" /></div>}
+        {mobileSearchOpen && <div id="header-search-panel" className="border-t border-violet-100 py-3 2xl:hidden"><SearchBar size="md" /></div>}
       </div>
 
       {mobileMenuOpen && (
-        <div className="border-t border-violet-100 bg-white px-3 pb-5 pt-3 shadow-xl sm:px-6 lg:hidden">
+        <div id="mobile-site-navigation" className="max-h-[calc(100dvh-70px)] overflow-y-auto border-t border-violet-100 bg-white px-3 pb-5 pt-3 shadow-xl sm:px-6 xl:hidden">
           <nav className="grid gap-1">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)} className={`rounded-2xl px-4 py-3.5 text-sm font-bold ${isActive(link.href) ? "bg-violet-100 text-violet-700" : "text-slate-700 hover:bg-violet-50"}`}>

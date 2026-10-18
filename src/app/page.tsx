@@ -24,7 +24,7 @@ import ColoringGrid from "@/components/ColoringGrid";
 import CategoryCard from "@/components/CategoryCard";
 import FAQ from "@/components/FAQ";
 import Newsletter from "@/components/Newsletter";
-import AdPlaceholder from "@/components/AdPlaceholder";
+
 import { getAllPublishedCategories, getAllPublishedColoringPagesWithCategory } from "@/db/queries";
 import { constructMetadata, generateFAQSchema } from "@/lib/seo";
 
@@ -58,14 +58,17 @@ export default async function HomePage() {
     .sort((a, b) => new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime())
     .slice(0, 4);
 
-  const exampleSearches = [
-    ["Unicorn", "/coloring-pages/unicorn/"],
-    ["Dinosaurs", "/coloring-pages/dinosaurs/"],
-    ["Princesses", "/coloring-pages/princesses/"],
-    ["Animals", "/coloring-pages/animals/"],
-    ["Christmas", "/coloring-pages/christmas/"],
-    ["Halloween", "/coloring-pages/halloween/"],
-  ];
+  const exampleSearches = featuredCategories
+    .filter(category => Boolean(category.slug))
+    .slice(0, 4)
+    .map(category => [category.name, `/coloring-pages/${category.slug}/`] as const);
+  const themeHref = (pattern: RegExp) => {
+    const found = allCategories.find(category => category.slug && pattern.test(category.slug));
+    return found?.slug ? `/coloring-pages/${found.slug}/` : "/coloring-pages/";
+  };
+  const magicHref = themeHref(/unicorn|fantasy|princess|fairy/i);
+  const adventureHref = themeHref(/dino|animal|ocean|vehicle/i);
+  const calmHref = themeHref(/flower|garden|mandala|adult|nature/i);
 
   return (
     <div className="overflow-hidden">
@@ -77,8 +80,8 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute bottom-0 left-[40%] h-48 w-80 rounded-full bg-yellow-200/50 blur-3xl" />
         <div className="absolute left-5 top-24 hidden text-3xl text-violet-400 cc-float sm:block" aria-hidden="true">✦</div>
         <div className="absolute right-[8%] top-12 text-4xl cc-float-reverse" aria-hidden="true">🌟</div>
-        <div className="relative mx-auto grid max-w-7xl items-center gap-7 px-4 pb-12 pt-11 sm:px-6 sm:pb-20 sm:pt-16 lg:grid-cols-[1.03fr_.97fr] lg:gap-6 lg:px-8 lg:py-20">
-          <div className="relative z-10 max-w-2xl">
+        <div className="relative mx-auto grid min-w-0 max-w-7xl items-center gap-7 px-4 pb-12 pt-11 sm:px-6 sm:pb-20 sm:pt-16 lg:grid-cols-[1.03fr_.97fr] lg:gap-6 lg:px-8 lg:py-20">
+          <div className="relative z-10 min-w-0 max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full border-2 border-yellow-200 bg-yellow-100 px-4 py-2 text-xs font-black uppercase tracking-[.12em] text-amber-900 shadow-sm">
               <span aria-hidden="true">🌈</span> A whole world of creative fun!
             </div>
@@ -89,11 +92,11 @@ export default async function HomePage() {
             </h1>
 
             <p className="mt-5 max-w-lg text-base font-semibold leading-8 text-slate-600 sm:text-lg">
-              A colorful playground where kids can <span className="font-black text-violet-700">draw, play games, earn stars</span> and bring their wildest ideas to life. Every adventure starts with a little imagination!
+              A colorful playground where kids can <span className="font-black text-violet-700">color cartoon friends, draw, play games and earn stars</span> and bring their wildest ideas to life. Every adventure starts with a little imagination!
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link href="/play/" className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.2rem] bg-[#7143e9] px-7 py-4 text-base font-black text-white shadow-[0_14px_32px_rgba(109,40,217,.28)] transition duration-200 hover:-translate-y-1 hover:bg-[#5726c7] hover:shadow-xl">
+              <Link href="/play/#cartoon" className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.2rem] bg-[#7143e9] px-7 py-4 text-base font-black text-white shadow-[0_14px_32px_rgba(109,40,217,.28)] transition duration-200 hover:-translate-y-1 hover:bg-[#5726c7] hover:shadow-xl">
                 <Gamepad2 className="h-5 w-5" /> Let&apos;s Play! <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
               </Link>
               <Link href="/color-online/" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.2rem] border-2 border-[#231747] bg-white px-6 py-4 text-base font-black text-[#231747] transition hover:-translate-y-1 hover:bg-yellow-100">
@@ -118,7 +121,7 @@ export default async function HomePage() {
             <div className="mt-7 max-w-lg">
               <SearchBar placeholder="Find unicorns, cats, dinosaurs..." size="lg" />
               <div className="mt-3 flex flex-wrap gap-2">
-                {exampleSearches.slice(0, 4).map(([label, href]) => (
+                {exampleSearches.map(([label, href]) => (
                   <Link key={label} href={href} className="rounded-full border border-violet-100 bg-white px-3.5 py-1.5 text-xs font-bold text-violet-700 transition hover:bg-violet-100">
                     {label}
                   </Link>
@@ -160,9 +163,9 @@ export default async function HomePage() {
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-white/80"><Wand2 className="h-4 w-4" /> Explore by mood</div>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {[
-                ["🌈", "Cute & Magical", "Unicorns, princesses, rainbows and dreamy friends.", "/coloring-pages/unicorn/"],
-                ["🦖", "Wild & Adventurous", "Dinosaurs, animals, jungle and big adventures.", "/coloring-pages/dinosaurs/"],
-                ["🌸", "Calm & Creative", "Flowers, mandalas and relaxing designs for everyone.", "/coloring-pages/adults/"],
+                ["🌈", "Cute & Magical", "Unicorns, princesses, rainbows and dreamy friends.", magicHref],
+                ["🦖", "Wild & Adventurous", "Dinosaurs, animals, jungle and big adventures.", adventureHref],
+                ["🌸", "Calm & Creative", "Flowers, mandalas and relaxing designs for everyone.", calmHref],
               ].map(([emoji, title, text, href]) => (
                 <Link key={title} href={href} className="group rounded-3xl bg-white/15 p-5 ring-1 ring-white/20 backdrop-blur transition hover:-translate-y-1 hover:bg-white/20">
                   <span className="text-3xl">{emoji}</span>
@@ -248,7 +251,7 @@ export default async function HomePage() {
             {[
               ["🧸", "Little Artists", "Simple shapes, friendly animals and early-learning themes.", "/coloring-pages/preschool/", "bg-pink-50 border-pink-200"],
               ["🚀", "Big Kids", "Dinosaurs, space, fantasy and exciting creative adventures.", "/coloring-pages/kindergarten/", "bg-sky-50 border-sky-200"],
-              ["🌿", "Creative Adults", "Botanical, floral and detailed designs for relaxing color time.", "/coloring-pages/adults/", "bg-violet-50 border-violet-200"],
+              ["🌿", "Creative Adults", "Botanical, floral and detailed designs for relaxing color time.", calmHref, "bg-violet-50 border-violet-200"],
             ].map(([emoji, title, text, href, cls]) => (
               <Link key={title} href={href} className={`group rounded-[2rem] border p-6 transition hover:-translate-y-1 hover:shadow-xl ${cls}`}>
                 <span className="text-4xl">{emoji}</span>
