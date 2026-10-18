@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { blogPosts, categories, coloringPages } from "@/db/schema";
+import { blogPosts, categories, categoryFaqs, coloringPages, faqs } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { deleteCraftColoringStorageUrl } from "@/lib/storage";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
@@ -32,11 +32,43 @@ function slugify(value: string) {
   return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 180);
 }
 
+function normalizedSlug(formData: FormData, fallback: string) {
+  const slug = slugify(text(formData, "slug") || fallback);
+  if (!slug) throw new Error("A valid URL slug is required.");
+  return slug;
+}
+
+async function assertUniqueColoringSlug(slug: string, exceptId?: number) {
+  const existing = await db.select({ id: coloringPages.id }).from(coloringPages).where(eq(coloringPages.slug, slug)).limit(1);
+  if (existing.length && existing[0].id !== exceptId) throw new Error("Another coloring page already uses this slug.");
+}
+
+async function assertUniqueCategorySlug(slug: string, exceptId?: number) {
+  const existing = await db.select({ id: categories.id }).from(categories).where(eq(categories.slug, slug)).limit(1);
+  if (existing.length && existing[0].id !== exceptId) throw new Error("Another category already uses this slug.");
+}
+
+async function assertUniqueBlogSlug(slug: string, exceptId?: number) {
+  const existing = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, slug)).limit(1);
+  if (existing.length && existing[0].id !== exceptId) throw new Error("Another blog post already uses this slug.");
+}
+
+function validatePublishablePage(formData: FormData, published: boolean) {
+  if (!published) return;
+  if (!Number(formData.get("categoryId"))) throw new Error("Choose a category before publishing.");
+  if (!text(formData, "imageUrl") && !text(formData, "svgUrl") && !text(formData, "svgContent")) {
+    throw new Error("Upload an image or SVG before publishing.");
+  }
+}
+
 export async function createColoringPage(formData: FormData) {
   await requireAdmin();
   const title = text(formData, "title"); if (!title) return;
   const published = checkbox(formData, "isPublished");
-  await db.insert(coloringPages).values({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null });
+  const slug = normalizedSlug(formData, title);
+  validatePublishablePage(formData, published);
+  await assertUniqueColoringSlug(slug);
+  await db.insert(coloringPages).values({ title, slug, description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null });
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
 }
 
@@ -44,11 +76,14 @@ export async function updateColoringPage(id: number, formData: FormData) {
   await requireAdmin();
   const title = text(formData, "title"); if (!title) return;
   const published = checkbox(formData, "isPublished");
+  const slug = normalizedSlug(formData, title);
+  validatePublishablePage(formData, published);
+  await assertUniqueColoringSlug(slug, id);
   const existing = await db.select({ publishedAt: coloringPages.publishedAt, imageUrl: coloringPages.imageUrl, svgUrl: coloringPages.svgUrl }).from(coloringPages).where(eq(coloringPages.id, id)).limit(1);
   const publishedAt = published ? existing[0]?.publishedAt ?? new Date() : existing[0]?.publishedAt ?? null;
   const nextImageUrl = text(formData, "imageUrl");
   const nextSvgUrl = text(formData, "svgUrl");
-  await db.update(coloringPages).set({ title, slug: text(formData, "slug") || slugify(title), description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
+  await db.update(coloringPages).set({ title, slug, description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
   if (existing[0]?.imageUrl && existing[0].imageUrl !== nextImageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   if (existing[0]?.svgUrl && existing[0].svgUrl !== nextSvgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
   revalidatePath("/");
@@ -62,7 +97,10 @@ export async function updateColoringPage(id: number, formData: FormData) {
 export async function deleteColoringPage(id: number) {
   await requireAdmin();
   const existing = await db.select({ imageUrl: coloringPages.imageUrl, svgUrl: coloringPages.svgUrl }).from(coloringPages).where(eq(coloringPages.id, id)).limit(1);
-  await db.delete(coloringPages).where(eq(coloringPages.id, id));
+  await db.transaction(async (tx) => {
+    await tx.delete(faqs).where(eq(faqs.coloringPageId, id));
+    await tx.delete(coloringPages).where(eq(coloringPages.id, id));
+  });
   if (existing[0]?.imageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   if (existing[0]?.svgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
@@ -70,15 +108,19 @@ export async function deleteColoringPage(id: number) {
 
 export async function createCategory(formData: FormData) {
   await requireAdmin(); const name = text(formData, "name"); if (!name) return;
-  await db.insert(categories).values({ name, slug: text(formData, "slug") || slugify(name), description: text(formData, "description"), imageUrl: text(formData, "imageUrl"), seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), iconName: text(formData, "iconName"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), heroColor: text(formData, "heroColor"), subcategories: list(formData, "subcategories") });
+  const slug = normalizedSlug(formData, name);
+  await assertUniqueCategorySlug(slug);
+  await db.insert(categories).values({ name, slug, description: text(formData, "description"), imageUrl: text(formData, "imageUrl"), seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), iconName: text(formData, "iconName"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), heroColor: text(formData, "heroColor"), subcategories: list(formData, "subcategories") });
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/categories/");
 }
 
 export async function updateCategory(id: number, formData: FormData) {
   await requireAdmin(); const name = text(formData, "name"); if (!name) return;
+  const slug = normalizedSlug(formData, name);
+  await assertUniqueCategorySlug(slug, id);
   const existing = await db.select({ imageUrl: categories.imageUrl }).from(categories).where(eq(categories.id, id)).limit(1);
   const nextImageUrl = text(formData, "imageUrl");
-  await db.update(categories).set({ name, slug: text(formData, "slug") || slugify(name), description: text(formData, "description"), imageUrl: nextImageUrl, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), iconName: text(formData, "iconName"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), heroColor: text(formData, "heroColor"), subcategories: list(formData, "subcategories") }).where(eq(categories.id, id));
+  await db.update(categories).set({ name, slug, description: text(formData, "description"), imageUrl: nextImageUrl, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), iconName: text(formData, "iconName"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), heroColor: text(formData, "heroColor"), subcategories: list(formData, "subcategories") }).where(eq(categories.id, id));
   if (existing[0]?.imageUrl && existing[0].imageUrl !== nextImageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/categories/");
 }
@@ -88,14 +130,19 @@ export async function deleteCategory(id: number) {
   const existing = await db.select({ imageUrl: categories.imageUrl }).from(categories).where(eq(categories.id, id)).limit(1);
   const linked = await db.select({ id: coloringPages.id }).from(coloringPages).where(eq(coloringPages.categoryId, id)).limit(1);
   if (linked.length) throw new Error("Cannot delete a category that still has coloring pages.");
-  await db.delete(categories).where(eq(categories.id, id));
+  await db.transaction(async (tx) => {
+    await tx.delete(categoryFaqs).where(eq(categoryFaqs.categoryId, id));
+    await tx.delete(categories).where(eq(categories.id, id));
+  });
   if (existing[0]?.imageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/categories/");
 }
 
 export async function createBlogPost(formData: FormData) {
   await requireAdmin(); const title = text(formData, "title"); if (!title) return; const published = checkbox(formData, "isPublished");
-  await db.insert(blogPosts).values({ title, slug: text(formData, "slug") || slugify(title), excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: text(formData, "featuredImage"), seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt: published ? new Date() : null });
+  const slug = normalizedSlug(formData, title);
+  await assertUniqueBlogSlug(slug);
+  await db.insert(blogPosts).values({ title, slug, excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: text(formData, "featuredImage"), seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt: published ? new Date() : null });
   revalidatePath("/blog/");
   revalidatePath("/blog/[slug]", "page");
   revalidatePath("/sitemap.xml");
@@ -104,9 +151,11 @@ export async function createBlogPost(formData: FormData) {
 
 export async function updateBlogPost(id: number, formData: FormData) {
   await requireAdmin(); const title = text(formData, "title"); if (!title) return; const published = checkbox(formData, "isPublished");
+  const slug = normalizedSlug(formData, title);
+  await assertUniqueBlogSlug(slug, id);
   const existing = await db.select({ publishedAt: blogPosts.publishedAt, featuredImage: blogPosts.featuredImage }).from(blogPosts).where(eq(blogPosts.id, id)).limit(1); const publishedAt = published ? existing[0]?.publishedAt ?? new Date() : existing[0]?.publishedAt ?? null;
   const nextFeaturedImage = text(formData, "featuredImage");
-  await db.update(blogPosts).set({ title, slug: text(formData, "slug") || slugify(title), excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: nextFeaturedImage, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt }).where(eq(blogPosts.id, id));
+  await db.update(blogPosts).set({ title, slug, excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: nextFeaturedImage, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt }).where(eq(blogPosts.id, id));
   if (existing[0]?.featuredImage && existing[0].featuredImage !== nextFeaturedImage) await deleteCraftColoringStorageUrl(existing[0].featuredImage);
   revalidatePath("/blog/");
   revalidatePath("/blog/[slug]", "page");
