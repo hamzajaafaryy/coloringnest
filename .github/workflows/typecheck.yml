@@ -20,3 +20,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - name: Compile Next.js routes (without live database)
+        run: npm run build -- --experimental-build-mode compile
+        env:
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
