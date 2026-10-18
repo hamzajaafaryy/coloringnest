@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, PartyPopper, RefreshCcw, Star } from "lucide-react";
+import { ArrowRight, PartyPopper, RefreshCcw } from "lucide-react";
 
 type Prompt = { clue: string; icon: string; answer: string };
 const COLORS = [
@@ -25,7 +25,7 @@ const QUESTIONS: Prompt[] = [
   { clue: "What color is a teddy bear?", icon: "🧸", answer: "Brown" },
 ];
 
-export default function ColorQuest({ onAward }: { onAward: (amount: number) => void }) {
+export default function ColorQuest({ onAward, onFeedback }: { onAward: (amount: number) => void; onFeedback?: (success: boolean) => void }) {
   const [round, setRound] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [mistake, setMistake] = useState<string | null>(null);
@@ -38,7 +38,8 @@ export default function ColorQuest({ onAward }: { onAward: (amount: number) => v
       setSelected(name);
       setMistake(null);
       onAward(2);
-    } else setMistake(name);
+      onFeedback?.(true);
+    } else { setMistake(name); onFeedback?.(false); }
   }
 
   function next() {
@@ -77,13 +78,13 @@ export default function ColorQuest({ onAward }: { onAward: (amount: number) => v
       </div>
 
       <div className="grid items-center gap-7 lg:grid-cols-[.7fr_1.3fr]">
-        <div className="flex min-h-64 flex-col items-center justify-center rounded-[2rem] bg-gradient-to-br from-pink-100 via-yellow-50 to-violet-100 px-4 py-7 text-center">
+        <div className="flex min-h-48 flex-col items-center justify-center rounded-[2rem] bg-gradient-to-br from-pink-100 via-yellow-50 to-violet-100 px-4 py-7 text-center">
           <div className="cc-bounce-soft text-8xl drop-shadow-lg sm:text-9xl" role="img" aria-label={prompt.clue}>{prompt.icon}</div>
           <p className="mt-5 text-xl font-black leading-7 text-slate-900 sm:text-2xl">{prompt.clue}</p>
         </div>
         <div>
           <p className="mb-4 text-sm font-extrabold text-slate-500">Tap one of the colorful bubbles:</p>
-          <div className="grid grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 gap-2 min-[400px]:grid-cols-4 sm:gap-4">
             {COLORS.map((color) => (
               <button
                 type="button"
