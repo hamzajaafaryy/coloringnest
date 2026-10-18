@@ -38,8 +38,8 @@ export default function Header() {
 
           <nav className="hidden items-center gap-1 lg:flex">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={`rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${isActive(link.href) ? "bg-violet-100 text-violet-700 shadow-sm" : "text-slate-600 hover:-translate-y-0.5 hover:bg-violet-50 hover:text-violet-700"}`}>
-                {link.label}
+              <Link key={link.href} href={link.href} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${isActive(link.href) ? "bg-violet-100 text-violet-700 shadow-sm" : "text-slate-600 hover:-translate-y-0.5 hover:bg-violet-50 hover:text-violet-700"}`}>
+                {link.href === "/favorites/" && <Heart className="h-4 w-4" aria-hidden="true" />}{link.label}
               </Link>
             ))}
           </nav>

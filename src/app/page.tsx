@@ -5,6 +5,7 @@ import {
   Heart,
   Palette,
   Printer,
+  Shuffle,
   Sparkles,
   Star,
   Wand2,
@@ -40,8 +41,12 @@ export default async function HomePage() {
     getAllPublishedCategories(),
   ]);
 
-  const popularPages = allPages.filter((page) => page.popular).slice(0, 8);
-  const featuredCategories = allCategories.slice(0, 8);
+  const popularPages = [...allPages]
+    .sort((a, b) => Number(Boolean(b.popular)) - Number(Boolean(a.popular)) || Number(Boolean(b.featured)) - Number(Boolean(a.featured)))
+    .slice(0, 8);
+  const featuredCategories = [...allCategories]
+    .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || Number(Boolean(b.popular)) - Number(Boolean(a.popular)))
+    .slice(0, 8);
   const newPages = [...allPages]
     .sort((a, b) => new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime())
     .slice(0, 4);
@@ -85,7 +90,7 @@ export default async function HomePage() {
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link href="/color-online/unicorn-rainbow-coloring-page/" className="cc-btn cc-btn-primary w-full px-5 py-3.5 sm:w-auto sm:px-6 sm:py-4">
+              <Link href="/color-online/" className="cc-btn cc-btn-primary w-full px-5 py-3.5 sm:w-auto sm:px-6 sm:py-4">
                 <Wand2 className="h-5 w-5 transition group-hover:rotate-12" />
                 Start Coloring Online
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
@@ -93,6 +98,10 @@ export default async function HomePage() {
               <Link href="/coloring-pages/" className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-6 py-4 text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:text-violet-700">
                 <Palette className="h-5 w-5 text-violet-500" />
                 Explore Pages
+              </Link>
+              <Link href="/surprise-me/" className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-pink-200 bg-pink-50 px-5 py-4 text-sm font-black text-pink-800 shadow-sm transition hover:-translate-y-1 hover:bg-pink-100">
+                <Shuffle className="h-5 w-5" />
+                Surprise Me
               </Link>
             </div>
 
@@ -221,7 +230,7 @@ export default async function HomePage() {
                 <div key={item} className="flex items-center gap-2 rounded-2xl bg-white p-3 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-100"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> {item}</div>
               ))}
             </div>
-            <Link href="/color-online/unicorn-rainbow-coloring-page/" className="cc-btn cc-btn-dark mt-7 w-full px-5 py-3.5 sm:w-auto sm:px-6">Try the coloring studio <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/color-online/" className="cc-btn cc-btn-dark mt-7 w-full px-5 py-3.5 sm:w-auto sm:px-6">Try the coloring studio <ArrowRight className="h-4 w-4" /></Link>
           </div>
 
           <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-yellow-100 via-pink-100 to-violet-200 p-7">
