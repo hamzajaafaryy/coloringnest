@@ -15,6 +15,7 @@ import AdPlaceholder from "@/components/AdPlaceholder";
 import DownloadButton from "@/components/DownloadButton";
 import PrintButton from "@/components/PrintButton";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
+import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 
 import {
   getAllPublishedColoringPagesWithCategory,
@@ -170,7 +171,7 @@ export default async function IndividualColoringPage({
           return "";
         }
       })()
-    : "";
+    : await loadColoringSvg(page.svgUrl);
 
   const imageUrl =
     page.imageUrl ||
@@ -252,7 +253,7 @@ export default async function IndividualColoringPage({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
         {/* Artwork */}
         <div className="md:col-span-7 bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-          <figure className="w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center overflow-hidden">
+          <figure className="printable-artwork w-full aspect-square max-w-md bg-white rounded-2xl p-4 shadow-inner border border-slate-100 flex items-center justify-center overflow-hidden">
             {safeSvgContent ? (
               <div
                 className="w-full h-full flex items-center justify-center select-none overflow-hidden [&>svg]:block [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-full [&>svg]:h-full"
@@ -359,13 +360,11 @@ export default async function IndividualColoringPage({
           </h2>
 
           <p className="text-sm sm:text-base leading-relaxed">
-            {page.description} Kids will
-            love coloring the details while
-            practicing fine motor skills and
-            pencil control. You can color this
-            page online in your browser or
-            print it for traditional coloring
-            with crayons, pencils, or markers.
+            Explore the shapes, outlines, and little details in {page.title}.
+            This creative activity invites kids and grown-ups to experiment
+            with colors while practicing focus and fine motor skills.
+            Open the browser coloring editor or print the artwork to use
+            crayons, pencils, or markers at home.
           </p>
         </div>
 

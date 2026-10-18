@@ -52,6 +52,7 @@ export default async function Footer() {
             <ul className="space-y-2.5">
               <li><Link href="/coloring-pages/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Coloring Pages</Link></li>
               <li><Link href="/color-online/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Color Online</Link></li>
+              <li><Link href="/favorites/" className="text-sm font-medium text-slate-600 hover:text-violet-700">My Favorites</Link></li>
               <li><Link href="/printable-coloring-pages/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Printable Pages</Link></li>
               <li><Link href="/blog/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Creative Blog</Link></li>
             </ul>

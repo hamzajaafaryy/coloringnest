@@ -9,6 +9,7 @@ import PrintButton from "@/components/PrintButton";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import SocialShare from "@/components/SocialShare";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
+import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 
 import {
   getAllPublishedColoringPagesWithCategory,
@@ -74,7 +75,7 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
           return "";
         }
       })()
-    : "";
+    : await loadColoringSvg(page.svgUrl);
 
   const imageUrl = page.imageUrl || `https://craftcoloring.com/images/${page.slug}.png`;
 
@@ -131,7 +132,7 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
 
       <div className="mt-10 grid items-start gap-8 lg:grid-cols-12">
         <div className="lg:col-span-7 rounded-[2rem] border border-orange-100 bg-[#f7f4ee] p-5 shadow-[0_20px_60px_rgba(234,88,12,0.08)] sm:p-8">
-          <figure className="rounded-2xl border border-slate-200 bg-white p-4 shadow-inner sm:p-7">
+          <figure className="printable-artwork rounded-2xl border border-slate-200 bg-white p-4 shadow-inner sm:p-7">
             {safeSvgContent ? (
               <div
                 className="flex aspect-[8.5/11] w-full items-center justify-center overflow-hidden [&>svg]:h-full [&>svg]:w-full [&>svg]:max-h-full [&>svg]:max-w-full"
@@ -229,9 +230,9 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
         <div>
           <h2 className="text-2xl font-black text-slate-900">About this printable coloring sheet</h2>
           <p className="mt-3 text-sm leading-7 sm:text-base">
-            {page.description} This printable {page.title.toLowerCase()} sheet is designed for
-            traditional coloring with crayons, colored pencils, or markers. Download it as a
-            high-resolution PNG and print it at home or school.
+            Make your own version of {page.title} using pencils, crayons,
+            or markers. Print a clean outline for a classroom activity,
+            a creative afternoon, or a relaxing project at home.
           </p>
         </div>
 

@@ -31,23 +31,11 @@ const PRESET_COLORS = [
 
 type Tool = "fill" | "brush" | "eraser";
 
+// Keep SVG preparation browser-independent: Client Components can also render on the server.
 function prepareColoringSvg(svgContent: string) {
-  const template = document.createElement("template");
-  template.innerHTML = svgContent.trim();
-  const svg = template.content.querySelector("svg");
-  if (!svg) return svgContent;
-
-  // IMPORTANT: preserve the source SVG exactly.
-  // The artwork shown on the site must match the uploaded SVG 1:1.
-  // Do not rewrite path fills, strokes, widths, opacity, <use>, <defs>, etc.
-  // Those changes alter the artwork and make the online version different
-  // from the original SVG.
-  svg.style.setProperty("background", "#ffffff", "important");
-  svg.removeAttribute("width");
-  svg.removeAttribute("height");
-
-  return svg.outerHTML;
+  return svgContent.trim();
 }
+
 function getSvgVersion(svg: string) {
   let hash = 2166136261;
   for (let i = 0; i < svg.length; i += 1) {
@@ -58,19 +46,19 @@ function getSvgVersion(svg: string) {
 }
 
 function getSvgAspectRatio(svgContent: string) {
-  const template = document.createElement("template");
-  template.innerHTML = svgContent.trim();
-  const svg = template.content.querySelector("svg");
-  if (!svg) return 4 / 3;
-
-  const viewBox = svg.getAttribute("viewBox")?.trim().split(/\s+/).map(Number);
-  if (viewBox && viewBox.length === 4 && viewBox[2] > 0 && viewBox[3] > 0) {
-    return viewBox[2] / viewBox[3];
+  const viewBox = svgContent.match(/\bviewBox\s*=\s*["']([^"']+)["']/i);
+  if (viewBox) {
+    const values = viewBox[1].trim().split(/[\s,]+/).map(Number);
+    if (values.length === 4 && values[2] > 0 && values[3] > 0) {
+      return values[2] / values[3];
+    }
   }
 
-  const width = parseFloat(svg.getAttribute("width") || "");
-  const height = parseFloat(svg.getAttribute("height") || "");
-  if (width > 0 && height > 0) return width / height;
+  const width = svgContent.match(/\bwidth\s*=\s*["']([\d.]+)/i);
+  const height = svgContent.match(/\bheight\s*=\s*["']([\d.]+)/i);
+  if (width && height && Number(width[1]) > 0 && Number(height[1]) > 0) {
+    return Number(width[1]) / Number(height[1]);
+  }
 
   return 4 / 3;
 }
@@ -452,7 +440,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
         </label>
       </div>
 
-      <div className="relative rounded-2xl bg-white overflow-auto min-h-[420px] flex items-center justify-center p-4">
+      <div className="printable-artwork relative rounded-2xl bg-white overflow-auto min-h-[420px] flex items-center justify-center p-4">
         <div
           className="relative w-full max-w-3xl"
           style={{ aspectRatio: String(aspectRatio), transform: `scale(${zoomLevel})`, transformOrigin: "center" }}

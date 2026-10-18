@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Palette, Search, Menu, X, Sparkles, Wand2 } from "lucide-react";
+import { Palette, Search, Menu, X, Sparkles, Wand2, Heart } from "lucide-react";
 import SearchBar from "./SearchBar";
 
 export default function Header() {
@@ -15,6 +15,7 @@ export default function Header() {
     { href: "/", label: "Home" },
     { href: "/coloring-pages/", label: "Coloring Pages" },
     { href: "/printable-coloring-pages/", label: "Printables" },
+    { href: "/favorites/", label: "Favorites" },
     { href: "/blog/", label: "Blog" },
   ];
 
@@ -45,7 +46,7 @@ export default function Header() {
 
           <div className="hidden min-w-0 items-center gap-2 xl:flex xl:w-[24rem]">
             <div className="min-w-0 flex-1"><SearchBar size="sm" /></div>
-            <Link href="/color-online/unicorn-rainbow-coloring-page/" className="cc-btn cc-btn-primary shrink-0 px-4 py-2.5 text-xs">
+            <Link href="/color-online/" className="cc-btn cc-btn-primary shrink-0 px-4 py-2.5 text-xs">
               <Wand2 className="h-4 w-4" /> Color
             </Link>
           </div>
@@ -76,7 +77,7 @@ export default function Header() {
             <Link href="/printable-coloring-pages/" onClick={() => setMobileMenuOpen(false)} className="cc-btn cc-btn-soft w-full">
               <Palette className="h-4 w-4" /> Printables
             </Link>
-            <Link href="/color-online/unicorn-rainbow-coloring-page/" onClick={() => setMobileMenuOpen(false)} className="cc-btn cc-btn-primary w-full">
+            <Link href="/color-online/" onClick={() => setMobileMenuOpen(false)} className="cc-btn cc-btn-primary w-full">
               <Sparkles className="h-4 w-4" /> Color Online
             </Link>
           </div>
