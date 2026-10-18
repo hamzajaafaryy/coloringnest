@@ -45,7 +45,7 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="hidden min-w-0 items-center gap-2 xl:flex xl:w-[24rem]">
+          <div className="hidden min-w-0 items-center gap-2 xl:flex xl:w-[16rem] 2xl:w-[22rem]">
             <div className="min-w-0 flex-1"><SearchBar size="sm" /></div>
             <Link href="/color-online/" className="cc-btn cc-btn-primary shrink-0 px-4 py-2.5 text-xs">
               <Wand2 className="h-4 w-4" /> Color

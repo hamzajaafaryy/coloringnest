@@ -10,6 +10,20 @@ interface CategoryCardCategory {
 }
 interface CategoryCardProps { category: CategoryCardCategory; variant?: "coloring" | "printable"; }
 
+const CATEGORY_EMOJIS: Record<string, string> = {
+  unicorn: "🦄", unicorns: "🦄", dinosaurs: "🦖", dinosaur: "🦖",
+  animals: "🐼", animal: "🐼", princesses: "👑", princess: "👸",
+  vehicles: "🚗", cars: "🏎️", fantasy: "🧚", nature: "🌳",
+  holidays: "🎉", christmas: "🎄", halloween: "🎃", easter: "🐰",
+  flowers: "🌸", flower: "🌻", garden: "🌷", ocean: "🐬",
+  sea: "🐠", space: "🚀", sports: "⚽", food: "🧁",
+  mandala: "🌺", kindergarten: "🎨", preschool: "🧸",
+  adults: "🪷", toddler: "🧸", robots: "🤖",
+};
+function emojiForCategory(slug: string) {
+  return CATEGORY_EMOJIS[slug] || Object.entries(CATEGORY_EMOJIS).find(([key]) => slug.includes(key))?.[1] || "🎨";
+}
+
 const accents = [
   "from-pink-100 via-white to-orange-100",
   "from-sky-100 via-white to-violet-100",
@@ -35,7 +49,15 @@ export default function CategoryCard({ category, variant = "coloring" }: Categor
           <img src={imageUrl} alt={category.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="text-6xl font-black text-violet-200/80">{category.name.charAt(0).toUpperCase()}</span>
+            <div className="relative flex h-full w-full items-center justify-center">
+              <span className="absolute left-[15%] top-[20%] h-10 w-10 rotate-12 rounded-2xl bg-white/60 shadow-sm" />
+              <span className="absolute bottom-[18%] right-[17%] h-8 w-8 -rotate-12 rounded-full bg-yellow-200/60" />
+              <span className="absolute right-[16%] top-[12%] text-2xl text-yellow-500" aria-hidden="true">✦</span>
+              <span className="absolute bottom-[17%] left-[16%] text-2xl text-rose-400" aria-hidden="true">✿</span>
+              <span role="img" aria-label={category.name} className="relative text-[clamp(4rem,7vw,6.5rem)] drop-shadow-[0_15px_8px_rgba(86,33,109,.13)] transition duration-500 group-hover:-rotate-12 group-hover:scale-125">
+                {emojiForCategory(slug)}
+              </span>
+            </div>
           </div>
         )}
         <span className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-violet-600 opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
