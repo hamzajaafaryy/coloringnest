@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle2, ChevronRight, Download, Eraser, Heart, Paintbrush, RotateCcw, Save, Sparkles, Undo2, WandSparkles } from "lucide-react";
+import { CheckCircle2, ChevronRight, Download, Eraser, Heart, Paintbrush, RotateCcw, Save, Undo2, WandSparkles } from "lucide-react";
 import CartoonCharacter, { CARTOONS, type CartoonId, type CartoonPaint } from "./CartoonCharacters";
 
 type Progress = Record<CartoonId, CartoonPaint>;
