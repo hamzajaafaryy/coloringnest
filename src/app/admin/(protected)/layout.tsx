@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   Palette,
+  Images,
   Sparkles,
 } from "lucide-react";
 
@@ -44,6 +45,12 @@ export default async function AdminProtectedLayout({
       label: "Coloring Pages",
       icon: Palette,
       accent: "bg-sky-100 text-sky-700",
+    },
+    {
+      href: "/admin/content-studio/",
+      label: "Content Studio",
+      icon: Images,
+      accent: "bg-fuchsia-100 text-fuchsia-700",
     },
     {
       href: "/admin/categories/",
