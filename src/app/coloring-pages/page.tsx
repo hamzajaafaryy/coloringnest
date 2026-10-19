@@ -1,4 +1,5 @@
 import CategoryCard from "@/components/CategoryCard";
+import PublicDomainColoringGallery from "@/components/PublicDomainColoringGallery";
 import ColoringGrid from "@/components/ColoringGrid";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import SearchBar from "@/components/SearchBar";
@@ -106,6 +107,8 @@ export default async function ColoringPagesDirectoryPage() {
         slotName="Directory Banner"
         format="horizontal"
       />
+
+      <PublicDomainColoringGallery />
 
       {/* Featured Coloring Pages */}
       <section className="space-y-6">
