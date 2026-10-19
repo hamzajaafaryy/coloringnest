@@ -7,23 +7,37 @@ import {isAdminAuthenticated} from "@/lib/admin-auth";
 export const dynamic="force-dynamic";
 export const maxDuration=60;
 type Seo={title:string;description:string;seoTitle:string;seoDescription:string;altText:string;tags:string[];ageRange:string;difficulty:string;categoryId:number;faqs:{question:string;answer:string}[]};
-const schema={type:"object",additionalProperties:false,required:["title","description","seoTitle","seoDescription","altText","tags","ageRange","difficulty","categoryId","faqs"],properties:{title:{type:"string"},description:{type:"string"},seoTitle:{type:"string"},seoDescription:{type:"string"},altText:{type:"string"},tags:{type:"array",items:{type:"string"}},ageRange:{type:"string"},difficulty:{type:"string"},categoryId:{type:"integer"},faqs:{type:"array",items:{type:"object",additionalProperties:false,required:["question","answer"],properties:{question:{type:"string"},answer:{type:"string"}}}}}};
+const schema={type:"OBJECT",required:["title","description","seoTitle","seoDescription","altText","tags","ageRange","difficulty","categoryId","faqs"],properties:{title:{type:"STRING"},description:{type:"STRING"},seoTitle:{type:"STRING"},seoDescription:{type:"STRING"},altText:{type:"STRING"},tags:{type:"ARRAY",items:{type:"STRING"}},ageRange:{type:"STRING"},difficulty:{type:"STRING"},categoryId:{type:"INTEGER"},faqs:{type:"ARRAY",items:{type:"OBJECT",required:["question","answer"],properties:{question:{type:"STRING"},answer:{type:"STRING"}}}}}};
 async function generate(imageUrl:string,title:string,hint:string,cats:{id:number;name:string}[]):Promise<Seo>{
- const key=process.env.OPENAI_API_KEY;if(!key)throw Error("OPENAI_API_KEY is not configured");
- const storage=process.env.SUPABASE_URL?.replace(/\/$/,"");
- if(!storage||!imageUrl.startsWith(storage+"/storage/v1/object/public/coloring-pages/"))throw Error("Image is not hosted in trusted storage");
- const response=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OPENAI_SEO_MODEL||"gpt-4.1-mini",temperature:0.4,response_format:{type:"json_schema",json_schema:{name:"coloring_page_seo",strict:true,schema}},messages:[{role:"system",content:"You are an expert English SEO editor for a family-friendly free printable coloring page website CraftColoring. Look carefully at the actual image. Do not invent elements not visible. Produce a unique descriptive title ending in 'Coloring Page' (under 80 characters), a natural 200-300 word description using 3 short paragraphs, seoTitle under 65 characters including ' | CraftColoring', meta seoDescription 140-160 characters, a precise accessible altText, 4-6 relevant tags, ageRange, difficulty, exactly 3 helpful FAQs with brief accurate answers, and choose an existing categoryId from the provided list. No unsupported claims or keyword stuffing. Return JSON only."},{role:"user",content:[{type:"text",text:JSON.stringify({currentTitle:title,imageHint:hint,categories:cats})},{type:"image_url",image_url:{url:imageUrl,detail:"low"}}]}]})});
- const data=await response.json();if(!response.ok)throw Error(data.error?.message||"AI request failed");const content=data.choices?.[0]?.message?.content;if(!content)throw Error("Empty AI response");const seo=JSON.parse(content) as Seo;
+ const key=process.env.GEMINI_API_KEY;if(!key)throw Error("GEMINI_API_KEY is not configured");
+ const storage=process.env.SUPABASE_URL?.replace(/\\/$/,"");
+ const url=new URL(imageUrl);
+ if(!storage||!imageUrl.startsWith(storage+"/storage/v1/object/public/coloring-pages/")||url.protocol!=="https:")throw Error("Image is not hosted in trusted storage");
+ const imageResponse=await fetch(imageUrl,{redirect:"error",signal:AbortSignal.timeout(15000)});
+ if(!imageResponse.ok)throw Error("Unable to retrieve image");
+ const mime=(imageResponse.headers.get("content-type")||"").split(";")[0].trim();
+ if(!["image/png","image/jpeg","image/webp"].includes(mime))throw Error("Unsupported image type");
+ const bytes=Buffer.from(await imageResponse.arrayBuffer());
+ if(!bytes.length||bytes.length>2097152)throw Error("Image must be under 2MB");
+ const model=process.env.GEMINI_SEO_MODEL||"gemini-2.5-flash";
+ if(!/^gemini-[a-z0-9.-]+$/.test(model))throw Error("Invalid Gemini model");
+ const prompt="You are an expert English SEO editor for CraftColoring, a family-friendly printable coloring page website. Analyze the ACTUAL uploaded coloring page image; use the image hint as context only and do not claim objects not visible. Create a precise descriptive English title ending in Coloring Page (max 80 chars), 200-300 words of natural SEO description in 3 paragraphs, SEO title max 65 chars ending | CraftColoring, meta description 140-160 chars, accurate accessible alt text, 4-6 tags, suitable age range and difficulty. Select a real categoryId from the list. Generate exactly 3 helpful accurate FAQ questions and answers. No keyword stuffing. Return only structured JSON. Context: "+JSON.stringify({currentTitle:title,imageHint:hint,categories:cats});
+ const response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent",{method:"POST",headers:{"x-goog-api-key":key,"Content-Type":"application/json"},signal:AbortSignal.timeout(40000),body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt},{inlineData:{mimeType:mime,data:bytes.toString("base64")}}]}],generationConfig:{temperature:0.4,responseMimeType:"application/json",responseSchema:schema}})});
+ const data=await response.json();
+ if(!response.ok){const status=response.status;if(status===429)throw Error("Gemini free-tier rate limit reached. Retry later.");throw Error("Gemini API error "+status+": "+String(data.error?.message||"request failed").slice(0,200));}
+ const content=data.candidates?.[0]?.content?.parts?.map((p:{text?:string})=>p.text||"").join("");
+ if(!content)throw Error("Gemini returned no SEO content");
+ const seo=JSON.parse(content) as Seo;
  if(!cats.some(c=>c.id===seo.categoryId))throw Error("AI selected unknown category");
- if(!seo.title||!seo.description||!seo.seoTitle||!seo.seoDescription||!seo.altText||!Array.isArray(seo.faqs)||seo.faqs.length!==3)throw Error("Incomplete SEO");
+ if(!seo.title||!seo.description||!seo.seoTitle||!seo.seoDescription||!seo.altText||!Array.isArray(seo.faqs)||seo.faqs.length!==3||!Array.isArray(seo.tags))throw Error("Incomplete SEO");
  return seo;
 }
 export async function POST(request:Request){
  if(!await isAdminAuthenticated())return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
- const body=await request.json();const ids=Array.isArray(body.ids)?Array.from(new Set<number>(body.ids.map(Number).filter((x:number)=>Number.isSafeInteger(x)&&x>0))).slice(0,5):[];
- if(!ids.length)return NextResponse.json({error:"Select up to 5 drafts per batch"},{status:400});
- if(!process.env.OPENAI_API_KEY)return NextResponse.json({error:"OPENAI_API_KEY is missing in Vercel environment variables"},{status:503});
+ const body=await request.json();const ids=Array.isArray(body.ids)?Array.from(new Set<number>(body.ids.map(Number).filter((x:number)=>Number.isSafeInteger(x)&&x>0))).slice(0,1):[];
+ if(!ids.length)return NextResponse.json({error:"Select one draft per request"},{status:400});
+ if(!process.env.GEMINI_API_KEY)return NextResponse.json({error:"GEMINI_API_KEY is missing in Vercel environment variables"},{status:503});
  const cats=await db.select({id:categories.id,name:categories.name}).from(categories);
  const drafts=await db.select().from(coloringPages).where(and(inArray(coloringPages.id,ids),eq(coloringPages.isPublished,false)));
  const results:{id:number;ok:boolean;error?:string;title?:string}[]=[];
