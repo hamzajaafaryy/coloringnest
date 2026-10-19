@@ -1,6 +1,7 @@
 import { and, desc, eq, ne } from "drizzle-orm";
 
 import { db } from "./index";
+import { curatedColoringCards, curatedColoringPage } from "@/lib/data/curatedColoring";
 
 import {
   categories,
@@ -54,7 +55,7 @@ export async function getColoringPageBySlug(slug: string) {
     )
     .limit(1);
 
-  return result[0] ?? null;
+  return result[0] ?? curatedColoringPage(slug);
 }
 
 /**
@@ -102,7 +103,7 @@ export async function getColoringPageByCategoryAndSlug(
     )
     .limit(1);
 
-  return result[0] ?? null;
+  return result[0] ?? curatedColoringPage(slug, categorySlug);
 }
 
 /* =========================================================
@@ -243,7 +244,7 @@ export async function getRelatedColoringPages(
  * Get all published coloring pages
  */
 export async function getAllPublishedColoringPages() {
-  return db
+  const rows = await db
     .select({
       id: coloringPages.id,
       title: coloringPages.title,
@@ -254,6 +255,8 @@ export async function getAllPublishedColoringPages() {
     .from(coloringPages)
     .where(eq(coloringPages.isPublished, true))
     .orderBy(desc(coloringPages.publishedAt));
+
+  return [...curatedColoringCards().map(({ id, title, slug, categoryId, publishedAt }) => ({ id, title, slug, categoryId, publishedAt })), ...rows];
 }
 
 /**
@@ -261,7 +264,7 @@ export async function getAllPublishedColoringPages() {
  * with category information
  */
 export async function getAllPublishedColoringPagesWithCategory() {
-  return db
+  const rows = await db
     .select({
       id: coloringPages.id,
       title: coloringPages.title,
@@ -289,6 +292,8 @@ export async function getAllPublishedColoringPagesWithCategory() {
       desc(coloringPages.featured),
       desc(coloringPages.publishedAt)
     );
+
+  return [...curatedColoringCards(), ...rows];
 }
 
 /* =========================================================
@@ -379,7 +384,7 @@ export async function getCategoryFaqs(
 export async function getPublishedColoringPagesByCategorySlug(
   categorySlug: string
 ) {
-  return db
+  const rows = await db
     .select({
       id: coloringPages.id,
       title: coloringPages.title,
@@ -412,6 +417,8 @@ export async function getPublishedColoringPagesByCategorySlug(
       desc(coloringPages.featured),
       desc(coloringPages.publishedAt)
     );
+
+  return [...curatedColoringCards(categorySlug), ...rows];
 }
 
 /* =========================================================
