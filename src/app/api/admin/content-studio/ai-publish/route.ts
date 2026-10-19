@@ -23,9 +23,23 @@ async function generate(imageUrl:string,title:string,hint:string,cats:{id:number
  const model=!configuredModel||configuredModel.startsWith("gemini-2.5-")?"gemini-3.8-flash":configuredModel;
  if(!/^gemini-[a-z0-9.-]+$/.test(model))throw Error("Invalid Gemini model");
  const prompt="You are an expert English SEO editor for CraftColoring, a family-friendly printable coloring page website. Analyze the ACTUAL uploaded coloring page image; use the image hint as context only and do not claim objects not visible. Create a precise descriptive English title ending in Coloring Page (max 80 chars), 220-300 words of unique human-sounding SEO description in 3 paragraphs based on actual visible artwork, with concrete visual details and varied natural sentences. Choose a specific relevant long-tail keyword with potentially lower competition, but do not claim measured keyword difficulty or search volume. Naturally use it in title, first paragraph and meta. SEO title 35-65 chars ending | CraftColoring, meta description 140-160 chars, descriptive alt text, 4-6 relevant tags, suitable age range and difficulty. Select a real categoryId from the list. Generate exactly 3 helpful accurate FAQ questions and answers. No keyword stuffing. Return only structured JSON. Context: "+JSON.stringify({currentTitle:title,imageHint:hint,categories:cats});
- const response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent",{method:"POST",headers:{"x-goog-api-key":key,"Content-Type":"application/json"},signal:AbortSignal.timeout(40000),body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt},{inlineData:{mimeType:mime,data:bytes.toString("base64")}}]}],generationConfig:{temperature:0.4,responseMimeType:"application/json",responseSchema:schema}})});
- const data=await response.json();
- if(!response.ok){const status=response.status;if([429,502,503,504].includes(status))throw Error("Temporary Gemini API issue "+status+"; retry this draft.");throw Error("Gemini API error "+status+": "+String(data.error?.message||"request failed").slice(0,200));}
+ const endpoint="https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent";
+ const payload=JSON.stringify({contents:[{role:"user",parts:[{text:prompt},{inlineData:{mimeType:mime,data:bytes.toString("base64")}}]}],generationConfig:{temperature:0.4,responseMimeType:"application/json",responseSchema:schema}});
+ let data:any;
+ for(let attempt=0;attempt<3;attempt++){
+  try{
+   const response=await fetch(endpoint,{method:"POST",headers:{"x-goog-api-key":key,"Content-Type":"application/json"},signal:AbortSignal.timeout(14000),body:payload});
+   data=await response.json();
+   if(response.ok)break;
+   const status=response.status;
+   if(![429,500,502,503,504].includes(status))throw Error("Gemini API error "+status+": "+String(data.error?.message||"request failed").slice(0,200));
+   if(attempt===2)throw Error("Gemini temporarily unavailable ("+status+") after 3 attempts. Draft kept; try again later.");
+  }catch(error){
+   if(error instanceof Error&&/^(Gemini API error|Gemini temporarily unavailable)/.test(error.message))throw error;
+   if(attempt===2)throw Error("Gemini network/timeout issue after 3 attempts; draft kept.");
+  }
+  await new Promise(resolve=>setTimeout(resolve,1000*(attempt+1)));
+ }
  const content=data.candidates?.[0]?.content?.parts?.map((p:{text?:string})=>p.text||"").join("");
  if(!content)throw Error("Gemini returned no SEO content");
  const seo=JSON.parse(content) as Seo;
