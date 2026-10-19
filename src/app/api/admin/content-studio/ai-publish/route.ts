@@ -10,7 +10,7 @@ type Seo={title:string;description:string;seoTitle:string;seoDescription:string;
 const schema={type:"OBJECT",required:["title","description","seoTitle","seoDescription","altText","tags","ageRange","difficulty","categoryId","faqs"],properties:{title:{type:"STRING"},description:{type:"STRING"},seoTitle:{type:"STRING"},seoDescription:{type:"STRING"},altText:{type:"STRING"},tags:{type:"ARRAY",items:{type:"STRING"}},ageRange:{type:"STRING"},difficulty:{type:"STRING"},categoryId:{type:"INTEGER"},faqs:{type:"ARRAY",items:{type:"OBJECT",required:["question","answer"],properties:{question:{type:"STRING"},answer:{type:"STRING"}}}}}};
 async function generate(imageUrl:string,title:string,hint:string,cats:{id:number;name:string}[]):Promise<Seo>{
  const key=process.env.GEMINI_API_KEY;if(!key)throw Error("GEMINI_API_KEY is not configured");
- const storage=process.env.SUPABASE_URL?.replace(/\\/$/,"");
+ const storage=process.env.SUPABASE_URL?.replace(/\/$/,"");
  const url=new URL(imageUrl);
  if(!storage||!imageUrl.startsWith(storage+"/storage/v1/object/public/coloring-pages/")||url.protocol!=="https:")throw Error("Image is not hosted in trusted storage");
  const imageResponse=await fetch(imageUrl,{redirect:"error",signal:AbortSignal.timeout(15000)});
