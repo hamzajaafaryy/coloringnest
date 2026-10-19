@@ -19,7 +19,8 @@ async function generate(imageUrl:string,title:string,hint:string,cats:{id:number
  if(!["image/png","image/jpeg","image/webp"].includes(mime))throw Error("Unsupported image type");
  const bytes=Buffer.from(await imageResponse.arrayBuffer());
  if(!bytes.length||bytes.length>2097152)throw Error("Image must be under 2MB");
- const model=process.env.GEMINI_SEO_MODEL||"gemini-2.5-flash";
+ const configuredModel=process.env.GEMINI_SEO_MODEL?.trim();
+ const model=!configuredModel||configuredModel.startsWith("gemini-2.5-")?"gemini-3.8-flash":configuredModel;
  if(!/^gemini-[a-z0-9.-]+$/.test(model))throw Error("Invalid Gemini model");
  const prompt="You are an expert English SEO editor for CraftColoring, a family-friendly printable coloring page website. Analyze the ACTUAL uploaded coloring page image; use the image hint as context only and do not claim objects not visible. Create a precise descriptive English title ending in Coloring Page (max 80 chars), 200-300 words of natural SEO description in 3 paragraphs, SEO title max 65 chars ending | CraftColoring, meta description 140-160 chars, accurate accessible alt text, 4-6 tags, suitable age range and difficulty. Select a real categoryId from the list. Generate exactly 3 helpful accurate FAQ questions and answers. No keyword stuffing. Return only structured JSON. Context: "+JSON.stringify({currentTitle:title,imageHint:hint,categories:cats});
  const response=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+model+":generateContent",{method:"POST",headers:{"x-goog-api-key":key,"Content-Type":"application/json"},signal:AbortSignal.timeout(40000),body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt},{inlineData:{mimeType:mime,data:bytes.toString("base64")}}]}],generationConfig:{temperature:0.4,responseMimeType:"application/json",responseSchema:schema}})});
