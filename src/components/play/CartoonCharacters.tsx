@@ -35,7 +35,6 @@ export const CARTOONS: { id: CartoonId; name: string; subtitle: string; pieces: 
 ];
 
 const OUTLINE = "#384063";
-const SHADOW = "#e4d8f2";
 
 function Part({
   id,
@@ -378,7 +377,7 @@ export default function CartoonCharacter({
     <svg
       viewBox="0 0 800 600"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
+      role={interactive ? "group" : "img"}
       aria-label={CARTOONS.find((item) => item.id === id)?.name || "Cartoon coloring illustration"}
       className={className}
       preserveAspectRatio="xMidYMid meet"
