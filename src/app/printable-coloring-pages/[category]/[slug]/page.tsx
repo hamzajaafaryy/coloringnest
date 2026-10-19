@@ -214,6 +214,16 @@ export default async function PrintablePage({ params }: PrintablePageProps) {
         <SocialShare title={`Printable ${page.title} Coloring Sheet`} imageUrl={imageUrl || undefined} />
       </div>
 
+
+      {"sourceUrl" in page && typeof page.sourceUrl === "string" && (
+        <aside className="no-print my-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-7 text-emerald-950">
+          <strong className="block text-base">CC0 public-domain coloring art</strong>
+          <span>This SVG was obtained from an Openclipart public-domain archive. The picture may be copied, printed, recolored and redistributed, including commercially. </span>
+          <a href={page.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-bold underline decoration-emerald-500 underline-offset-2">
+            View original artwork and source
+          </a>.
+        </aside>
+      )}
       <AdPlaceholder slotName="Printable Detail Banner" format="horizontal" />
 
       <section className="mt-10 max-w-4xl space-y-6 text-slate-700">

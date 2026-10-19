@@ -323,6 +323,16 @@ export default async function IndividualColoringPage({
         imageUrl={imageUrl || undefined}
       />
 
+
+      {"sourceUrl" in page && typeof page.sourceUrl === "string" && (
+        <aside className="no-print my-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-7 text-emerald-950">
+          <strong className="block text-base">CC0 public-domain coloring art</strong>
+          <span>This SVG was obtained from an Openclipart public-domain archive. The picture may be copied, printed, recolored and redistributed, including commercially. </span>
+          <a href={page.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-bold underline decoration-emerald-500 underline-offset-2">
+            View original artwork and source
+          </a>.
+        </aside>
+      )}
       <AdPlaceholder
         slotName="Below Coloring Tools"
         format="horizontal"

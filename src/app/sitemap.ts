@@ -99,7 +99,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...(lastModified ? { lastModified } : {}),
       changeFrequency: "monthly",
       priority: 0.9,
-      ...(page.imageUrl ? { images: [page.imageUrl] } : {}),
+      ...(page.imageUrl ? { images: [page.imageUrl.startsWith("http") ? page.imageUrl : `${DOMAIN}${page.imageUrl.startsWith("/") ? "" : "/"}${page.imageUrl}`] } : {}),
     });
 
     routes.push({

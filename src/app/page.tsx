@@ -20,6 +20,7 @@ import SearchBar from "@/components/SearchBar";
 import AdsterraNativeBanner from "@/components/ads/AdsterraNativeBanner";
 import HeroArtwork from "@/components/home/HeroArtwork";
 import HomePlayGames from "@/components/home/HomePlayGames";
+import { curatedColoringCards } from "@/lib/data/curatedColoring";
 import ColoringGrid from "@/components/ColoringGrid";
 import CategoryCard from "@/components/CategoryCard";
 import FAQ from "@/components/FAQ";
@@ -138,6 +139,22 @@ export default async function HomePage() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 lg:px-8"><HomePlayGames /></div>
+      <section aria-labelledby="open-clipart-home" className="mx-auto max-w-7xl px-4 pt-14 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-xs font-black uppercase tracking-wide text-emerald-800">
+              <ShieldCheck className="h-4 w-4" /> Public-domain artwork · CC0
+            </span>
+            <h2 id="open-clipart-home" className="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+              Fresh printable line art from real artists
+            </h2>
+            <p className="mt-2 text-sm leading-7 text-slate-600">10 handpicked coloring pictures from Openclipart's public-domain collection. No watermark, no sign-up. Print the artwork or color it online.</p>
+          </div>
+          <Link href="/coloring-pages/#public-domain" className="cc-btn cc-btn-outline">View all 10 new pictures <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+        <ColoringGrid pages={curatedColoringCards().slice(0,4)} />
+      </section>
+
 
       <AdsterraNativeBanner />
 

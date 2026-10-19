@@ -2,6 +2,7 @@ import CategoryCard from "@/components/CategoryCard";
 import ColoringGrid from "@/components/ColoringGrid";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import SearchBar from "@/components/SearchBar";
+import { curatedColoringCards } from "@/lib/data/curatedColoring";
 import AdPlaceholder from "@/components/AdPlaceholder";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +70,13 @@ export default async function ColoringPagesDirectoryPage() {
           />
         </div>
       </div>
+
+      <section id="public-domain" aria-label="New public-domain coloring pages" className="scroll-mt-28 space-y-5 rounded-[2rem] bg-gradient-to-br from-violet-50 via-white to-emerald-50 px-4 py-7 sm:px-7">
+        <span className="inline-block rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-black uppercase text-emerald-800">New · CC0 public domain</span>
+        <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">10 fresh, watermark-free coloring drawings</h2>
+        <p className="max-w-3xl text-sm leading-7 text-slate-600">We've collected ten printable SVG line-art drawings from Openclipart's public-domain collection. They are hosted locally, ready to download, print or color online. Attribution and original source links are available on each artwork's page.</p>
+        <ColoringGrid pages={curatedColoringCards()} />
+      </section>
 
       {/* All Categories Grid */}
       <section className="space-y-6">

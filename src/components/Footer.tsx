@@ -53,6 +53,7 @@ export default function Footer() {
             <ul className="space-y-2.5">
               <li><Link href="/coloring-pages/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Coloring Pages</Link></li>
               <li><Link href="/play/" className="text-sm font-black text-violet-700 hover:text-pink-600">🌈 Kids Play Zone</Link></li>
+              <li><Link href="/coloring-pages/#public-domain" className="text-sm font-bold text-emerald-700 hover:text-emerald-800">Free Public-Domain Art</Link></li>
               <li><Link href="/color-online/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Color Online</Link></li>
               <li><Link href="/favorites/" className="text-sm font-medium text-slate-600 hover:text-violet-700">My Favorites</Link></li>
               <li><Link href="/printable-coloring-pages/" className="text-sm font-medium text-slate-600 hover:text-violet-700">Printable Pages</Link></li>
