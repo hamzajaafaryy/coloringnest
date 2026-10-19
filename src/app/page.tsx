@@ -6,6 +6,7 @@ import {
   Palette,
   Printer,
   Shuffle,
+  ShieldCheck,
   Sparkles,
   Gamepad2,
   Rocket,
