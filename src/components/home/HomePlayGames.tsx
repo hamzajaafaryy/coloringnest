@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Gamepad2, Sparkles } from "lucide-react";
 import GameIllustration from "@/components/play/GameIllustration";
+import CartoonCharacter from "@/components/play/CartoonCharacters";
 
 const games = [
-  { id:"cartoon" as const, title:"Cartoon Coloring", description:"Paint three hand-drawn characters! Tap every part of a kitty, a unicorn or a dino.", detail:"3 cartoon scenes", gradient:"from-[#fbd2e6] to-[#ffdea6]", dark:"text-rose-950" },
+  { id:"cartoon" as const, title:"Cartoon Coloring", description:"Color four adorable characters: a kitten, unicorn, dinosaur and bunny.", detail:"4 storybook friends", gradient:"from-[#fbd2e6] to-[#ffdea6]", dark:"text-rose-950" },
   { id:"colors" as const, title:"Rainbow Quest", description:"Discover colors by matching them with familiar things in a magical rainbow world.", detail:"Color challenges", gradient:"from-[#ffe0a9] to-[#9febdc]", dark:"text-emerald-950" },
   { id:"memory" as const, title:"Memory Garden", description:"Find matching cartoon friends with three levels from Easy to Expert.", detail:"3 difficulty levels", gradient:"from-[#c3b4ff] to-[#a0e6ff]", dark:"text-violet-950" },
   { id:"doodle" as const, title:"Doodle Studio", description:"Draw on a free canvas, add stickers, use brushes and save your masterpiece.", detail:"Free drawing studio", gradient:"from-[#ffe8a5] to-[#a8e8cf]", dark:"text-emerald-950" },
@@ -30,7 +31,7 @@ export default function HomePlayGames() {
               <span className="rounded-full bg-white/70 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide">Adventure {String(index+1).padStart(2,"0")}</span>
               <ArrowRight className="h-5 w-5"/>
             </div>
-            <GameIllustration variant={game.id} className="mx-auto aspect-[4/3] w-full max-w-[260px] transition-transform duration-300 group-hover:scale-105"/>
+            {game.id === "cartoon" ? <CartoonCharacter id="kitty" interactive={false} className="mx-auto aspect-[4/3] w-full max-w-[260px] transition-transform duration-300 group-hover:scale-105"/> : <GameIllustration variant={game.id} className="mx-auto aspect-[4/3] w-full max-w-[260px] transition-transform duration-300 group-hover:scale-105"/>}
             <div>
               <h3 className="text-xl font-black sm:text-2xl">{game.title}</h3>
               <p className="mt-1.5 max-w-md text-sm font-semibold leading-6 opacity-80">{game.description}</p>
