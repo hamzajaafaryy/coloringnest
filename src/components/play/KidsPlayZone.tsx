@@ -9,6 +9,7 @@ import DoodleStudio from "./DoodleStudio";
 import ColorByNumber from "./ColorByNumber";
 import CartoonColoring from "./CartoonColoring";
 import GameIllustration from "./GameIllustration";
+import CartoonCharacter from "./CartoonCharacters";
 
 type Game = "cartoon" | "colors" | "memory" | "doodle" | "numbers";
 const STARS_KEY = "craftcoloring_kids_stars_v1";
@@ -142,7 +143,7 @@ export default function KidsPlayZone() {
             </div>
           </div>
           <div className="relative mx-auto w-full max-w-[350px] rounded-[2rem] border border-white/15 bg-white/10 p-2 backdrop-blur-sm">
-            <GameIllustration variant="cartoon" className="mx-auto block aspect-[4/3] w-full cc-float"/>
+            <CartoonCharacter id="kitty" interactive={false} className="mx-auto block aspect-[4/3] w-full cc-float"/>
           </div>
         </div>
       </section>
@@ -172,7 +173,7 @@ export default function KidsPlayZone() {
           {TABS.map(game=>(
             <button type="button" key={game.id} role="tab" aria-selected={active===game.id} aria-controls="kids-active-game" onClick={()=>chooseGame(game.id)}
               className={`group relative flex min-w-0 min-h-32 flex-col items-start overflow-hidden rounded-[1.5rem] border-2 bg-gradient-to-br ${game.color} p-3 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-violet-700 sm:p-4 ${active===game.id?"border-violet-500 ring-2 ring-violet-100":"border-white"}`}>
-              <GameIllustration variant={game.id} className="mx-auto aspect-[4/3] w-full max-w-[145px] transition-transform group-hover:scale-105"/>
+              {game.id === "cartoon" ? <CartoonCharacter id="kitty" interactive={false} className="mx-auto aspect-[4/3] w-full max-w-[145px] transition-transform group-hover:scale-105"/> : <GameIllustration variant={game.id} className="mx-auto aspect-[4/3] w-full max-w-[145px] transition-transform group-hover:scale-105"/>}
               <span className="mt-auto block max-w-full text-[13px] font-black leading-tight text-slate-900 sm:text-base">{game.title}</span>
               <span className="mt-1 block text-[11px] font-semibold leading-tight text-slate-600 sm:text-xs">{game.subtitle}</span>
               {active===game.id&&<CheckCircle2 className="absolute right-2 top-2 h-5 w-5 text-violet-700"/>}
