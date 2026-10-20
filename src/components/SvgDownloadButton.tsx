@@ -17,5 +17,5 @@ export default function SvgDownloadButton({ svgContent, slug }: { svgContent: st
       setDone(true); setTimeout(() => setDone(false), 2500);
     } catch { setError(true); }
   }
-  return <div><button type="button" onClick={download} className="cc-btn cc-btn-soft min-h-12 w-full">{done ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}{done ? "SVG downloaded!" : "Download SVG"}</button>{error && <p role="alert" className="mt-2 text-sm text-red-700">Unable to download the SVG. Please try again.</p>}</div>;
+  return <div><button type="button" onClick={download} className="cc-btn cc-btn-soft min-h-14 w-full px-3">{done ? <Check aria-hidden="true" className="h-4 w-4 shrink-0" /> : <Download aria-hidden="true" className="h-4 w-4 shrink-0" />}<span aria-live="polite">{done ? "SVG downloaded!" : "Download SVG"}</span></button>{error && <p role="alert" className="mt-2 text-sm text-red-700">Unable to download the SVG. Please try again.</p>}</div>;
 }

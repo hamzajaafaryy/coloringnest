@@ -10,6 +10,7 @@ export default function ImageDownloadButton({ imageUrl, slug }: { imageUrl: stri
 
   async function download() {
     setBusy(true);
+    setDone(false);
     setError(false);
     try {
       const response = await fetch(imageUrl);
@@ -35,9 +36,9 @@ export default function ImageDownloadButton({ imageUrl, slug }: { imageUrl: stri
   }
 
   return <div>
-    <button type="button" disabled={busy} onClick={() => void download()} className="cc-btn cc-btn-dark w-full min-h-12 disabled:opacity-60">
-      {done ? <Check className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-      {busy ? "Downloading…" : done ? "Image downloaded!" : "Download Image"}
+    <button type="button" disabled={busy} aria-busy={busy} onClick={() => void download()} className="cc-btn cc-btn-dark min-h-14 w-full px-3 disabled:opacity-60">
+      {done ? <Check aria-hidden="true" className="h-4 w-4 shrink-0" /> : <Download aria-hidden="true" className="h-4 w-4 shrink-0" />}
+      <span aria-live="polite">{busy ? "Downloading…" : done ? "Image downloaded!" : "Download Image"}</span>
     </button>
     {error && <p role="alert" className="mt-2 text-sm text-red-700">We could not download the image. <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="font-bold underline">Open it to save it</a>.</p>}
   </div>;
