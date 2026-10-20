@@ -5,15 +5,15 @@ import { Share2, Check, Copy } from "lucide-react";
 
 interface SocialShareProps {
   title: string;
-  url?: string;
+  url: string;
   imageUrl?: string;
 }
 
 export default function SocialShare({ title, url, imageUrl }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
-  const currentUrl = typeof window !== "undefined" ? url || window.location.href : "";
-  const encodedUrl = encodeURIComponent(currentUrl);
+  const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   const encodedImage = encodeURIComponent(imageUrl || "");
 
@@ -23,11 +23,15 @@ export default function SocialShare({ title, url, imageUrl }: SocialShareProps) 
     whatsapp: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
   };
 
-  const handleCopy = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(currentUrl);
+  const handleCopy = async () => {
+    setCopyError(false);
+    setCopied(false);
+    try {
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopyError(true);
     }
   };
 
@@ -73,13 +77,14 @@ export default function SocialShare({ title, url, imageUrl }: SocialShareProps) 
 
       {/* Copy Link */}
       <button
-        onClick={handleCopy}
+        onClick={() => void handleCopy()}
         type="button"
         className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-slate-200 px-3.5 py-1.5 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-300 sm:ml-auto"
       >
         {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-        {copied ? "Link Copied!" : "Copy Link"}
+        <span aria-live="polite">{copied ? "Link Copied!" : "Copy Link"}</span>
       </button>
+      {copyError && <p role="alert" className="col-span-2 text-sm text-red-700 sm:basis-full">We could not copy the link. Copy the page address from your browser instead.</p>}
     </div>
   );
 }

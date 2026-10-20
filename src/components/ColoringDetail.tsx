@@ -11,7 +11,7 @@ import RelatedColoringPages from "@/components/RelatedColoringPages";
 import { getColoringPageByCategoryAndSlug, getColoringPageFaqs, getRelatedColoringPages } from "@/db/queries";
 import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
-import { generateBreadcrumbSchema, generateImageObjectSchema } from "@/lib/seo";
+import { buildCanonicalUrl, generateBreadcrumbSchema, generateImageObjectSchema } from "@/lib/seo";
 
 type Page = NonNullable<Awaited<ReturnType<typeof getColoringPageByCategoryAndSlug>>>;
 
@@ -85,7 +85,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
           </aside>
         </div>
 
-        <SocialShare title={page.title} imageUrl={image || undefined} />
+        <SocialShare title={page.title} url={buildCanonicalUrl(`${base}/${page.categorySlug}/${page.slug}/`)} imageUrl={image || undefined} />
         {page.description && <section className="space-y-4 rounded-3xl border border-[#eee5ef] bg-white p-5 sm:p-8 lg:px-12">
           <h2 className="text-2xl font-black">About this coloring picture</h2>
           {page.description.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index} className="max-w-3xl text-sm leading-8 text-[#73677d] sm:text-base">{paragraph}</p>)}
