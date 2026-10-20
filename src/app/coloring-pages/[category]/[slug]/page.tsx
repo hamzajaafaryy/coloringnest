@@ -260,7 +260,7 @@ export default async function IndividualColoringPage({
           </figure>
 
           <p className="text-xs text-slate-400 mt-4 text-center">
-            Original artwork preview • open the interactive editor to color it your way.
+            Coloring page preview • print this picture to color it with crayons or pencils.
           </p>
         </div>
 
@@ -273,17 +273,17 @@ export default async function IndividualColoringPage({
             Make this page yours
           </h2>
           <p className="text-sm leading-6 text-slate-600">
-            Choose your colors, experiment, undo, and create a version that is uniquely yours.
+            Pick your favorite colors and make this picture your own. Print it for a fun activity at home or in class.
           </p>
 
           <div className="space-y-3">
-            <Link
+            {safeSvgContent && <Link
               href={`/color-online/${page.slug}/`}
               className="cc-btn cc-btn-primary w-full min-h-12 px-4 py-3.5 text-sm sm:text-base"
             >
               <Sparkles className="w-5 h-5" />
               Color This Page Online
-            </Link>
+            </Link>}
 
             {safeSvgContent && (
               <DownloadButton

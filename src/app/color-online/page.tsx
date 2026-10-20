@@ -14,7 +14,7 @@ export const metadata = constructMetadata({
 });
 
 export default async function ColorOnlineDirectoryPage() {
-  const pages = await getAllPublishedColoringPagesWithCategory();
+  const pages = (await getAllPublishedColoringPagesWithCategory()).filter(page => Boolean(page.svgContent));
 
   const breadcrumbItems = [
     { label: "Color Online", href: "/color-online/" },
@@ -39,9 +39,7 @@ export default async function ColorOnlineDirectoryPage() {
           Color Coloring Pages Online
         </h1>
         <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-          Pick a design and color it directly in your browser. Use the fill
-          tool, brush, colors, undo, zoom, and reset controls without needing
-          to install an app.
+          Choose an interactive picture to color on screen. Some pictures are only available to print, so those will appear in our printable collection instead.
         </p>
       </header>
 

@@ -24,6 +24,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
   const difficulty = page.difficulty || null;
   const pageUrl = isPrintable ? `/printable-coloring-pages/${categorySlug}/${pageSlug}/` : `/coloring-pages/${categorySlug}/${pageSlug}/`;
   const onlineUrl = `/color-online/${pageSlug}/`;
+  const canColorOnline = Boolean(svgContent);
   const cardLabel = isPrintable ? `Open printable ${page.title}` : `View ${page.title}`;
 
   return (
@@ -65,7 +66,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
         </div>
 
         <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
-          {isPrintable ? (
+          {isPrintable || !canColorOnline ? (
             <Link href={`${pageUrl}#print`} className="cc-btn cc-btn-print col-span-2 w-full py-2.5 text-xs">
               <Printer className="h-3.5 w-3.5" /> Print This Sheet
             </Link>

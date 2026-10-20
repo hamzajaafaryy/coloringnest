@@ -13,10 +13,8 @@ export default function Header() {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/play/", label: "Kids Play" },
     { href: "/coloring-pages/", label: "Coloring Pages" },
     { href: "/printable-coloring-pages/", label: "Printables" },
-    { href: "/favorites/", label: "Favorites" },
     { href: "/blog/", label: "Blog" },
   ];
 
