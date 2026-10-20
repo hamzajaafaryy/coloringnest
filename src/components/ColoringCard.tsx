@@ -17,7 +17,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
   const isDbPage = "categoryId" in page;
   const pageSlug = page.slug || "";
   const categorySlug = isDbPage ? page.categorySlug || "coloring-pages" : page.categorySlug;
-  const description = page.description || "";
+  const description = ("seoDescription" in page && typeof page.seoDescription === "string" && page.seoDescription.trim()) || (page.description || "").replace(/\s+/g, " ").slice(0, 155);
   const svgContent = page.svgContent ? sanitizeSvg(page.svgContent) : "";
   const imageUrl = isDbPage ? page.imageUrl : null;
   const altText = isDbPage ? page.altText || page.title : page.altText;
@@ -61,7 +61,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
           <Link href={pageUrl}>
             <h3 className="mb-1.5 line-clamp-1 text-base font-black text-slate-900 transition-colors group-hover:text-violet-700">{page.title}</h3>
           </Link>
-          <p className="mb-4 line-clamp-2 text-xs leading-relaxed text-slate-500">{isPrintable ? `Print-ready ${description.toLowerCase()}` : description}</p>
+          <p className="mb-4 line-clamp-2 text-xs leading-relaxed text-slate-500">{description}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">

@@ -42,12 +42,11 @@ export async function generateMetadata({ params }: PrintablePageProps) {
   }
 
   return constructMetadata({
-    title: page.seoTitle
-      ? `Printable ${page.seoTitle}`
-      : `Printable ${page.title} Coloring Sheet`,
+    title: `Printable ${page.title}`,
     description:
       `Download and print this free ${page.title.toLowerCase()} coloring sheet. High-resolution black-and-white line art for home, school, and creative activities.`,
     path: `/printable-coloring-pages/${category}/${slug}/`,
+    image: page.imageUrl || undefined,
   });
 }
 
