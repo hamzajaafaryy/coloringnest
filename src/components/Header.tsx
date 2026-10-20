@@ -3,83 +3,130 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Palette, Search, Menu, X, Sparkles, Wand2, Heart, Gamepad2 } from "lucide-react";
-import SearchBar from "./SearchBar";
+import { ArrowRight, Menu, Palette, Printer, Search, Sparkles, X } from "lucide-react";
+import SearchBar from "@/components/SearchBar";
+
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/coloring-pages/", label: "Coloring Pages" },
+  { href: "/printable-coloring-pages/", label: "Printables" },
+  { href: "/blog/", label: "Coloring Tips" },
+];
 
 export default function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
-
-  const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/coloring-pages/", label: "Coloring Pages" },
-    { href: "/printable-coloring-pages/", label: "Printables" },
-    { href: "/blog/", label: "Blog" },
-  ];
-
-  const isActive = (href: string) => href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const active = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-violet-100/80 bg-white/90 backdrop-blur-xl shadow-[0_8px_30px_rgba(124,58,237,0.06)]">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="flex min-h-[68px] items-center justify-between gap-2 sm:min-h-20">
-          <Link href="/" className="group flex min-w-0 items-center gap-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-400">
-            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-sky-400 text-white shadow-lg shadow-violet-200 transition duration-300 group-hover:-rotate-3 group-hover:scale-105 sm:h-11 sm:w-11">
-              <Palette className="h-5 w-5" />
-              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-yellow-300 ring-2 ring-white animate-pulse" />
+    <header className="sticky top-0 z-50 border-b border-[#eee6f5] bg-white/95 shadow-[0_6px_25px_rgba(53,33,74,0.045)] backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="flex min-h-[76px] items-center justify-between gap-3 lg:min-h-[88px]">
+          <Link
+            href="/"
+            onClick={() => { setMenuOpen(false); setSearchOpen(false); }}
+            className="group flex min-w-0 shrink-0 items-center gap-2.5 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500"
+            aria-label="CraftColoring home"
+          >
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#a05de2] via-[#d96eb8] to-[#ffb362] text-white shadow-[0_7px_18px_rgba(143,73,186,0.22)] transition group-hover:-rotate-6">
+              <Palette className="h-6 w-6" aria-hidden="true" />
+              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-[#ffe68e]" />
             </span>
-            <span className="min-w-0">
-              <span className="block truncate text-lg font-black tracking-tight text-slate-900 sm:text-2xl">Craft<span className="text-violet-600">Coloring</span></span>
-              <span className="hidden text-[10px] font-bold uppercase tracking-[0.16em] text-violet-400 sm:block">Play • Create • Color • Smile</span>
+            <span className="block leading-none">
+              <span className="block text-[1.22rem] font-black tracking-tight text-[#392653] sm:text-[1.5rem]">
+                Craft<span className="text-[#9255cb]">Coloring</span>
+              </span>
+              <span className="mt-1 hidden text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#8b789d] sm:block">
+                Little art, big smiles
+              </span>
             </span>
           </Link>
 
-          <nav className="hidden min-w-0 items-center gap-0.5 xl:flex">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${isActive(link.href) ? "bg-violet-100 text-violet-700 shadow-sm" : link.href === "/play/" ? "bg-yellow-200 text-violet-900 shadow-sm hover:-translate-y-0.5 hover:bg-yellow-300" : "text-slate-600 hover:-translate-y-0.5 hover:bg-violet-50 hover:text-violet-700"}`}>
-                {link.href === "/play/" && <Gamepad2 className="h-4 w-4" aria-hidden="true" />}{link.href === "/favorites/" && <Heart className="h-4 w-4" aria-hidden="true" />}{link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="hidden min-w-0 items-center gap-2 2xl:flex 2xl:w-[19rem]">
-            <div className="min-w-0 flex-1"><SearchBar size="sm" /></div>
-            <Link href="/color-online/" className="cc-btn cc-btn-primary shrink-0 px-4 py-2.5 text-xs">
-              <Wand2 className="h-4 w-4" /> Color
-            </Link>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-1 2xl:hidden">
-            <button type="button" aria-controls="header-search-panel" aria-expanded={mobileSearchOpen} onClick={() => setMobileSearchOpen(!mobileSearchOpen)} className="rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Search">
-              <Search className="h-5 w-5" />
-            </button>
-            <button type="button" aria-controls="mobile-site-navigation" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="xl:hidden rounded-xl p-2.5 text-slate-600 hover:bg-violet-50 hover:text-violet-700" aria-label="Toggle Menu">
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-
-        {mobileSearchOpen && <div id="header-search-panel" className="border-t border-violet-100 py-3 2xl:hidden"><SearchBar size="md" /></div>}
-      </div>
-
-      {mobileMenuOpen && (
-        <div id="mobile-site-navigation" className="max-h-[calc(100dvh-70px)] overflow-y-auto border-t border-violet-100 bg-white px-3 pb-5 pt-3 shadow-xl sm:px-6 xl:hidden">
-          <nav className="grid gap-1">
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)} className={`rounded-2xl px-4 py-3.5 text-sm font-bold ${isActive(link.href) ? "bg-violet-100 text-violet-700" : "text-slate-700 hover:bg-violet-50"}`}>
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active(link.href) ? "page" : undefined}
+                className={
+                  "rounded-full px-4 py-2.5 text-sm font-extrabold transition " +
+                  (active(link.href)
+                    ? "bg-[#f1e7fb] text-[#7840b5]"
+                    : "text-[#695b76] hover:bg-[#f7f0fc] hover:text-[#7946ad]")
+                }
+              >
                 {link.label}
               </Link>
             ))}
           </nav>
-          <div className="mt-3 grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 sm:grid-cols-2">
-            <Link href="/printable-coloring-pages/" onClick={() => setMobileMenuOpen(false)} className="cc-btn cc-btn-soft w-full">
-              <Palette className="h-4 w-4" /> Printables
+
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="hidden w-56 2xl:block">
+              <SearchBar size="sm" placeholder="Search a picture..." />
+            </div>
+            <Link
+              href="/printable-coloring-pages/"
+              className="hidden min-h-11 items-center gap-2 rounded-full bg-[#8147c8] px-5 py-2 text-sm font-extrabold text-white shadow-[0_8px_22px_rgba(128,70,203,0.18)] transition hover:bg-[#6c32b3] lg:inline-flex"
+            >
+              <Printer className="h-4 w-4" /> Print &amp; color <ArrowRight className="h-3.5 w-3.5" />
             </Link>
-            <Link href="/color-online/" onClick={() => setMobileMenuOpen(false)} className="cc-btn cc-btn-primary w-full">
-              <Sparkles className="h-4 w-4" /> Color Online
-            </Link>
+            <button
+              type="button"
+              aria-label="Search coloring pages"
+              aria-controls="header-search-panel"
+              aria-expanded={searchOpen}
+              onClick={() => { setSearchOpen((old) => !old); setMenuOpen(false); }}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#eee2f4] bg-white text-[#72459d] transition hover:bg-[#f8efff] 2xl:hidden"
+            >
+              {searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+            </button>
+            <button
+              type="button"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-controls="mobile-site-navigation"
+              aria-expanded={menuOpen}
+              onClick={() => { setMenuOpen((old) => !old); setSearchOpen(false); }}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f5eafa] text-[#704299] transition hover:bg-[#ecd7f8] lg:hidden"
+            >
+              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
+        </div>
+
+        {searchOpen && (
+          <div id="header-search-panel" className="border-t border-[#f0e6f6] pb-4 pt-3 2xl:hidden">
+            <SearchBar size="md" placeholder="Search unicorns, cats, dinosaurs..." />
+          </div>
+        )}
+      </div>
+
+      {menuOpen && (
+        <div id="mobile-site-navigation" className="max-h-[calc(100dvh-76px)] overflow-y-auto border-t border-[#f0e6f6] bg-white px-4 pb-6 pt-3 shadow-xl sm:px-6 lg:hidden">
+          <nav aria-label="Mobile navigation" className="mx-auto grid max-w-7xl gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active(link.href) ? "page" : undefined}
+                onClick={() => setMenuOpen(false)}
+                className={
+                  "rounded-xl px-4 py-3.5 text-sm font-extrabold " +
+                  (active(link.href) ? "bg-[#f1e7fb] text-[#7840b5]" : "text-[#554369] hover:bg-[#fbf5ff]")
+                }
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href="/coloring-pages/"
+              onClick={() => setMenuOpen(false)}
+              className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#8147c8] px-4 py-3.5 font-extrabold text-white"
+            >
+              <Sparkles className="h-4 w-4" /> Start coloring <ArrowRight className="h-4 w-4" />
+            </Link>
+          </nav>
         </div>
       )}
     </header>

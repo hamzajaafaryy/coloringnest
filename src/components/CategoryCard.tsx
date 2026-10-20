@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
 import CategoryArtwork from "@/components/home/CategoryArtwork";
 
 interface CategoryCardCategory {
@@ -9,52 +9,63 @@ interface CategoryCardCategory {
   description?: string | null;
   imageUrl?: string | null;
 }
-interface CategoryCardProps { category: CategoryCardCategory; variant?: "coloring" | "printable"; }
+interface CategoryCardProps {
+  category: CategoryCardCategory;
+  variant?: "coloring" | "printable";
+}
 
 const accents = [
-  "from-pink-100 via-white to-orange-100",
-  "from-sky-100 via-white to-violet-100",
-  "from-yellow-100 via-white to-emerald-100",
-  "from-violet-100 via-white to-fuchsia-100",
+  "from-[#ffecf1] via-[#fff8f4] to-[#ffe8d2]",
+  "from-[#e2f5fc] via-[#f7f8ff] to-[#ecedff]",
+  "from-[#fef0cc] via-[#fffdf0] to-[#e8f5dd]",
+  "from-[#eee2fd] via-[#fdf8ff] to-[#ffe4f0]",
 ];
 
-export default function CategoryCard({ category, variant = "coloring" }: CategoryCardProps) {
-  const slug = category.slug ?? "coloring-pages";
-  const categoryUrl = variant === "printable" ? `/printable-coloring-pages/${slug}/` : `/coloring-pages/${slug}/`;
-  const description = category.description ?? "";
-  const imageUrl = category.imageUrl ?? null;
+export default function CategoryCard({
+  category,
+  variant = "coloring",
+}: CategoryCardProps) {
+  const slug = category.slug || "";
+  const href = variant === "printable"
+    ? "/printable-coloring-pages/" + slug + "/"
+    : "/coloring-pages/" + slug + "/";
   const accent = accents[String(category.id).length % accents.length];
 
   return (
-    <Link href={categoryUrl} className="group relative block min-w-0 overflow-hidden rounded-[1.75rem] border border-white bg-white p-2 shadow-[0_12px_35px_rgba(15,23,42,0.07)] transition-all duration-500 hover:-translate-y-2 hover:rotate-[0.4deg] hover:shadow-[0_24px_55px_rgba(124,58,237,0.15)]">
-      <div className={`relative aspect-[4/3] overflow-hidden rounded-[1.4rem] bg-gradient-to-br ${accent}`}>
-        <span className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/50 transition-transform duration-500 group-hover:scale-150" />
-        <span className="absolute bottom-4 left-4 z-10 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-violet-700 shadow-sm">
-          Explore
-        </span>
-        {imageUrl ? (
-          <img src={imageUrl} alt={category.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+    <Link
+      href={href}
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[1.6rem] border border-[#ede6f1] bg-white p-2 shadow-[0_9px_26px_rgba(61,35,81,0.06)] transition duration-300 hover:-translate-y-1.5 hover:border-[#d6b5ef] hover:shadow-[0_16px_38px_rgba(104,63,139,0.13)] sm:rounded-[1.9rem] sm:p-2.5"
+    >
+      <div className={"relative flex aspect-[1.2/1] min-h-0 items-center justify-center overflow-hidden rounded-[1.1rem] bg-gradient-to-br sm:rounded-[1.45rem] " + accent}>
+        <span className="absolute -left-6 -top-6 h-24 w-24 rounded-full border-[12px] border-white/40" aria-hidden="true" />
+        <span className="absolute -bottom-7 -right-5 h-24 w-24 rounded-full border-[12px] border-white/35" aria-hidden="true" />
+        {category.imageUrl ? (
+          <img
+            src={category.imageUrl}
+            alt={category.name}
+            loading="lazy"
+            className="relative z-10 h-full w-full object-contain p-2 drop-shadow-[0_8px_14px_rgba(60,37,73,0.08)] transition-transform duration-500 group-hover:scale-[1.045] sm:p-3"
+          />
         ) : (
-          <div className="flex h-full items-center justify-center">
-            <div className="relative flex h-full w-full items-center justify-center">
-              <span className="absolute left-[15%] top-[20%] h-10 w-10 rotate-12 rounded-2xl bg-white/60 shadow-sm" />
-              <span className="absolute bottom-[18%] right-[17%] h-8 w-8 -rotate-12 rounded-full bg-yellow-200/60" />
-              <span className="absolute right-[16%] top-[12%] text-2xl text-yellow-500" aria-hidden="true">✦</span>
-              <span className="absolute bottom-[17%] left-[16%] text-2xl text-rose-400" aria-hidden="true">✿</span>
-              <CategoryArtwork slug={slug} name={category.name} />
-            </div>
+          <div className="relative z-10 flex h-full w-full items-center justify-center">
+            <CategoryArtwork slug={slug} name={category.name} />
           </div>
         )}
-        <span className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-violet-600 opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+        <span className="absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-[#7542ac] opacity-0 shadow-md transition group-hover:opacity-100 sm:right-3 sm:top-3">
           <ArrowUpRight className="h-4 w-4" />
         </span>
       </div>
-      <div className="flex items-start justify-between gap-3 px-3 pb-3 pt-4">
-        <div>
-          <h3 className="text-lg font-black text-slate-900 transition-colors group-hover:text-violet-700">{category.name}</h3>
-          {description && <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500">{description}</p>}
+      <div className="flex flex-1 flex-col px-2 pb-3 pt-4 sm:px-3">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-2 text-sm font-black leading-snug text-[#38294d] transition group-hover:text-[#8147c8] sm:text-lg">{category.name}</h3>
+          <Sparkles className="mt-0.5 hidden h-4 w-4 shrink-0 text-[#e8a651] sm:block" />
         </div>
-        <Sparkles className="mt-1 h-4 w-4 shrink-0 text-yellow-400 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-125" />
+        {category.description && (
+          <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#786b81] sm:text-sm">{category.description}</p>
+        )}
+        <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-xs font-extrabold text-[#824bbd] sm:text-sm">
+          Browse pictures <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+        </span>
       </div>
     </Link>
   );
