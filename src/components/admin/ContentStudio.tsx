@@ -50,7 +50,7 @@ export default function ContentStudio(){
   setDrafts(old=>publish?old:[{id:result.id,title:seo.title,imageUrl:info.url},...old]);setFile(null);setJson("");setSeo(null);
  }catch(e){setMessage("Error: "+(e instanceof Error?e.message:"Unknown error"));}finally{setBusy(false);}}
  return <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
-  <div><div className="mb-3"><Link className="text-sm font-bold text-red-700 underline" href="/admin/content-reset/">Reset old content database</Link></div><h1 className="text-3xl font-black">Content Studio — Image + SEO JSON</h1><p className="mt-2 text-slate-600">One coloring page image and one SEO JSON file. No Gemini API required.</p></div>
+  <div><h1 className="text-3xl font-black">Content Studio — Image + SEO JSON</h1><p className="mt-2 text-slate-600">One coloring page image and one SEO JSON file. No Gemini API required.</p></div>
   <section className="rounded-2xl border bg-white p-5 space-y-4">
    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-xl font-bold">1. Generate SEO JSON with any AI</h2><button type="button" onClick={()=>navigator.clipboard.writeText(samplePrompt).then(()=>setMessage("Master Prompt copied."))} className="rounded-lg bg-violet-100 px-4 py-2 font-semibold text-violet-900">Copy Master Prompt</button></div>
    <p className="text-sm text-slate-600">Send your coloring page image and this prompt to ChatGPT, Gemini or Claude. Copy the resulting JSON or save it as a .json file.</p>
