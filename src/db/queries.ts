@@ -1,7 +1,6 @@
 import { and, desc, eq, ne } from "drizzle-orm";
 
 import { db } from "./index";
-import { curatedColoringCards, curatedColoringPage } from "@/lib/data/curatedColoring";
 
 import {
   categories,
@@ -56,7 +55,7 @@ export async function getColoringPageBySlug(slug: string) {
     )
     .limit(1);
 
-  return result[0] ?? curatedColoringPage(slug);
+  return result[0] ?? null;
 }
 
 /**
@@ -105,7 +104,7 @@ export async function getColoringPageByCategoryAndSlug(
     )
     .limit(1);
 
-  return result[0] ?? curatedColoringPage(slug, categorySlug);
+  return result[0] ?? null;
 }
 
 /* =========================================================
@@ -260,7 +259,7 @@ export async function getAllPublishedColoringPages() {
     .where(eq(coloringPages.isPublished, true))
     .orderBy(desc(coloringPages.publishedAt));
 
-  return [...curatedColoringCards().map(({ id, title, slug, categoryId, publishedAt }) => ({ id, title, slug, categoryId, publishedAt })), ...rows];
+  return rows;
 }
 
 /**
@@ -298,7 +297,7 @@ export async function getAllPublishedColoringPagesWithCategory() {
       desc(coloringPages.publishedAt)
     );
 
-  return [...curatedColoringCards(), ...rows];
+  return rows;
 }
 
 /* =========================================================
@@ -424,7 +423,7 @@ export async function getPublishedColoringPagesByCategorySlug(
       desc(coloringPages.publishedAt)
     );
 
-  return [...curatedColoringCards(categorySlug), ...rows];
+  return rows;
 }
 
 /* =========================================================

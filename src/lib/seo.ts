@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   domain: SITE_ROOT,
   defaultTitle: "Free Coloring Pages for Kids & Adults | CraftColoring",
   defaultDescription:
-    "Explore free online coloring pages for kids and adults. Color directly in your browser with interactive tools and discover themed collections for learning and creativity.",
+    "Find free coloring pages for kids. Browse simple pictures, print them at home, and enjoy a little art time with crayons or pencils.",
   ogImage: `${SITE_ROOT}/opengraph-image`,
   twitterHandle: undefined,
 };
