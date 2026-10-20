@@ -11,7 +11,7 @@ export async function POST(request:Request){if(!await isAdminAuthenticated())ret
  if(!x||typeof x!=="object"||Array.isArray(x))return NextResponse.json({error:"Invalid JSON object"},{status:400});
  const str=(key:string)=>typeof x[key]==="string"?x[key].trim():"";
  const chars=(key:string,min:number,max:number)=>str(key).length>=min&&str(key).length<=max;
- const words=(v:string)=>v.trim().split(/\\s+/).filter(Boolean).length;
+ const words=(v:string)=>v.trim().split(/\s+/).filter(Boolean).length;
  const exact=(v:unknown,min:number,max:number)=>Array.isArray(v)&&v.length>=min&&v.length<=max&&v.every(w=>typeof w==="string"&&w.trim().length>0&&w.trim().length<=100);
  const err:string[]=[];
  for(const [k,low,high] of [["title",35,75],["slug",15,85],["seoTitle",45,60],["seoDescription",140,160],["altText",70,125],["cardDescription",100,155]] as [string,number,number][])if(!chars(k,low,high))err.push(k+" must have "+low+"-"+high+" characters");
@@ -27,7 +27,7 @@ export async function POST(request:Request){if(!await isAdminAuthenticated())ret
  if(!Array.isArray(x.faqs)||x.faqs.length!==3||x.faqs.some((f:unknown)=>{if(!f||typeof f!=="object")return true;const o=f as {question?:unknown;answer?:unknown};return typeof o.question!=="string"||!o.question.trim()||typeof o.answer!=="string"||words(o.answer)<35||words(o.answer)>70;}))err.push("faqs must contain 3 questions with 35-70 word answers");
  const category=str("category");const allowed=["Animal","Christmas","Adults","Dinosaur","Easter","Fantasy & Fairy Tales","Flower & Garden","Food & Sweet Treat","Halloween","Holiday & Season","Kindergarten","Mandala","Nature & Landscape","Ocean & Sea Life","Outer Space","Preschool & Toddler","Princess","Sports","Unicorn","Vehicle & Car"];
  if(!allowed.includes(category))err.push("category must match an approved category");
- const imageUrl=String(b.imageUrl||"");const storage=process.env.SUPABASE_URL?.replace(/\\/$/,"");
+ const imageUrl=String(b.imageUrl||"");const storage=process.env.SUPABASE_URL?.replace(/\/$/,"");
  if(!storage||!imageUrl.startsWith(storage+"/storage/v1/object/public/coloring-pages/"))err.push("Upload a valid image first");
  if(err.length)return NextResponse.json({error:err.join("; "),issues:err},{status:400});
  let matching=await db.select({id:categories.id}).from(categories).where(eq(categories.name,category)).limit(1);
