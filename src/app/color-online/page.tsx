@@ -14,7 +14,7 @@ export const metadata = constructMetadata({
 });
 
 export default async function ColorOnlineDirectoryPage() {
-  const pages = (await getAllPublishedColoringPagesWithCategory()).filter(page => Boolean(page.svgContent));
+  const pages = (await getAllPublishedColoringPagesWithCategory()).filter(page => Boolean(page.svgContent || page.svgUrl));
 
   const breadcrumbItems = [
     { label: "Color Online", href: "/color-online/" },

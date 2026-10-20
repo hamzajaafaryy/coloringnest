@@ -7,6 +7,7 @@ export interface DbColoringPageCard {
   seoDescription?: string | null;
   imageUrl: string | null;
   svgContent: string | null;
+  svgUrl?: string | null;
   altText: string | null;
 
   categoryId: number | null;

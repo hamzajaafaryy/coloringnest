@@ -109,7 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     });
 
-    if (page.svgContent) routes.push({
+    if (page.svgContent || page.svgUrl) routes.push({
       url: `${DOMAIN}/color-online/${page.slug}/`,
       ...(lastModified ? { lastModified } : {}),
       changeFrequency: "monthly",

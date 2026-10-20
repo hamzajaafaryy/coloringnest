@@ -3,6 +3,7 @@ import { Heart, Printer, Sparkles } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DownloadButton from "@/components/DownloadButton";
 import ImageDownloadButton from "@/components/ImageDownloadButton";
+import SvgDownloadButton from "@/components/SvgDownloadButton";
 import PrintButton from "@/components/PrintButton";
 import SocialShare from "@/components/SocialShare";
 import FAQ from "@/components/FAQ";
@@ -36,7 +37,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
   const fallbackFaqs = [
     { question: "Is this coloring page free?", answer: "Yes. You can print this picture for personal and classroom coloring activities without an account. See our Terms of Use for sharing details." },
     { question: "How do I print this picture?", answer: "Select Print Coloring Sheet, choose your printer and paper size, and use the fit-to-page option in your browser's print settings." },
-    ...(canDownload ? [{ question: "How do I save this picture?", answer: `Select ${svg ? "Download Printable PNG" : "Download Image"} to save the artwork to your device, then open the saved file whenever you want to print it.` }] : []),
+    ...(canDownload ? [{ question: "How do I save this picture?", answer: `Select ${image ? "Download Image" : "Download Printable PNG"} to save the artwork to your device, then open the saved file whenever you want to print it.` }] : []),
   ];
   const intro = `Print ${page.title.replace(/ coloring page$/i, "").toLowerCase()} and make it your own with crayons, pencils, or markers.`;
   return (
@@ -57,16 +58,15 @@ export default async function ColoringDetail({ page, printable = false }: { page
 
         <div id="print" className="no-print grid scroll-mt-28 gap-3 sm:grid-cols-2 lg:max-w-3xl lg:grid-cols-3">
           {(svg || image) && <PrintButton title={page.title} />}
-          {svg ? <DownloadButton slug={page.slug!} svgContent={svg} title={page.title} /> : image ? <ImageDownloadButton imageUrl={image} slug={page.slug!} /> : null}
-          {canColor && !printable && <Link href={`/color-online/${page.slug}/`} className="cc-btn cc-btn-soft min-h-12"><Sparkles className="h-4 w-4" /> Color Online</Link>}
+          {image ? <ImageDownloadButton imageUrl={image} slug={page.slug!} /> : svg ? <DownloadButton slug={page.slug!} svgContent={svg} title={page.title} /> : null}
+          {svg && <SvgDownloadButton svgContent={svg} slug={page.slug!} />}
+
         </div>
 
         <div className="grid items-start gap-6 lg:grid-cols-[1.4fr_0.8fr]">
           <div className="rounded-[2rem] border border-[#e9dfef] bg-[#f6f0fa] p-3 sm:p-5">
             <figure className="printable-artwork flex min-h-64 items-center justify-center overflow-hidden rounded-2xl bg-white p-3 shadow-sm sm:p-5">
-              {svg ? <div className="flex w-full items-center justify-center [&>svg]:max-h-[65vh] [&>svg]:w-full [&>svg]:object-contain" dangerouslySetInnerHTML={{ __html: svg }} /> : image ? (
-                <img src={image} alt={page.altText || page.title} fetchPriority="high" className="max-h-[65vh] w-full object-contain" />
-              ) : <p className="py-16 text-sm text-[#786b81]">This picture is being prepared. Please choose another coloring page below.</p>}
+              {image ? <img src={image} alt={page.altText || page.title} fetchPriority="high" className="max-h-[65vh] w-full object-contain" /> : svg ? <div role="img" aria-label={page.altText || page.title} className="flex w-full items-center justify-center [&>svg]:max-h-[65vh] [&>svg]:w-full [&>svg]:object-contain" dangerouslySetInnerHTML={{ __html: svg }} /> : <p className="py-16 text-sm text-[#786b81]">This picture is being prepared. Please choose another coloring page below.</p>}
             </figure>
           </div>
           <aside className="no-print space-y-5 rounded-[2rem] border border-[#eee0e9] bg-gradient-to-br from-[#fff4df] via-[#fff9f3] to-[#fbeafa] p-6 sm:p-7">
@@ -75,9 +75,10 @@ export default async function ColoringDetail({ page, printable = false }: { page
             <p className="text-sm leading-7 text-[#77677d]">Pick a comfy spot and your favorite colors. Make the picture bright, soft, silly, or completely your own.</p>
             <ul className="space-y-3 text-sm leading-6 text-[#77677d]">
               {(svg || image) && <li><strong className="text-[#4c355f]">Print:</strong> Choose Print Coloring Sheet, then select your paper size and fit to page.</li>}
-              {canDownload && <li><strong className="text-[#4c355f]">Save:</strong> Choose {svg ? "Download Printable PNG" : "Download Image"} to keep a copy on your device.</li>}
-              {canColor && !printable && <li><strong className="text-[#4c355f]">Color on screen:</strong> Select Color Online to open the coloring tools.</li>}
+              {canDownload && <li><strong className="text-[#4c355f]">Save:</strong> Choose {image ? "Download Image" : "Download Printable PNG"} to keep a copy on your device.</li>}
+              {svg && <li><strong className="text-[#4c355f]">Vector file:</strong> Download SVG saves the scalable artwork; it does not open the coloring editor.</li>}
             </ul>
+            {canColor && !printable && <div className="space-y-3 rounded-2xl bg-white/80 p-4"><h3 className="font-black">Prefer to color on screen?</h3><p className="text-sm leading-6 text-[#77677d]">Open the browser coloring tools. There is nothing to download to start.</p><Link href={`/color-online/${page.slug}/`} className="cc-btn cc-btn-primary w-full"><Sparkles className="h-4 w-4" /> Color Online</Link></div>}
             <p className="flex items-center gap-2 border-t border-[#ead9e8] pt-4 text-xs font-semibold text-[#79627d]"><Heart className="h-4 w-4 shrink-0 text-[#bd6b8f]" /> Free for personal and classroom coloring.</p>
           </aside>
         </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { sanitizeSvg } from "@/lib/sanitize-svg";
+import { validateColoringSvg } from "@/lib/coloring/validateSvg";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -183,14 +183,14 @@ export async function POST(request: Request) {
       const svgText = new TextDecoder().decode(bytes);
 
       try {
-        const sanitized = new TextEncoder().encode(sanitizeSvg(svgText));
+        const sanitized = new TextEncoder().encode(validateColoringSvg(svgText));
         bytes = sanitized.buffer.slice(
           sanitized.byteOffset,
           sanitized.byteOffset + sanitized.byteLength
         ) as ArrayBuffer;
       } catch {
         return NextResponse.json(
-          { error: "Invalid or unsafe SVG file." },
+          { error: "Use a valid vector SVG with drawable paths or shapes. Raster images wrapped in SVG are not supported." },
           { status: 400 }
         );
       }
