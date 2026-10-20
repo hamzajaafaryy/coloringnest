@@ -1,3 +1,5 @@
+import { getCategoryBySlugFromDb } from "@/db/queries";
+import { canonicalCategorySlug } from "@/lib/category-catalog";
 import {NextResponse} from "next/server";
 import {eq,inArray,and} from "drizzle-orm";
 import {revalidatePath} from "next/cache";
@@ -6,7 +8,7 @@ import {categories,coloringPages,faqs} from "@/db/schema";
 import {isAdminAuthenticated} from "@/lib/admin-auth";
 export const dynamic="force-dynamic";
 export async function GET(){if(!await isAdminAuthenticated())return NextResponse.json({error:"Unauthorized"},{status:401});const [drafts,cats]=await Promise.all([db.select({id:coloringPages.id,title:coloringPages.title,description:coloringPages.description,imageUrl:coloringPages.imageUrl,categoryId:coloringPages.categoryId}).from(coloringPages).where(eq(coloringPages.isPublished,false)).limit(250),db.select({id:categories.id,name:categories.name}).from(categories)]);return NextResponse.json({drafts,categories:cats});}
-export async function POST(request:Request){if(!await isAdminAuthenticated())return NextResponse.json({error:"Unauthorized"},{status:401});try{const b=await request.json();if(b.action==="seedCategories"){const existing=await db.select({id:categories.id}).from(categories).limit(1);if(existing.length)return NextResponse.json({error:"Categories already exist. Refresh the page."},{status:409});const names=["Animal","Christmas","Adults","Dinosaur","Easter","Fantasy & Fairy Tales","Flower & Garden","Food & Sweet Treat","Halloween","Holiday & Season","Kindergarten","Mandala","Nature & Landscape","Ocean & Sea Life","Outer Space","Preschool & Toddler","Princess","Sports","Unicorn","Vehicle & Car"];await db.insert(categories).values(names.map(name=>({name,slug:name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")})));return NextResponse.json({created:names.length});}if(b.action==="importJson"){
+export async function POST(request:Request){if(!await isAdminAuthenticated())return NextResponse.json({error:"Unauthorized"},{status:401});try{const b=await request.json();if(b.action==="seedCategories"){const existing=await db.select({id:categories.id}).from(categories).limit(1);if(existing.length)return NextResponse.json({error:"Categories already exist. Refresh the page."},{status:409});const names=["Animal","Christmas","Adults","Dinosaur","Easter","Fantasy & Fairy Tales","Flower & Garden","Food & Sweet Treat","Halloween","Holiday & Season","Kindergarten","Mandala","Nature & Landscape","Ocean & Sea Life","Outer Space","Preschool & Toddler","Princess","Sports","Unicorn","Vehicle & Car"];await db.insert(categories).values(names.map(name=>({name,slug:canonicalCategorySlug(name)})));return NextResponse.json({created:names.length});}if(b.action==="importJson"){
  const x=b.seo;
  if(!x||typeof x!=="object"||Array.isArray(x))return NextResponse.json({error:"Invalid JSON object"},{status:400});
  const str=(key:string)=>typeof x[key]==="string"?x[key].trim():"";
@@ -30,8 +32,9 @@ export async function POST(request:Request){if(!await isAdminAuthenticated())ret
  const imageUrl=String(b.imageUrl||"");const storage=process.env.SUPABASE_URL?.replace(/\/$/,"");
  if(!storage||!imageUrl.startsWith(storage+"/storage/v1/object/public/coloring-pages/"))err.push("Upload a valid image first");
  if(err.length)return NextResponse.json({error:err.join("; "),issues:err},{status:400});
- let matching=await db.select({id:categories.id}).from(categories).where(eq(categories.name,category)).limit(1);
- if(!matching.length){matching=await db.insert(categories).values({name:category,slug:category.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}).returning({id:categories.id});}
+ const existingCategory=await getCategoryBySlugFromDb(canonicalCategorySlug(category));
+ let matching=existingCategory?[{id:existingCategory.id}]:[];
+ if(!matching.length){matching=await db.insert(categories).values({name:category,slug:canonicalCategorySlug(category)}).returning({id:categories.id});}
  const chosenSlug=str("slug");
  const other=await db.select({id:coloringPages.id}).from(coloringPages).where(eq(coloringPages.slug,chosenSlug)).limit(1);
  if(other.length)return NextResponse.json({error:"This slug already exists. Change it in the JSON."},{status:409});

@@ -7,6 +7,7 @@ import { Search, X, Sparkles, ArrowRight } from "lucide-react";
 
 interface SearchBarProps {
   placeholder?: string;
+  initialQuery?: string;
   className?: string;
   size?: "sm" | "md" | "lg";
 }
@@ -31,10 +32,11 @@ interface SearchResults {
 
 export default function SearchBar({
   placeholder = "Search free coloring pages...",
+  initialQuery = "",
   className = "",
   size = "md",
 }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState<SearchResults>({
     categories: [],

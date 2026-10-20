@@ -22,7 +22,7 @@ export default async function PrintableDirectory() {
     getAllPublishedColoringPagesWithCategory(),
   ]);
   const categories = allCategories.filter((cat) => Boolean(cat.slug))
-    .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || a.name.localeCompare(b.name));
+    .sort((a, b) => Number(b.pageCount > 0) - Number(a.pageCount > 0) || Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || a.name.localeCompare(b.name));
   const pages = allPages.filter((page) => Boolean(page.slug && page.categorySlug));
 
   return (
@@ -78,13 +78,13 @@ export default async function PrintableDirectory() {
         )}
       </section>
 
-      {categories.length > 0 && (
+      {categories.some((category) => category.pageCount > 0) && (
         <section className="bg-[#f8f6ff] py-14 sm:py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <h2 className="text-3xl font-black text-[#362b4a] sm:text-4xl">Find a printable by theme</h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#756a7f]">From animals to magical worlds, there is a theme for every mood.</p>
             <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-              {categories.slice(0, 8).map((category) => <CategoryCard key={category.id} category={category} variant="printable" />)}
+              {categories.filter((category) => category.pageCount > 0).slice(0, 8).map((category) => <CategoryCard key={category.id} category={category} variant="printable" />)}
             </div>
           </div>
         </section>

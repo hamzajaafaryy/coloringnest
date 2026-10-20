@@ -1,8 +1,9 @@
+import { getAllPublishedCategories } from "@/db/queries";
 import {NextResponse} from "next/server";
 import {and,eq,inArray} from "drizzle-orm";
 import {revalidatePath} from "next/cache";
 import {db} from "@/db";
-import {categories,coloringPages,faqs} from "@/db/schema";
+import {coloringPages,faqs} from "@/db/schema";
 import {isAdminAuthenticated} from "@/lib/admin-auth";
 export const dynamic="force-dynamic";
 export const maxDuration=60;
@@ -57,7 +58,7 @@ export async function POST(request:Request){
  const body=await request.json();const ids=Array.isArray(body.ids)?Array.from(new Set<number>(body.ids.map(Number).filter((x:number)=>Number.isSafeInteger(x)&&x>0))).slice(0,1):[];
  if(!ids.length)return NextResponse.json({error:"Select one draft per request"},{status:400});
  if(!process.env.GEMINI_API_KEY)return NextResponse.json({error:"GEMINI_API_KEY is missing in Vercel environment variables"},{status:503});
- const cats=await db.select({id:categories.id,name:categories.name}).from(categories);
+ const cats=(await getAllPublishedCategories()).map(({id,name})=>({id,name}));
  const drafts=await db.select().from(coloringPages).where(and(inArray(coloringPages.id,ids),eq(coloringPages.isPublished,false)));
  const results:{id:number;ok:boolean;error?:string;title?:string}[]=[];
  for(const id of ids){

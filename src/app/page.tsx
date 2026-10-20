@@ -83,11 +83,8 @@ export default async function HomePage() {
   ]);
 
   const pages = allPages.filter((page) => page.slug && page.categorySlug);
-  const categories = allCategories
-    .filter((category) => Boolean(category.slug))
-    .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || Number(Boolean(b.popular)) - Number(Boolean(a.popular)) || a.name.localeCompare(b.name));
-
-  const featuredCategories = categories.slice(0, 8);
+  const categories = allCategories.filter((category) => category.slug);
+  const featuredCategories = categories.filter((category) => category.pageCount > 0).slice(0, 8);
   const newestPages = [...pages]
     .sort((a, b) => (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0))
     .slice(0, 8);
