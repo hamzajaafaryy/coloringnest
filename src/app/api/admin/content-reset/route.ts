@@ -11,7 +11,7 @@ export async function GET(){if(!await isAdminAuthenticated())return NextResponse
  }catch(e){console.error(e);return NextResponse.json({error:"Backup failed"},{status:500});}}
 export async function POST(request:Request){if(!await isAdminAuthenticated())return NextResponse.json({error:"Unauthorized"},{status:401});if(!sameOrigin(request))return NextResponse.json({error:"Invalid request origin"},{status:403});
  try{const body=await request.json();if(body.confirm!=="RESET CRAFTCOLORING CONTENT")return NextResponse.json({error:"Type the exact confirmation phrase."},{status:400});
- await db.transaction(async tx=>{await tx.delete(faqs);await tx.delete(categoryFaqs);await tx.delete(coloringPages);await tx.delete(blogPosts);await tx.delete(tags);await tx.delete(categories);});
+ await db.transaction(async tx=>{await tx.delete(faqs);await tx.delete(coloringPages);await tx.delete(blogPosts);await tx.delete(tags);});
  for(const path of ["/","/coloring-pages/","/printable-coloring-pages/","/blog/","/color-online/","/sitemap.xml"])revalidatePath(path);
- return NextResponse.json({ok:true,message:"All content tables reset. Admin account and storage settings were not touched."});
+ return NextResponse.json({ok:true,message:"Old coloring pages, page FAQs, blog posts and tags were deleted. Categories, category images, category FAQs, admin account and storage were preserved."});
  }catch(e){console.error(e);return NextResponse.json({error:"Reset failed; check server logs."},{status:500});}}
