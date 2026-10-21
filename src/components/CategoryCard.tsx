@@ -8,6 +8,7 @@ interface CategoryCardCategory {
   slug: string | null;
   description?: string | null;
   imageUrl?: string | null;
+  pageCount?: number;
 }
 interface CategoryCardProps {
   category: CategoryCardCategory;
@@ -64,7 +65,7 @@ export default function CategoryCard({
           <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#786b81] sm:text-sm">{category.description}</p>
         )}
         <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-xs font-extrabold text-[#824bbd] sm:text-sm">
-          Browse pictures <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+          {category.pageCount === undefined ? "Browse pictures" : category.pageCount === 0 ? "Coming soon" : `${category.pageCount} ${category.pageCount === 1 ? "picture" : "pictures"}`} <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
         </span>
       </div>
     </Link>

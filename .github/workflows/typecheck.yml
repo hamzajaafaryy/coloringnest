@@ -40,6 +40,8 @@ jobs:
       - run: npm ci
       - name: Push schema to disposable CI PostgreSQL
         run: npx drizzle-kit push --config drizzle.config.json --force
+      - name: Verify category aliases and studio JSON validation
+        run: node --test tests/*.test.mjs
       - run: npm run typecheck
       - name: Build app against disposable CI PostgreSQL
         run: npm run build

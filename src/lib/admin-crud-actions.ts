@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
+import { getCategoryBySlugFromDb } from "@/db/queries";
 import { blogPosts, categories, categoryFaqs, coloringPages, faqs } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { deleteCraftColoringStorageUrl } from "@/lib/storage";
@@ -109,6 +110,7 @@ export async function deleteColoringPage(id: number) {
 export async function createCategory(formData: FormData) {
   await requireAdmin(); const name = text(formData, "name"); if (!name) return;
   const slug = normalizedSlug(formData, name);
+  if (await getCategoryBySlugFromDb(slug)) throw new Error("This category already exists. Edit the existing category instead.");
   await assertUniqueCategorySlug(slug);
   await db.insert(categories).values({ name, slug, description: text(formData, "description"), imageUrl: text(formData, "imageUrl"), seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), iconName: text(formData, "iconName"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), heroColor: text(formData, "heroColor"), subcategories: list(formData, "subcategories") });
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/categories/");

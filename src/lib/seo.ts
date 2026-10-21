@@ -37,7 +37,7 @@ export function constructMetadata({
   noindex = false,
   type = "website",
 }: MetadataParams = {}): Metadata {
-  const cleanTitle = title?.endsWith(` | ${SITE_CONFIG.name}`) ? title.slice(0, -(` | ${SITE_CONFIG.name}`).length) : title;
+  const cleanTitle = title?.replace(/(?:\s*\|\s*(?:ColoringNest|ColoringCraft|CraftColoring))+\s*$/gi, "").trim();
   const metaTitle = cleanTitle
     ? `${cleanTitle} | ${SITE_CONFIG.name}`
     : SITE_CONFIG.defaultTitle;

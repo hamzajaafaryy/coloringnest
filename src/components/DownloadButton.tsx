@@ -13,12 +13,15 @@ interface DownloadButtonProps {
 export default function DownloadButton({ slug, svgContent, title }: DownloadButtonProps) {
   const [downloading, setDownloading] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleDownload = async () => {
     setDownloading(true);
+    setCompleted(false);
+    setError(false);
+    const tempDiv = document.createElement("div");
     try {
       // Create hidden element to render SVG
-      const tempDiv = document.createElement("div");
       tempDiv.style.position = "absolute";
       tempDiv.style.left = "-9999px";
       tempDiv.innerHTML = svgContent;
@@ -26,34 +29,37 @@ export default function DownloadButton({ slug, svgContent, title }: DownloadButt
 
       const filename = `${slug}-coloring-page.png`;
       await downloadSvgAsPng(tempDiv, filename, 3);
-      document.body.removeChild(tempDiv);
 
       setCompleted(true);
       setTimeout(() => setCompleted(false), 2500);
-    } catch (err) {
-      console.error("Download failed:", err);
+    } catch {
+      setError(true);
     } finally {
+      tempDiv.remove();
       setDownloading(false);
     }
   };
 
   return (
-    <button
+    <div><button
+      type="button"
+      aria-label={completed ? "PNG Downloaded!" : downloading ? "Generating PNG..." : `Download Printable PNG: ${title}`}
+      aria-busy={downloading}
       onClick={handleDownload}
       disabled={downloading}
-      className="cc-btn cc-btn-dark w-full min-h-12 px-4 py-3.5 disabled:cursor-not-allowed disabled:opacity-60"
+      className="cc-btn cc-btn-dark min-h-14 w-full px-3 py-3.5 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {completed ? (
         <>
-          <Check className="w-4 h-4 text-emerald-400" />
-          <span>PNG Downloaded!</span>
+          <Check aria-hidden="true" className="h-4 w-4 shrink-0 text-emerald-400" />
+          <span aria-live="polite">PNG Downloaded!</span>
         </>
       ) : (
         <>
-          <Download className="w-4 h-4 text-indigo-400" />
-          <span>{downloading ? "Generating PNG..." : "Download Printable PNG"}</span>
+          <Download aria-hidden="true" className="h-4 w-4 shrink-0 text-indigo-400" />
+          <span aria-live="polite">{downloading ? "Generating PNG..." : "Download Printable PNG"}</span>
         </>
       )}
-    </button>
+    </button>{error && <p role="alert" className="mt-2 text-sm text-red-700">We could not create the PNG. Please try Download SVG or Print Coloring Sheet.</p>}</div>
   );
 }

@@ -1,4 +1,6 @@
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, count, desc, eq, inArray, ne } from "drizzle-orm";
+import { cache } from "react";
+import { canonicalCategorySlug, categorySlugs, consolidateCategories } from "@/lib/category-catalog";
 
 import { db } from "./index";
 
@@ -55,7 +57,7 @@ export async function getColoringPageBySlug(slug: string) {
     )
     .limit(1);
 
-  return result[0] ?? null;
+  return result[0] ? await canonicalizePage(result[0]) : null;
 }
 
 /**
@@ -98,13 +100,13 @@ export async function getColoringPageByCategoryAndSlug(
     .where(
       and(
         eq(coloringPages.slug, slug),
-        eq(categories.slug, categorySlug),
+        inArray(categories.slug, categorySlugs(categorySlug)),
         eq(coloringPages.isPublished, true)
       )
     )
     .limit(1);
 
-  return result[0] ?? null;
+  return result[0] ? await canonicalizePage(result[0]) : null;
 }
 
 /* =========================================================
@@ -145,6 +147,7 @@ export async function getRelatedColoringPages(
   categoryId: number | null,
   limit = 6
 ) {
+  const categoryGroup = (await getAllPublishedCategories()).find((category) => category.sourceIds.includes(categoryId ?? -1));
   const sameCategory = categoryId
     ? await db
         .select({
@@ -154,6 +157,7 @@ export async function getRelatedColoringPages(
           description: coloringPages.description,
       seoDescription: coloringPages.seoDescription,
           imageUrl: coloringPages.imageUrl,
+          svgUrl: coloringPages.svgUrl,
           svgContent: coloringPages.svgContent,
           altText: coloringPages.altText,
           categoryId: coloringPages.categoryId,
@@ -172,7 +176,7 @@ export async function getRelatedColoringPages(
         )
         .where(
           and(
-            eq(coloringPages.categoryId, categoryId),
+            inArray(coloringPages.categoryId, categoryGroup?.sourceIds || [categoryId]),
             eq(coloringPages.isPublished, true),
             ne(coloringPages.id, currentPageId)
           )
@@ -185,7 +189,7 @@ export async function getRelatedColoringPages(
     : [];
 
   if (sameCategory.length >= limit) {
-    return sameCategory;
+    return canonicalizePages(sameCategory);
   }
 
   const existingIds = new Set(
@@ -200,6 +204,7 @@ export async function getRelatedColoringPages(
       description: coloringPages.description,
       seoDescription: coloringPages.seoDescription,
       imageUrl: coloringPages.imageUrl,
+      svgUrl: coloringPages.svgUrl,
       svgContent: coloringPages.svgContent,
       altText: coloringPages.altText,
       categoryId: coloringPages.categoryId,
@@ -233,10 +238,7 @@ export async function getRelatedColoringPages(
     (page) => !existingIds.has(page.id)
   );
 
-  return [
-    ...sameCategory,
-    ...filteredRemaining,
-  ].slice(0, limit);
+  return canonicalizePages([...sameCategory, ...filteredRemaining].slice(0, limit));
 }
 
 /* =========================================================
@@ -275,6 +277,7 @@ export async function getAllPublishedColoringPagesWithCategory() {
       description: coloringPages.description,
       seoDescription: coloringPages.seoDescription,
       imageUrl: coloringPages.imageUrl,
+      svgUrl: coloringPages.svgUrl,
       svgContent: coloringPages.svgContent,
       altText: coloringPages.altText,
       categoryId: coloringPages.categoryId,
@@ -297,7 +300,7 @@ export async function getAllPublishedColoringPagesWithCategory() {
       desc(coloringPages.publishedAt)
     );
 
-  return rows;
+  return canonicalizePages(rows);
 }
 
 /* =========================================================
@@ -309,61 +312,52 @@ export async function getAllPublishedColoringPagesWithCategory() {
  *
  * Category metadata now comes entirely from Supabase.
  */
-export async function getAllPublishedCategories() {
-  return db
-    .select({
-      id: categories.id,
-      name: categories.name,
-      slug: categories.slug,
-      description: categories.description,
-      imageUrl: categories.imageUrl,
-      seoTitle: categories.seoTitle,
-      seoDescription: categories.seoDescription,
-      iconName: categories.iconName,
-      featured: categories.featured,
-      popular: categories.popular,
-      heroColor: categories.heroColor,
-      subcategories: categories.subcategories,
-    })
-    .from(categories)
-    .orderBy(categories.name);
+export const getAllPublishedCategories = cache(async () => {
+  const rows = await db.select({
+    id: categories.id,
+    name: categories.name,
+    slug: categories.slug,
+    description: categories.description,
+    imageUrl: categories.imageUrl,
+    seoTitle: categories.seoTitle,
+    seoDescription: categories.seoDescription,
+    iconName: categories.iconName,
+    featured: categories.featured,
+    popular: categories.popular,
+    heroColor: categories.heroColor,
+    subcategories: categories.subcategories,
+    pageCount: count(coloringPages.id),
+  }).from(categories).leftJoin(coloringPages, and(
+    eq(coloringPages.categoryId, categories.id),
+    eq(coloringPages.isPublished, true),
+  )).groupBy(categories.id);
+  return consolidateCategories(rows);
+});
+
+export async function getCategoryBySlugFromDb(slug: string) {
+  return (await getAllPublishedCategories()).find((category) =>
+    category.slug === canonicalCategorySlug(slug)) || null;
 }
 
-/**
- * Get one category by slug
- *
- * Category metadata now comes entirely from Supabase.
- */
-export async function getCategoryBySlugFromDb(
-  slug: string
-) {
-  const result = await db
-    .select({
-      id: categories.id,
-      name: categories.name,
-      slug: categories.slug,
-      description: categories.description,
-      imageUrl: categories.imageUrl,
-      seoTitle: categories.seoTitle,
-      seoDescription: categories.seoDescription,
-      iconName: categories.iconName,
-      featured: categories.featured,
-      popular: categories.popular,
-      heroColor: categories.heroColor,
-      subcategories: categories.subcategories,
-    })
-    .from(categories)
-    .where(eq(categories.slug, slug))
-    .limit(1);
+type CategorizedPage = { categorySlug: string | null; categoryName: string | null };
 
-  return result[0] ?? null;
+async function canonicalizePages<T extends CategorizedPage>(pages: T[]): Promise<T[]> {
+  const catalog = new Map((await getAllPublishedCategories()).map((category) => [category.slug, category]));
+  return pages.map((page) => {
+    const category = page.categorySlug ? catalog.get(canonicalCategorySlug(page.categorySlug)) : undefined;
+    return category ? { ...page, categorySlug: category.slug, categoryName: category.name } : page;
+  });
+}
+
+async function canonicalizePage<T extends CategorizedPage>(page: T): Promise<T> {
+  return (await canonicalizePages([page]))[0];
 }
 
 /**
  * Get category FAQs
  */
 export async function getCategoryFaqs(
-  categoryId: number
+  categoryId: number, sourceIds = [categoryId]
 ) {
   return db
     .select({
@@ -373,7 +367,7 @@ export async function getCategoryFaqs(
       sortOrder: categoryFaqs.sortOrder,
     })
     .from(categoryFaqs)
-    .where(eq(categoryFaqs.categoryId, categoryId))
+    .where(inArray(categoryFaqs.categoryId, sourceIds))
     .orderBy(categoryFaqs.sortOrder);
 }
 
@@ -396,6 +390,7 @@ export async function getPublishedColoringPagesByCategorySlug(
       description: coloringPages.description,
       seoDescription: coloringPages.seoDescription,
       imageUrl: coloringPages.imageUrl,
+      svgUrl: coloringPages.svgUrl,
       svgContent: coloringPages.svgContent,
       altText: coloringPages.altText,
       categoryId: coloringPages.categoryId,
@@ -414,7 +409,7 @@ export async function getPublishedColoringPagesByCategorySlug(
     )
     .where(
       and(
-        eq(categories.slug, categorySlug),
+        inArray(categories.slug, categorySlugs(categorySlug)),
         eq(coloringPages.isPublished, true)
       )
     )
@@ -423,7 +418,7 @@ export async function getPublishedColoringPagesByCategorySlug(
       desc(coloringPages.publishedAt)
     );
 
-  return rows;
+  return canonicalizePages(rows);
 }
 
 /* =========================================================

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { canvasPngBlob, downloadBlob } from "@/lib/coloring/download";
 import {
   PaintBucket,
   Brush,
@@ -185,6 +186,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const [brushSize, setBrushSize] = useState(12);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [editorError, setEditorError] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -398,13 +400,17 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const link = document.createElement("a");
-    link.download = `${slug}-colored.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    if (!canvas || downloading) return;
+    setDownloading(true);
+    try {
+      downloadBlob(await canvasPngBlob(canvas), `${slug}-colored.png`);
+    } catch {
+      setEditorError("The colored picture could not be downloaded. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handlePrint = () => window.print();
@@ -478,7 +484,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
           {savedSuccess ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
           {savedSuccess ? "Saved" : "Save"}
         </button>
-        <button onClick={handleDownload} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Download className="w-4 h-4" />Download PNG</button>
+        <button type="button" disabled={downloading} aria-busy={downloading} onClick={() => void handleDownload()} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm disabled:opacity-50"><Download aria-hidden="true" className="w-4 h-4" /><span aria-live="polite">{downloading ? "Creating PNG…" : "Download PNG"}</span></button>
         <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Printer className="w-4 h-4" />Print</button>
         <button onClick={handleReset} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Sparkles className="w-4 h-4" />Start Over</button>
         <button onClick={() => { const editor = canvasRef.current?.closest(".cc-editor"); void editor?.requestFullscreen?.().catch(() => {}); }} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Maximize2 className="w-4 h-4" />Fullscreen</button>

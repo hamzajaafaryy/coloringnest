@@ -20,6 +20,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const routes: MetadataRoute.Sitemap = [
     {
+      url: `${DOMAIN}/name-coloring/`,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${DOMAIN}/`,
       changeFrequency: "daily",
       priority: 1.0,
@@ -73,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Category URLs
   categories.forEach((category) => {
-    if (!category.slug) return;
+    if (!category.slug || category.pageCount === 0) return;
 
     routes.push({
       url: `${DOMAIN}/coloring-pages/${category.slug}/`,
@@ -109,7 +114,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     });
 
-    routes.push({
+    if (page.svgContent || page.svgUrl) routes.push({
       url: `${DOMAIN}/color-online/${page.slug}/`,
       ...(lastModified ? { lastModified } : {}),
       changeFrequency: "monthly",

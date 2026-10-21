@@ -98,6 +98,8 @@ export default async function SearchPage({
         </h1>
 
         <SearchBar
+          key={query}
+          initialQuery={q?.trim() || ""}
           placeholder="Search coloring pages..."
           size="lg"
         />
@@ -126,7 +128,7 @@ export default async function SearchPage({
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-slate-900">
           {query
-            ? `Found ${results.length} Coloring Pages`
+            ? `Found ${results.length} Coloring ${results.length === 1 ? "Page" : "Pages"}`
             : "Popular Coloring Pages"}
         </h2>
 

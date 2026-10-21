@@ -23,7 +23,7 @@ export default async function ColoringPagesDirectory() {
     getAllPublishedColoringPagesWithCategory(),
   ]);
   const categories = allCategories.filter((cat) => Boolean(cat.slug))
-    .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || a.name.localeCompare(b.name));
+    .sort((a, b) => Number(b.pageCount > 0) - Number(a.pageCount > 0) || Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || a.name.localeCompare(b.name));
   const pages = allPages.filter((page) => Boolean(page.slug && page.categorySlug));
 
   return (

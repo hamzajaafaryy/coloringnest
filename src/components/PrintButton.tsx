@@ -13,10 +13,12 @@ export default function PrintButton({ title }: PrintButtonProps) {
 
   return (
     <button
+      type="button"
+      aria-label={`Print ${title}`}
       onClick={handlePrint}
-      className="cc-btn cc-btn-outline w-full min-h-12 px-4 py-3.5"
+      className="cc-btn cc-btn-print min-h-14 w-full px-3 py-3.5"
     >
-      <Printer className="w-4 h-4 text-slate-600" />
+      <Printer aria-hidden="true" className="h-4 w-4 shrink-0" />
       <span>Print Coloring Sheet</span>
     </button>
   );
