@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ArrowRight, Menu, Palette, Printer, Search, Sparkles, X } from "lucide-react";
+import { ArrowRight, Menu, Printer, Search, Sparkles, X } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 
 const navLinks = [
@@ -33,10 +34,14 @@ export default function Header() {
             className="group flex min-w-0 shrink-0 items-center gap-2.5 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-violet-500"
             aria-label="CraftColoring home"
           >
-            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#a05de2] via-[#d96eb8] to-[#ffb362] text-white shadow-[0_7px_18px_rgba(143,73,186,0.22)] transition group-hover:-rotate-6">
-              <Palette className="h-6 w-6" aria-hidden="true" />
-              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-[#ffe68e]" />
-            </span>
+            <Image
+              src="/icons/craftcoloring-192.png"
+              alt=""
+              width={48}
+              height={48}
+              priority
+              className="h-11 w-11 shrink-0 object-contain transition group-hover:-rotate-6 sm:h-12 sm:w-12"
+            />
             <span className="block leading-none">
               <span className="block text-[1.22rem] font-black tracking-tight text-[#392653] sm:text-[1.5rem]">
                 Craft<span className="text-[#9255cb]">Coloring</span>
