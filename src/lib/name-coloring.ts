@@ -128,10 +128,11 @@ export function layoutName(name: string, width: number, height: number, wrap = t
   });
 }
 
-function letterOutlines(name: string, width: number, height: number, wrap = true) {
+function letterOutlines(name: string, width: number, height: number, wrap = true, dotted = false) {
   return layoutName(name, width, height, wrap).map(row =>
-    `<g data-name-row="${escapeSvgText(row.text)}" transform="translate(${rounded(row.x)} ${rounded(row.baseline)}) scale(${rounded(row.scale)})">`
-    + row.characters.filter(item => item.glyph.path).map(item => `<path d="${item.glyph.path}" transform="translate(${item.offset} 0)" vector-effect="non-scaling-stroke"/>`).join("") + "</g>"
+    // Explicit stroke widths survive rasterization consistently in browsers and print tools.
+    `<g data-name-row="${escapeSvgText(row.text)}" transform="translate(${rounded(row.x)} ${rounded(row.baseline)}) scale(${rounded(row.scale)})" stroke-width="${rounded(3.6 / row.scale)}"${dotted ? ` stroke-dasharray="${rounded(5 / row.scale)} ${rounded(4 / row.scale)}"` : ""}>`
+    + row.characters.filter(item => item.glyph.path).map(item => `<path d="${item.glyph.path}" transform="translate(${item.offset} 0)"/>`).join("") + "</g>"
   ).join("");
 }
 
@@ -145,7 +146,7 @@ export function buildNameSheet(options: NameSheetOptions) {
   const title = `${name} ${theme.short.toLowerCase()} name coloring page`;
   const outlines = letterOutlines(name, width, height);
   const tracing = options.tracing
-    ? `<text x="${width / 2}" y="${height - 177}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="${INK}" stroke="none">Trace your name, then make it colorful.</text><g transform="translate(${width * 0.3} ${height - 115 - height * 0.2}) scale(0.4)" stroke-width="1.4" stroke-dasharray="5 4">${letterOutlines(name, width, height, false)}</g>`
+    ? `<text x="${width / 2}" y="${height - 177}" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="${INK}" stroke="none">Trace your name, then make it colorful.</text><g data-tracing-row="true" transform="translate(${width * 0.3} ${height - 115 - height * 0.2}) scale(0.4)">${letterOutlines(name, width, height, false, true)}</g>`
     : "";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeSvgText(title)}"><title>${escapeSvgText(title)}</title><desc>Free personalized name coloring sheet with ${theme.description.toLowerCase()}. Print on ${options.paper === "a4" ? "A4" : "US Letter"} paper.</desc><metadata>Letter outlines derived from Fredoka. Copyright 2016 The Fredoka Project Authors. SIL Open Font License 1.1. https://github.com/google/fonts/tree/main/ofl/fredoka</metadata><rect width="${width}" height="${height}" fill="#fff"/><g fill="#fff" stroke="${INK}" color="${INK}" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><rect x="31" y="31" width="${width - 62}" height="${height - 62}" rx="35"/><text x="${width / 2}" y="111" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" letter-spacing="3" fill="${INK}" stroke="none">MY COLORING PAGE</text>${decoration(options.theme, width, height, options.tracing)}<rect x="69" y="${height * 0.5 - 145}" width="${width - 138}" height="290" rx="57"/><g stroke-width="3.6">${outlines}</g>${tracing}<text x="${width / 2}" y="${height - 58}" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="${INK}" stroke="none">CraftColoring · Made for ${escapeSvgText(name)}</text></g></svg>`;
 }

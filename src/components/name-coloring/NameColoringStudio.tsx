@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowDown, Bug, Check, Download, Flower2, Footprints, Orbit, Palette, Printer, Sparkles } from "lucide-react";
 import { buildNameSheet, MAX_NAME_LENGTH, NAME_THEMES, nameSheetDimensions, nameSheetFilename, validateColoringName, type NamePaper, type NameTheme } from "@/lib/name-coloring";
 import { downloadBlob, downloadSvgPng } from "@/lib/coloring/download";
@@ -27,7 +27,7 @@ export default function NameColoringStudio() {
   const valid = !validation.error;
   const previewName = valid ? validation.name : "SARA";
   const dimensions = nameSheetDimensions(paper);
-  const svg = useMemo(() => buildNameSheet({ name: previewName, theme, paper, tracing }), [previewName, theme, paper, tracing]);
+  const svg = buildNameSheet({ name: previewName, theme, paper, tracing });
   const selectedTheme = NAME_THEMES.find(item => item.id === theme)!;
 
   function designChanged() {

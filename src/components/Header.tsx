@@ -18,8 +18,10 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
-  const active = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const active = (href: string) => {
+    const path = href.replace(/\/$/, "");
+    return href === "/" ? pathname === "/" : pathname === path || pathname.startsWith(`${path}/`);
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#eee6f5] bg-white/95 shadow-[0_6px_25px_rgba(53,33,74,0.045)] backdrop-blur-xl">

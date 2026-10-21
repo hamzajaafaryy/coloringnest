@@ -23,7 +23,11 @@ test("every theme creates a distinct self-contained printable vector with real l
     assert.match(svg, /^<svg xmlns="http:\/\/www.w3.org\/2000\/svg"/);
     assert.match(svg, /viewBox="0 0 850 1100"/);
     assert.match(svg, /data-name-row="SARA"/);
-    assert.match(svg, /vector-effect="non-scaling-stroke"/);
+    const row = svg.match(/<g data-name-row="SARA"[^>]*>/)[0];
+    const scale = Number(row.match(/scale\(([\d.]+)\)/)[1]);
+    const stroke = Number(row.match(/stroke-width="([\d.]+)"/)[1]);
+    assert.ok(Math.abs(scale * stroke - 3.6) < .02, "letter outlines stay legible after rasterization");
+    assert.doesNotMatch(svg, /vector-effect/);
     assert.ok((svg.match(/<path /g) || []).length > 10);
     assert.doesNotMatch(svg, /<(?:image|script|foreignObject|use|iframe)\b|\b(?:href|onload|onclick)=/i);
     assert.doesNotMatch(svg, /<text[^>]*>SARA<\/text>/);
@@ -58,7 +62,8 @@ test("paper size and tracing settings produce the requested sheet without mutati
   const plain = buildNameSheet(defaults);
   const traced = buildNameSheet({ ...defaults, paper: "a4", tracing: true });
   assert.match(traced, /viewBox="0 0 827 1169"/);
-  assert.match(traced, /stroke-dasharray="5 4"/);
+  assert.match(traced, /data-tracing-row="true"/);
+  assert.match(traced, /stroke-dasharray=/);
   assert.match(traced, /Trace your name/);
   assert.doesNotMatch(plain, /stroke-dasharray/);
   assert.equal(buildNameSheet(defaults), plain);
