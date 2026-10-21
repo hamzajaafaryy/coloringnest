@@ -4,6 +4,7 @@ import { ArrowRight, Heart, Palette, Printer, Sparkles } from "lucide-react";
 const links = [
   { label: "All coloring pages", href: "/coloring-pages/" },
   { label: "Printable pictures", href: "/printable-coloring-pages/" },
+  { label: "Name coloring", href: "/name-coloring/" },
   { label: "Coloring tips", href: "/blog/" },
   { label: "Color online", href: "/color-online/" },
 ];

@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/coloring-pages/", label: "Coloring Pages" },
   { href: "/printable-coloring-pages/", label: "Printables" },
+  { href: "/name-coloring/", label: "Name Coloring" },
   { href: "/blog/", label: "Coloring Tips" },
 ];
 
@@ -23,7 +24,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#eee6f5] bg-white/95 shadow-[0_6px_25px_rgba(53,33,74,0.045)] backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="flex min-h-[76px] items-center justify-between gap-3 lg:min-h-[88px]">
+        <div className="flex min-h-[76px] items-center justify-between gap-3 xl:min-h-[88px]">
           <Link
             href="/"
             onClick={() => { setMenuOpen(false); setSearchOpen(false); }}
@@ -44,7 +45,7 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+          <nav className="hidden items-center gap-1 xl:flex" aria-label="Main navigation">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -68,7 +69,7 @@ export default function Header() {
             </div>
             <Link
               href="/printable-coloring-pages/"
-              className="hidden min-h-11 items-center gap-2 rounded-full bg-[#8147c8] px-5 py-2 text-sm font-extrabold text-white shadow-[0_8px_22px_rgba(128,70,203,0.18)] transition hover:bg-[#6c32b3] lg:inline-flex"
+              className="hidden min-h-11 items-center gap-2 rounded-full bg-[#8147c8] px-5 py-2 text-sm font-extrabold text-white shadow-[0_8px_22px_rgba(128,70,203,0.18)] transition hover:bg-[#6c32b3] xl:inline-flex"
             >
               <Printer className="h-4 w-4" /> Print &amp; color <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -88,7 +89,7 @@ export default function Header() {
               aria-controls="mobile-site-navigation"
               aria-expanded={menuOpen}
               onClick={() => { setMenuOpen((old) => !old); setSearchOpen(false); }}
-              className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f5eafa] text-[#704299] transition hover:bg-[#ecd7f8] lg:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f5eafa] text-[#704299] transition hover:bg-[#ecd7f8] xl:hidden"
             >
               {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -103,7 +104,7 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div id="mobile-site-navigation" className="max-h-[calc(100dvh-76px)] overflow-y-auto border-t border-[#f0e6f6] bg-white px-4 pb-6 pt-3 shadow-xl sm:px-6 lg:hidden">
+        <div id="mobile-site-navigation" className="max-h-[calc(100dvh-76px)] overflow-y-auto border-t border-[#f0e6f6] bg-white px-4 pb-6 pt-3 shadow-xl sm:px-6 xl:hidden">
           <nav aria-label="Mobile navigation" className="mx-auto grid max-w-7xl gap-1">
             {navLinks.map((link) => (
               <Link

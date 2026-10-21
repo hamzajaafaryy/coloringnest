@@ -16,6 +16,7 @@ import CategoryCard from "@/components/CategoryCard";
 import ColoringGrid from "@/components/ColoringGrid";
 import SearchBar from "@/components/SearchBar";
 import HeroArtwork from "@/components/home/HeroArtwork";
+import NameColoringTeaser from "@/components/name-coloring/NameColoringTeaser";
 import {
   getAllPublishedCategories,
   getAllPublishedColoringPagesWithCategory,
@@ -239,18 +240,7 @@ export default async function HomePage() {
 
       {/* Dual feature cards */}
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2">
-        <div className="relative overflow-hidden rounded-[2.2rem] bg-[#ffe5d2] px-7 py-9 sm:px-10 sm:py-11">
-          <div aria-hidden="true" className="absolute -right-12 -top-16 h-48 w-48 rounded-full bg-[#ffb7aa]/55" />
-          <div className="relative z-10">
-            <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#dc7454] shadow-sm"><Printer className="h-7 w-7" /></span>
-            <h2 className="mt-6 max-w-sm text-3xl font-black leading-tight tracking-tight text-[#5b3441]">Print it. Color it. Keep it.</h2>
-            <p className="mt-3 max-w-md text-sm leading-7 text-[#73525a] sm:text-base">Coloring time is easy to set up. Choose a page, print it, and get creative with the supplies you already have.</p>
-            <Link href="/printable-coloring-pages/" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#5b3441] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#784653]">
-              Explore printables <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div aria-hidden="true" className="pointer-events-none absolute -bottom-8 right-4 hidden rotate-[-18deg] text-[8rem] leading-none opacity-20 sm:block">✎</div>
-        </div>
+        <NameColoringTeaser />
         <div className="relative overflow-hidden rounded-[2.2rem] bg-[#e0f1e7] px-7 py-9 sm:px-10 sm:py-11">
           <div aria-hidden="true" className="absolute -bottom-20 -right-12 h-52 w-52 rounded-full bg-[#b2e3ca]/60" />
           <div className="relative z-10">

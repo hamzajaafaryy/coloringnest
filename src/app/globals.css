@@ -246,6 +246,14 @@ select {
 /* Print only the artwork, not site navigation, ad spaces, toolbars, or copy. */
 @media print {
   @page { margin: 12mm; }
+  /* The generator's controls and FAQs must not create extra print pages. */
+  body:has(.name-coloring-print-root) main {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
   body:has(.printable-artwork) * {
     visibility: hidden !important;
   }
