@@ -1,56 +1,11 @@
 "use client";
 
 import { useState } from "react";
-
-const MAX_OUTPUT_BYTES = 1.5 * 1024 * 1024;
-const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+import { getColoringImageAssets } from "@/lib/coloring-image-assets";
+import { MAX_IMAGE_UPLOAD_BYTES, MAX_SVG_UPLOAD_BYTES, prepareImageFile } from "@/lib/image-upload";
 
 function formatBytes(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-}
-
-async function compressImage(file: File) {
-  if (file.type === "image/svg+xml") return file;
-
-  const bitmap = await createImageBitmap(file);
-  const maxDimension = 1600;
-  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-
-  const context = canvas.getContext("2d");
-  if (!context) {
-    bitmap.close();
-    throw new Error("Could not prepare the image.");
-  }
-
-  context.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-
-  let quality = 0.82;
-  let blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/webp", quality)
-  );
-
-  while (blob && blob.size > MAX_OUTPUT_BYTES && quality > 0.42) {
-    quality = Math.max(0.42, quality - 0.06);
-    blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/webp", quality)
-    );
-  }
-
-  if (!blob) throw new Error("Could not compress the image.");
-  if (blob.size > MAX_OUTPUT_BYTES) {
-    throw new Error("Could not reduce the image below 1.5 MB. Choose a smaller image.");
-  }
-
-  return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, {
-    type: "image/webp",
-  });
 }
 
 export function ImageUploadField({
@@ -58,6 +13,7 @@ export function ImageUploadField({
   name,
   slugField = "slug",
   kind = "image",
+  profile = "general",
   defaultValue = "",
   required = false,
 }: {
@@ -65,6 +21,7 @@ export function ImageUploadField({
   name: string;
   slugField?: string;
   kind?: "image" | "svg";
+  profile?: "general" | "coloring";
   defaultValue?: string | null;
   required?: boolean;
 }) {
@@ -79,18 +36,18 @@ export function ImageUploadField({
     setUploading(true);
     setSelectedName(file.name);
     setStatus("Preparing file…");
-    if (required) setUrl("");
-
     try {
-      const prepared = kind === "image" ? await compressImage(file) : file;
+      const prepared = kind === "image" ? await prepareImageFile(file) : file;
 
-      if (prepared.size > MAX_UPLOAD_BYTES) {
-        throw new Error("File is larger than 2 MB.");
+      const maxBytes = kind === "svg" ? MAX_SVG_UPLOAD_BYTES : MAX_IMAGE_UPLOAD_BYTES;
+      if (prepared.size > maxBytes) {
+        throw new Error(`File is larger than ${maxBytes / 1024 / 1024} MB.`);
       }
 
       const formData = new FormData();
       formData.append("file", prepared);
       formData.append("kind", kind);
+      formData.append("profile", profile);
 
       const slugInput = document.querySelector<HTMLInputElement>(
         `[name="${slugField}"]`
@@ -111,6 +68,9 @@ export function ImageUploadField({
         url?: string;
         error?: string;
         size?: number;
+        width?: number;
+        height?: number;
+        warning?: string;
       };
 
       if (!response.ok || !data.url) {
@@ -118,13 +78,15 @@ export function ImageUploadField({
       }
 
       setUrl(data.url);
-      setStatus(`Uploaded • ${formatBytes(data.size ?? prepared.size)}`);
+      setStatus(`Uploaded${data.width && data.height ? ` • ${data.width} × ${data.height}` : ""} • ${formatBytes(data.size ?? prepared.size)}${data.warning ? ` • ${data.warning}` : ""}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Upload failed.");
     } finally {
       setUploading(false);
     }
   }
+
+  const assets = getColoringImageAssets(url);
 
   return (
     <div className="block">
@@ -141,6 +103,7 @@ export function ImageUploadField({
       <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
         <input
           type="file"
+          aria-label={label}
           accept={kind === "svg" ? "image/svg+xml,.svg" : "image/webp,image/png,image/jpeg"}
           disabled={uploading}
           onChange={(event) => void handleChange(event.target.files?.[0])}
@@ -149,7 +112,9 @@ export function ImageUploadField({
 
         <p className="mt-2 text-xs text-slate-500">
           {kind === "image"
-            ? "Images are automatically resized to max 1600px and converted to WebP. Target size: under 1.5 MB."
+            ? profile === "coloring"
+              ? "Upload PNG, JPG or WebP up to 20 MB. Print and lighter web copies are prepared automatically, without cropping or stretching."
+              : "Upload PNG, JPG or WebP up to 20 MB. Images are automatically fitted within 1600px without cropping or stretching."
             : "SVG is kept as vector. Maximum file size: 2 MB."}
         </p>
 
@@ -160,14 +125,16 @@ export function ImageUploadField({
         )}
 
         {status && (
-          <p className="mt-2 text-xs font-medium text-slate-600">{status}</p>
+          <p role="status" className="mt-2 text-xs font-medium text-slate-600">{status}</p>
         )}
 
         {url && kind === "image" && (
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white p-2">
             <img
-              src={url}
+              src={assets.previewUrl}
               alt="Uploaded coloring page preview"
+              width={assets.width}
+              height={assets.height}
               className="max-h-48 w-auto object-contain"
             />
           </div>

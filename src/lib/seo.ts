@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { getColoringImageAssets } from "./coloring-image-assets";
 
 const configuredSite = process.env.NEXT_PUBLIC_SITE_URL || "https://coloringnest.vercel.app";
 const SITE_ROOT = configuredSite.endsWith("/") ? configuredSite.slice(0, -1) : configuredSite;
@@ -43,7 +44,11 @@ export function constructMetadata({
     : SITE_CONFIG.defaultTitle;
   const metaDescription = description || SITE_CONFIG.defaultDescription;
   const canonical = buildCanonicalUrl(path);
-  const imageUrl = image || SITE_CONFIG.ogImage;
+  const imageAssets = image ? getColoringImageAssets(image) : null;
+  const imageUrl = imageAssets?.previewUrl || SITE_CONFIG.ogImage;
+  const imageDimensions = imageAssets?.width
+    ? { width: imageAssets.width, height: imageAssets.height }
+    : image ? {} : { width: 1200, height: 630 };
 
   return {
     title: metaTitle,
@@ -75,8 +80,7 @@ export function constructMetadata({
       images: [
         {
           url: imageUrl,
-          width: 1200,
-          height: 630,
+          ...imageDimensions,
           alt: metaTitle,
         },
       ],

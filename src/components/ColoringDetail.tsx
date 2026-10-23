@@ -11,6 +11,7 @@ import RelatedColoringPages from "@/components/RelatedColoringPages";
 import { getColoringPageByCategoryAndSlug, getColoringPageFaqs, getRelatedColoringPages } from "@/db/queries";
 import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
+import { getColoringImageAssets } from "@/lib/coloring-image-assets";
 import { buildCanonicalUrl, generateBreadcrumbSchema, generateImageObjectSchema } from "@/lib/seo";
 
 type Page = NonNullable<Awaited<ReturnType<typeof getColoringPageByCategoryAndSlug>>>;
@@ -21,6 +22,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
     svg = page.svgContent ? sanitizeSvg(page.svgContent) : await loadColoringSvg(page.svgUrl);
   } catch { /* A malformed SVG must not hide an otherwise printable image. */ }
   const image = page.imageUrl || null;
+  const imageAssets = image ? getColoringImageAssets(image) : null;
   const canDownload = Boolean(svg || image);
   const canColor = Boolean(svg);
   const [dbFaqs, related] = await Promise.all([
@@ -59,7 +61,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
         </div>
 
         <div id="print" aria-label="Print, download or color this picture" className="no-print grid scroll-mt-28 grid-cols-2 items-start gap-2.5 sm:gap-3 lg:grid-cols-4">
-          {(svg || image) && <PrintButton title={page.title} />}
+          {(svg || image) && <PrintButton title={page.title} imageUrl={image || undefined} />}
           {canColor && <Link href={`/color-online/${page.slug}/`} className="cc-btn cc-btn-primary min-h-14 w-full bg-linear-to-r from-violet-700 via-fuchsia-700 to-rose-700 px-3"><Palette aria-hidden="true" className="h-4 w-4 shrink-0" /> Color Online</Link>}
           {image ? <ImageDownloadButton imageUrl={image} slug={page.slug!} /> : svg ? <DownloadButton slug={page.slug!} svgContent={svg} title={page.title} /> : null}
           {svg && <SvgDownloadButton svgContent={svg} slug={page.slug!} />}
@@ -68,7 +70,10 @@ export default async function ColoringDetail({ page, printable = false }: { page
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-7">
           <div className="min-w-0 rounded-[2rem] border border-[#e9dfef] bg-[#f6f0fa] p-3 sm:p-5">
             <figure className="printable-artwork flex min-h-64 items-center justify-center overflow-hidden rounded-2xl bg-white p-3 shadow-sm sm:p-5">
-              {image ? <img src={image} alt={page.altText || page.title} fetchPriority="high" className="max-h-[65vh] w-full object-contain" /> : svg ? <div role="img" aria-label={page.altText || page.title} className="flex w-full items-center justify-center [&>svg]:max-h-[65vh] [&>svg]:w-full [&>svg]:object-contain" dangerouslySetInnerHTML={{ __html: svg }} /> : <p className="py-16 text-sm text-[#786b81]">This picture is being prepared. Please choose another coloring page below.</p>}
+              {imageAssets ? <picture className="block w-full">
+                <source media="print" srcSet={imageAssets.printUrl} />
+                <img src={imageAssets.previewUrl} srcSet={imageAssets.srcSet} sizes="(min-width: 1024px) 700px, 100vw" width={imageAssets.width} height={imageAssets.height} alt={page.altText || page.title} fetchPriority="high" className="max-h-[65vh] w-full object-contain" />
+              </picture> : svg ? <div role="img" aria-label={page.altText || page.title} className="flex w-full items-center justify-center [&>svg]:max-h-[65vh] [&>svg]:w-full [&>svg]:object-contain" dangerouslySetInnerHTML={{ __html: svg }} /> : <p className="py-16 text-sm text-[#786b81]">This picture is being prepared. Please choose another coloring page below.</p>}
             </figure>
           </div>
           <aside aria-labelledby="coloring-options-title" className="no-print space-y-5 rounded-[2rem] border border-[#eee0e9] bg-gradient-to-br from-[#fff4df] via-[#fff9f3] to-[#fbeafa] p-5 sm:p-6">

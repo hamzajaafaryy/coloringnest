@@ -39,7 +39,7 @@ export default async function EditColoringPage({ params }: { params: Promise<{ i
         </section>
 
         <section className="grid gap-5 md:grid-cols-2">
-          <ImageUploadField label="Preview image" name="imageUrl" slugField="slug" kind="image" defaultValue={page.imageUrl} required />
+          <ImageUploadField label="Coloring image" name="imageUrl" slugField="slug" kind="image" profile="coloring" defaultValue={page.imageUrl} required />
           <ImageUploadField label="SVG line art" name="svgUrl" slugField="slug" kind="svg" defaultValue={page.svgUrl} />
         </section>
 
