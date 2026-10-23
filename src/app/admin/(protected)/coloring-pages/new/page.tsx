@@ -27,7 +27,7 @@ export default async function NewColoringPage() {
         </section>
 
         <section className="grid gap-5 md:grid-cols-2">
-          <ImageUploadField label="Preview image" name="imageUrl" slugField="slug" kind="image" required />
+          <ImageUploadField label="Coloring image" name="imageUrl" slugField="slug" kind="image" profile="coloring" required />
           <ImageUploadField label="SVG line art" name="svgUrl" slugField="slug" kind="svg" />
         </section>
 

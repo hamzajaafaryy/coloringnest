@@ -1,3 +1,5 @@
+import { coloringImagePaths } from "./coloring-image-assets";
+
 const BUCKET = "coloring-pages";
 
 function getConfig() {
@@ -13,26 +15,22 @@ export async function deleteCraftColoringStorageUrl(fileUrl: string | null | und
   if (!config) return;
 
   const marker = `/storage/v1/object/public/${BUCKET}/`;
-  const index = fileUrl.indexOf(marker);
-  if (index === -1) return;
+  let path: string;
+  try {
+    const parsed = new URL(fileUrl);
+    if (parsed.origin !== new URL(config.url).origin || !parsed.pathname.startsWith(marker)) return;
+    path = decodeURIComponent(parsed.pathname.slice(marker.length));
+    if (!path || path.split("/").some(segment => segment === "." || segment === "..")) return;
+  } catch { return; }
 
-  const path = decodeURIComponent(fileUrl.slice(index + marker.length));
-  if (!path) return;
-
-  const response = await fetch(
-    `${config.url}/storage/v1/object/${BUCKET}/${path}`,
-    {
+  await Promise.all(coloringImagePaths(path).map(async assetPath => {
+    const response = await fetch(`${config.url}/storage/v1/object/${BUCKET}/${assetPath}`, {
       method: "DELETE",
-      headers: {
-        apikey: config.serviceRoleKey,
-        Authorization: `Bearer ${config.serviceRoleKey}`,
-      },
+      headers: { apikey: config.serviceRoleKey, Authorization: `Bearer ${config.serviceRoleKey}` },
       cache: "no-store",
+    });
+    if (!response.ok && response.status !== 404) {
+      console.error("CraftColoring storage cleanup failed:", await response.text());
     }
-  );
-
-  if (!response.ok && response.status !== 404) {
-    const message = await response.text();
-    console.error("CraftColoring storage cleanup failed:", message);
-  }
+  }));
 }

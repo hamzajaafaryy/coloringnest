@@ -6,9 +6,10 @@ import { buildStudioPrompt } from "@/lib/content-studio-prompt";
 import { fieldCount, SEO_RULES, validateStudioSeo } from "@/lib/content-studio-seo";
 import { canonicalCategorySlug } from "@/lib/category-catalog";
 import { validateColoringSvg } from "@/lib/coloring/validateSvg";
+import { getColoringImageAssets } from "@/lib/coloring-image-assets";
+import { IMAGE_TYPES, MAX_IMAGE_SOURCE_BYTES, MAX_SVG_UPLOAD_BYTES, prepareImageFile } from "@/lib/image-upload";
 
 type Draft = { id: number; title: string; imageUrl: string | null };
-const MAX_BYTES = 2 * 1024 * 1024;
 
 export default function ContentStudio() {
   const [file, setFile] = useState<File | null>(null);
@@ -21,7 +22,7 @@ export default function ContentStudio() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [inputKey, setInputKey] = useState(0);
   const [publishedUrl, setPublishedUrl] = useState("");
-  const uploaded = useRef<{ image?: { file: File; url: string }; svg?: { file: File; url: string } }>({});
+  const uploaded = useRef<{ image?: { file: File; url: string; warning?: string }; svg?: { file: File; url: string; warning?: string } }>({});
   const saving = useRef(false);
   const svgInput = useRef<HTMLInputElement>(null);
 
@@ -46,8 +47,8 @@ export default function ContentStudio() {
   function chooseImage(selected?: File) {
     setAssetError(""); setPublishedUrl("");
     if (!selected) { setFile(null); setPreview(""); return; }
-    if (!["image/png", "image/jpeg", "image/webp"].includes(selected.type) || selected.size > MAX_BYTES || selected.size === 0) {
-      setFile(null); setPreview(""); setAssetError("Choose a PNG, JPG, or WebP image between 1 byte and 2 MB."); return;
+    if (!IMAGE_TYPES.includes(selected.type) || selected.size > MAX_IMAGE_SOURCE_BYTES || selected.size === 0) {
+      setFile(null); setPreview(""); setAssetError("Choose a PNG, JPG, or WebP image between 1 byte and 20 MB."); return;
     }
     setFile(selected); setPreview(URL.createObjectURL(selected));
   }
@@ -55,7 +56,7 @@ export default function ContentStudio() {
     setAssetError(""); uploaded.current.svg = undefined;
     if (!selected) { setSvgFile(null); return; }
     setSvgFile(null);
-    if ((!selected.name.toLowerCase().endsWith(".svg") && selected.type !== "image/svg+xml") || selected.size > MAX_BYTES || selected.size === 0) {
+    if ((!selected.name.toLowerCase().endsWith(".svg") && selected.type !== "image/svg+xml") || selected.size > MAX_SVG_UPLOAD_BYTES || selected.size === 0) {
       setAssetError("Choose a vector SVG file between 1 byte and 2 MB."); return;
     }
     try {
@@ -77,11 +78,12 @@ export default function ContentStudio() {
     const cached = uploaded.current[kind];
     if (cached?.file === selected) return cached.url;
     const form = new FormData();
-    form.append("file", selected); form.append("slug", slug); form.append("kind", kind);
+    const prepared = kind === "image" ? await prepareImageFile(selected) : selected;
+    form.append("file", prepared); form.append("slug", slug); form.append("kind", kind); form.append("profile", "coloring");
     const response = await fetch("/api/admin/upload", { method: "POST", body: form });
     const data = await response.json();
     if (!response.ok || !data.url) throw new Error(data.error || `${kind} upload failed.`);
-    uploaded.current[kind] = { file: selected, url: data.url };
+    uploaded.current[kind] = { file: selected, url: data.url, warning: data.warning };
     return data.url as string;
   }
   async function submit(publish: boolean) {
@@ -100,7 +102,7 @@ export default function ContentStudio() {
       const response = await fetch("/api/admin/content-studio", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "importJson", imageUrl, svgUrl, seo, publish }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Save failed.");
-      setMessage(`${publish ? "Published" : "Draft saved"} successfully. ${svgFile ? "Print, image download, SVG download, and online coloring are available when published." : "Print and image download are available when published."}`);
+      setMessage(`${publish ? "Published" : "Draft saved"} successfully. ${svgFile ? "Print, image download, SVG download, and online coloring are available when published." : "Print and image download are available when published."}${uploaded.current.image?.warning ? ` ${uploaded.current.image.warning}` : ""}`);
       if (publish) setPublishedUrl(`/coloring-pages/${result.categorySlug}/${seo.slug}/`);
       else setDrafts(old => [{ id: result.id, title: seo.title, imageUrl }, ...old]);
       setFile(null); setSvgFile(null); setPreview(""); setJson(""); uploaded.current = {}; setInputKey(old => old + 1);
@@ -121,7 +123,7 @@ export default function ContentStudio() {
         <label className="block text-sm font-bold">Printable preview image — required
           <input key={`image-${inputKey}`} aria-label="Coloring page image" type="file" accept="image/png,image/jpeg,image/webp" onChange={event => chooseImage(event.target.files?.[0])} className="mt-2 block w-full rounded-lg border p-3" />
         </label>
-        <p className="text-sm text-slate-500">PNG, JPG or WebP · max 2 MB. Used on cards, in search previews, and for image downloads.</p>
+        <p className="text-sm text-slate-500">PNG, JPG or WebP · max 20 MB. Print and lighter web copies are prepared automatically, preserving the whole drawing.</p>
         {preview && <img src={preview} alt="Selected artwork preview" className="max-h-64 max-w-full rounded-xl border object-contain" />}
         <label className="block text-sm font-bold">Vector SVG — optional, for online coloring and vector download
           <input ref={svgInput} key={`svg-${inputKey}`} aria-label="Coloring SVG file" type="file" accept=".svg,image/svg+xml" onChange={event => void chooseSvg(event.target.files?.[0])} className="mt-2 block w-full rounded-lg border p-3" />
@@ -152,6 +154,6 @@ export default function ContentStudio() {
     </fieldset>
     {message && <p role="status" className="rounded-xl bg-violet-50 p-4 text-sm font-medium text-violet-900">{message}</p>}
     {publishedUrl && <Link href={publishedUrl} className="inline-block font-bold text-violet-700 underline">View published page →</Link>}
-    <section className="rounded-2xl border bg-white p-5"><h2 className="text-xl font-bold">Existing drafts ({drafts.length})</h2><div className="mt-3 grid gap-3 sm:grid-cols-2">{drafts.map(draft => <div key={draft.id} className="flex gap-3 rounded-xl border p-3">{draft.imageUrl && <img src={draft.imageUrl} alt="" className="h-20 w-16 object-contain" />}<div><p className="text-sm font-bold">{draft.title}</p><Link href={`/admin/coloring-pages/${draft.id}/`} className="text-sm font-bold text-violet-700 underline">Review or edit draft</Link></div></div>)}</div></section>
+    <section className="rounded-2xl border bg-white p-5"><h2 className="text-xl font-bold">Existing drafts ({drafts.length})</h2><div className="mt-3 grid gap-3 sm:grid-cols-2">{drafts.map(draft => <div key={draft.id} className="flex gap-3 rounded-xl border p-3">{draft.imageUrl && <img src={getColoringImageAssets(draft.imageUrl).thumbnailUrl} alt="" className="h-20 w-16 object-contain" />}<div><p className="text-sm font-bold">{draft.title}</p><Link href={`/admin/coloring-pages/${draft.id}/`} className="text-sm font-bold text-violet-700 underline">Review or edit draft</Link></div></div>)}</div></section>
   </main>;
 }

@@ -5,6 +5,7 @@ import { ArrowUpRight, Sparkles, Printer } from "lucide-react";
 import type { ColoringPage } from "@/lib/data/coloringPages";
 import type { DbColoringPageCard } from "@/types/coloring";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
+import { getColoringImageAssets } from "@/lib/coloring-image-assets";
 
 interface ColoringCardProps {
   page: ColoringPage | DbColoringPageCard;
@@ -20,6 +21,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
   const description = ("seoDescription" in page && typeof page.seoDescription === "string" && page.seoDescription.trim()) || (page.description || "").replace(/\s+/g, " ").slice(0, 155);
   const svgContent = page.svgContent ? sanitizeSvg(page.svgContent) : "";
   const imageUrl = isDbPage ? page.imageUrl : null;
+  const imageAssets = imageUrl ? getColoringImageAssets(imageUrl) : null;
   const altText = isDbPage ? page.altText || page.title : page.altText;
   const difficulty = page.difficulty || null;
   const pageUrl = isPrintable ? `/printable-coloring-pages/${categorySlug}/${pageSlug}/` : `/coloring-pages/${categorySlug}/${pageSlug}/`;
@@ -43,8 +45,8 @@ export default function ColoringCard({ page, priority = false, variant = "colori
         </div>
 
         <div className="relative z-[1] flex h-full w-full items-center justify-center p-2 transition duration-500 group-hover:scale-[1.045] group-hover:rotate-1 sm:p-3">
-          {imageUrl ? (
-            <img src={imageUrl} alt={altText || page.title} className="cc-media max-h-full drop-shadow-[0_12px_14px_rgba(15,23,42,0.08)]" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} />
+          {imageAssets ? (
+            <img src={imageAssets.thumbnailUrl} width={imageAssets.thumbnailWidth} height={imageAssets.thumbnailHeight} alt={altText || page.title} className="cc-media max-h-full drop-shadow-[0_12px_14px_rgba(15,23,42,0.08)]" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} />
           ) : svgContent ? (
             <div className="flex h-full w-full items-center justify-center overflow-hidden [&>svg]:block [&>svg]:h-full [&>svg]:w-full [&>svg]:max-h-full [&>svg]:max-w-full" dangerouslySetInnerHTML={{ __html: svgContent }} />
           ) : (

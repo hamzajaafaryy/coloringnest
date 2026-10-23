@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { validateColoringSvg } from "@/lib/coloring/validateSvg";
+import { MAX_IMAGE_UPLOAD_BYTES, MAX_SVG_UPLOAD_BYTES } from "@/lib/image-upload";
+import { prepareImage, type PreparedImageFile } from "@/lib/prepare-image";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const BUCKET = "coloring-pages";
-const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_STORED_BYTES = 32 * 1024 * 1024;
 const SUPPORTED_TYPES = new Set([
   "image/webp",
   "image/png",
@@ -44,10 +47,21 @@ async function ensureBucket(url: string, serviceRoleKey: string) {
     throw new Error(`Could not check Supabase Storage buckets: ${message}`);
   }
 
-  const buckets = (await listResponse.json()) as Array<{ id?: string }>;
-  const bucketExists = buckets.some((bucket) => bucket.id === BUCKET);
+  const buckets = (await listResponse.json()) as Array<{ id?: string; file_size_limit?: number | null }>;
+  const existing = buckets.find((bucket) => bucket.id === BUCKET);
 
-  if (bucketExists) return;
+  if (existing) {
+    // Older installations limited every stored object to 2 MB. Print PNGs can be larger.
+    if (existing.file_size_limit != null && existing.file_size_limit < MAX_STORED_BYTES) {
+      const updateResponse = await fetch(`${url}/storage/v1/bucket/${BUCKET}`, {
+        method: "PUT",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ file_size_limit: MAX_STORED_BYTES }),
+      });
+      if (!updateResponse.ok) throw new Error("Could not update the image storage size limit.");
+    }
+    return;
+  }
 
   const createResponse = await fetch(`${url}/storage/v1/bucket`, {
     method: "POST",
@@ -59,7 +73,7 @@ async function ensureBucket(url: string, serviceRoleKey: string) {
       id: BUCKET,
       name: BUCKET,
       public: true,
-      file_size_limit: MAX_BYTES,
+      file_size_limit: MAX_STORED_BYTES,
       allowed_mime_types: [...SUPPORTED_TYPES],
     }),
   });
@@ -129,6 +143,7 @@ export async function POST(request: Request) {
     const file = formData.get("file");
     const slug = safeSegment(String(formData.get("slug") ?? "coloring-page"));
     const kind = formData.get("kind") === "svg" ? "svg" : "image";
+    const profile = formData.get("profile") === "coloring" ? "coloring" : "general";
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file selected." }, { status: 400 });
@@ -155,9 +170,10 @@ export async function POST(request: Request) {
       );
     }
 
-    if (file.size > MAX_BYTES) {
+    const maxBytes = kind === "svg" ? MAX_SVG_UPLOAD_BYTES : MAX_IMAGE_UPLOAD_BYTES;
+    if (!file.size || file.size > maxBytes) {
       return NextResponse.json(
-        { error: "File is too large. Maximum allowed size is 2 MB." },
+        { error: `Use a non-empty file smaller than ${maxBytes / 1024 / 1024} MB.` },
         { status: 413 }
       );
     }
@@ -170,9 +186,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    const { url, serviceRoleKey } = getSupabaseConfig();
-    await ensureBucket(url, serviceRoleKey);
 
     let bytes = originalBytes.buffer.slice(
       originalBytes.byteOffset,
@@ -195,7 +208,7 @@ export async function POST(request: Request) {
         );
       }
 
-      if (bytes.byteLength > MAX_BYTES) {
+      if (bytes.byteLength > MAX_SVG_UPLOAD_BYTES) {
         return NextResponse.json(
           { error: "Sanitized SVG is larger than 2 MB." },
           { status: 413 }
@@ -203,44 +216,59 @@ export async function POST(request: Request) {
       }
     }
 
-    const extension =
-      file.type === "image/svg+xml"
-        ? "svg"
-        : file.type === "image/webp"
-          ? "webp"
-          : file.type === "image/png"
-            ? "png"
-            : "jpg";
-
-    const folder = kind === "svg" ? "svg" : "images";
-    const path = `${folder}/${slug}-${Date.now()}.${extension}`;
-
-    const uploadResponse = await fetch(
-      `${url}/storage/v1/object/${BUCKET}/${path}`,
-      {
-        method: "POST",
-        headers: {
-          apikey: serviceRoleKey,
-          Authorization: `Bearer ${serviceRoleKey}`,
-          "Content-Type": file.type,
-          "x-upsert": "true",
-          "Cache-Control": "public, max-age=31536000, immutable",
-        },
-        body: bytes,
+    let files: PreparedImageFile[];
+    let warning: string | undefined;
+    if (kind === "svg") {
+      files = [{ name: "image.svg", contentType: "image/svg+xml", data: Buffer.from(bytes), width: 0, height: 0 }];
+    } else {
+      try {
+        ({ files, warning } = await prepareImage(originalBytes, profile));
+      } catch {
+        return NextResponse.json(
+          { error: "Could not read this image. Use a still PNG, JPG, or WebP with no more than 40 million pixels." },
+          { status: 400 }
+        );
       }
-    );
-
-    if (!uploadResponse.ok) {
-      const message = await uploadResponse.text();
-      throw new Error(`Upload failed: ${message}`);
+    }
+    if (files.some(asset => asset.data.byteLength > MAX_STORED_BYTES)) {
+      return NextResponse.json({ error: "The prepared image is too large to store." }, { status: 413 });
     }
 
-    const publicUrl = `${url}/storage/v1/object/public/${BUCKET}/${path}`;
-
+    const id = `${slug}-${randomUUID()}`;
+    const prefix = kind === "svg" ? "svg" : "images";
+    const paths = kind === "image" && profile === "coloring"
+      ? files.map(asset => `images/optimized-v1/${id}/${files[0].width}x${files[0].height}/${asset.name}`)
+      : files.map(asset => `${prefix}/${id}.${asset.name.split(".").pop()}`);
+    const { url, serviceRoleKey } = getSupabaseConfig();
+    await ensureBucket(url, serviceRoleKey);
+    const headers = { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` };
+    const uploaded: string[] = [];
+    try {
+      for (const [index, asset] of files.entries()) {
+        const body = asset.data.buffer.slice(asset.data.byteOffset, asset.data.byteOffset + asset.data.byteLength) as ArrayBuffer;
+        const response = await fetch(`${url}/storage/v1/object/${BUCKET}/${paths[index]}`, {
+          method: "POST",
+          headers: { ...headers, "Content-Type": asset.contentType, "Cache-Control": "public, max-age=31536000, immutable" },
+          body,
+        });
+        if (!response.ok) throw new Error(`Image storage upload failed (HTTP ${response.status}).`);
+        uploaded.push(paths[index]);
+      }
+    } catch (error) {
+      // A failed variant must not leave an incomplete family or a successful URL.
+      await Promise.allSettled(uploaded.map(path => fetch(`${url}/storage/v1/object/${BUCKET}/${path}`, { method: "DELETE", headers })));
+      throw error;
+    }
+    const publicUrl = (path: string) => `${url}/storage/v1/object/public/${BUCKET}/${path}`;
     return NextResponse.json({
-      url: publicUrl,
-      path,
-      size: bytes.byteLength,
+      url: publicUrl(paths[0]),
+      path: paths[0],
+      size: files[0].data.byteLength,
+      width: files[0].width || undefined,
+      height: files[0].height || undefined,
+      previewUrl: paths[1] ? publicUrl(paths[1]) : undefined,
+      thumbnailUrl: paths[2] ? publicUrl(paths[2]) : undefined,
+      warning,
     });
   } catch (error) {
     console.error("Admin upload error:", error);
