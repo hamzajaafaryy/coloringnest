@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: Props) {
     title: `Printable ${category.name}`,
     description: category.seoDescription || category.description || undefined,
     path: `/printable-coloring-pages/${category.slug}/`,
+    canonicalPath: `/coloring-pages/${category.slug}/`,
     noindex: category.pageCount === 0,
   });
 }
