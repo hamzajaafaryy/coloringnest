@@ -24,7 +24,8 @@ export default function ColoringCard({ page, priority = false, variant = "colori
   const imageAssets = imageUrl ? getColoringImageAssets(imageUrl) : null;
   const altText = isDbPage ? page.altText || page.title : page.altText;
   const difficulty = page.difficulty || null;
-  const pageUrl = isPrintable ? `/printable-coloring-pages/${categorySlug}/${pageSlug}/` : `/coloring-pages/${categorySlug}/${pageSlug}/`;
+  // Printable cards still have a Print CTA, but link to the single canonical page.
+  const pageUrl = `/coloring-pages/${categorySlug}/${pageSlug}`;
   const onlineUrl = `/color-online/${pageSlug}/`;
   const canColorOnline = Boolean(svgContent || ("svgUrl" in page && page.svgUrl));
   const cardLabel = isPrintable ? `Open printable ${page.title}` : `View ${page.title}`;
