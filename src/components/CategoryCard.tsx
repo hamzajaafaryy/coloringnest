@@ -22,14 +22,10 @@ const accents = [
   "from-[#eee2fd] via-[#fdf8ff] to-[#ffe4f0]",
 ];
 
-export default function CategoryCard({
-  category,
-  variant = "coloring",
-}: CategoryCardProps) {
+export default function CategoryCard({ category }: CategoryCardProps) {
   const slug = category.slug || "";
-  const href = variant === "printable"
-    ? "/printable-coloring-pages/" + slug + "/"
-    : "/coloring-pages/" + slug + "/";
+  // Both directories point visitors to the canonical category URL.
+  const href = "/coloring-pages/" + slug;
   const accent = accents[String(category.id).length % accents.length];
 
   return (

@@ -14,6 +14,7 @@ export async function generateMetadata({ params }: Props) {
     title: `Printable ${page.title}`,
     description: page.seoDescription || `Print ${page.title.toLowerCase()} for a little coloring time at home or school.`,
     path: `/printable-coloring-pages/${page.categorySlug}/${page.slug}/`,
+    canonicalPath: `/coloring-pages/${page.categorySlug}/${page.slug}/`,
     image: page.imageUrl || undefined,
   });
 }

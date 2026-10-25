@@ -1,139 +1,83 @@
-import { MetadataRoute } from "next";
-import { SITE_CONFIG } from "@/lib/seo";
+import type { MetadataRoute } from "next";
+import { getAllPublishedCategories, getSitemapBlogPosts, getSitemapColoringPages } from "@/db/queries";
+import { buildCanonicalUrl, SITE_CONFIG } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-import {
-  getAllPublishedColoringPagesWithCategory,
-  getAllPublishedCategories,
-  getAllPublishedBlogPosts,
-} from "@/db/queries";
+// Only list canonical, public URLs. Next.js uses slashless URLs by default,
+// and buildCanonicalUrl ensures the sitemap agrees with page metadata.
+const publicRoutes = [
+  "/",
+  "/name-coloring",
+  "/coloring-pages",
+  "/printable-coloring-pages",
+  "/color-online",
+  "/play",
+  "/blog",
+  "/about",
+  "/contact",
+  "/privacy-policy",
+  "/terms",
+];
 
-const DOMAIN = SITE_CONFIG.domain;
+function absoluteImageUrl(imageUrl: string) {
+  return new URL(imageUrl, `${SITE_CONFIG.domain}/`).href;
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [pages, categories, blogPosts] = await Promise.all([
-    getAllPublishedColoringPagesWithCategory(),
+    getSitemapColoringPages(),
     getAllPublishedCategories(),
-    getAllPublishedBlogPosts(),
+    getSitemapBlogPosts(),
   ]);
 
-  const routes: MetadataRoute.Sitemap = [
-    {
-      url: `${DOMAIN}/name-coloring/`,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${DOMAIN}/`,
-      changeFrequency: "daily",
-      priority: 1.0,
-    },
-    {
-      url: `${DOMAIN}/coloring-pages/`,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    {
-      url: `${DOMAIN}/printable-coloring-pages/`,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${DOMAIN}/color-online/`,
-      changeFrequency: "daily",
-      priority: 0.85,
-    },
-    {
-      url: `${DOMAIN}/play/`,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${DOMAIN}/blog/`,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${DOMAIN}/about/`,
-      changeFrequency: "monthly",
-      priority: 0.4,
-    },
-    {
-      url: `${DOMAIN}/contact/`,
-      changeFrequency: "monthly",
-      priority: 0.4,
-    },
-    {
-      url: `${DOMAIN}/privacy-policy/`,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${DOMAIN}/terms/`,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-  ];
+  const routes: MetadataRoute.Sitemap = publicRoutes.map((path) => ({
+    url: buildCanonicalUrl(path),
+  }));
 
-  // Category URLs
-  categories.forEach((category) => {
-    if (!category.slug || category.pageCount === 0) return;
+  // Consolidated categories may be backed by multiple database category IDs.
+  const categorySlugById = new Map<number, string>();
+  for (const category of categories) {
+    if (!category.slug || category.pageCount === 0) continue;
+    for (const id of category.sourceIds) {
+      categorySlugById.set(id, category.slug);
+    }
+    routes.push({ url: buildCanonicalUrl(`/coloring-pages/${category.slug}`) });
+  }
 
+  for (const page of pages) {
+    const categorySlug =
+      page.categoryId === null ? undefined : categorySlugById.get(page.categoryId);
+    if (!page.slug || !categorySlug) continue;
+
+    // publishedAt is the last trustworthy date stored by the current schema.
+    // Don't invent newer lastmod values on every sitemap request.
+    const modified = page.publishedAt ? { lastModified: page.publishedAt } : {};
     routes.push({
-      url: `${DOMAIN}/coloring-pages/${category.slug}/`,
-      changeFrequency: "weekly",
-      priority: 0.8,
+      url: buildCanonicalUrl(`/coloring-pages/${categorySlug}/${page.slug}`),
+      ...modified,
+      ...(page.imageUrl ? { images: [absoluteImageUrl(page.imageUrl)] } : {}),
     });
 
+    // Online editor is a distinct interactive page, not a copy of the printable page.
+    if (page.hasOnlineVersion) {
+      routes.push({
+        url: buildCanonicalUrl(`/color-online/${page.slug}`),
+        ...modified,
+      });
+    }
+  }
+
+  for (const post of blogPosts) {
+    if (!post.slug) continue;
     routes.push({
-      url: `${DOMAIN}/printable-coloring-pages/${category.slug}/`,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    });
-  });
-
-  // Individual Coloring Page URLs & Color Online URLs
-  pages.forEach((page) => {
-    if (!page.slug || !page.categorySlug) return;
-
-    const lastModified = page.publishedAt ?? undefined;
-
-    routes.push({
-      url: `${DOMAIN}/coloring-pages/${page.categorySlug}/${page.slug}/`,
-      ...(lastModified ? { lastModified } : {}),
-      changeFrequency: "monthly",
-      priority: 0.9,
-      ...(page.imageUrl ? { images: [page.imageUrl.startsWith("http") ? page.imageUrl : `${DOMAIN}${page.imageUrl.startsWith("/") ? "" : "/"}${page.imageUrl}`] } : {}),
-    });
-
-    routes.push({
-      url: `${DOMAIN}/printable-coloring-pages/${page.categorySlug}/${page.slug}/`,
-      ...(lastModified ? { lastModified } : {}),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    });
-
-    if (page.svgContent || page.svgUrl) routes.push({
-      url: `${DOMAIN}/color-online/${page.slug}/`,
-      ...(lastModified ? { lastModified } : {}),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    });
-  });
-
-  // Blog Post URLs
-  blogPosts.forEach((post) => {
-    if (!post.slug) return;
-
-    routes.push({
-      url: `${DOMAIN}/blog/${post.slug}/`,
+      url: buildCanonicalUrl(`/blog/${post.slug}`),
       ...(post.publishedAt ? { lastModified: post.publishedAt } : {}),
-      changeFrequency: "monthly",
-      priority: 0.7,
-      ...(post.featuredImage ? { images: [post.featuredImage] } : {}),
+      ...(post.featuredImage
+        ? { images: [absoluteImageUrl(post.featuredImage)] }
+        : {}),
     });
-  });
+  }
 
   return routes;
 }
