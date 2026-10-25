@@ -25,6 +25,7 @@ interface MetadataParams {
   title?: string;
   description?: string;
   path?: string;
+  canonicalPath?: string;
   image?: string;
   noindex?: boolean;
   type?: "website" | "article";
@@ -34,6 +35,7 @@ export function constructMetadata({
   title,
   description,
   path = "/",
+  canonicalPath,
   image,
   noindex = false,
   type = "website",
@@ -43,7 +45,8 @@ export function constructMetadata({
     ? `${cleanTitle} | ${SITE_CONFIG.name}`
     : SITE_CONFIG.defaultTitle;
   const metaDescription = description || SITE_CONFIG.defaultDescription;
-  const canonical = buildCanonicalUrl(path);
+  // Keep one preferred URL when a printable route mirrors a coloring page.
+  const canonical = buildCanonicalUrl(canonicalPath ?? path);
   const imageAssets = image ? getColoringImageAssets(image) : null;
   const imageUrl = imageAssets?.previewUrl || SITE_CONFIG.ogImage;
   const imageDimensions = imageAssets?.width
