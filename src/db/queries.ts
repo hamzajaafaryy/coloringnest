@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, count, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { cache } from "react";
 import { canonicalCategorySlug, categorySlugs, consolidateCategories } from "@/lib/category-catalog";
 
@@ -239,6 +239,37 @@ export async function getRelatedColoringPages(
   );
 
   return canonicalizePages([...sameCategory, ...filteredRemaining].slice(0, limit));
+}
+
+/* =========================================================
+   SITEMAP: small projections avoid loading large SVG payloads
+   ========================================================= */
+
+export async function getSitemapColoringPages() {
+  return db
+    .select({
+      slug: coloringPages.slug,
+      categoryId: coloringPages.categoryId,
+      imageUrl: coloringPages.imageUrl,
+      publishedAt: coloringPages.publishedAt,
+      hasOnlineVersion: sql<boolean>`(
+        coalesce(${coloringPages.svgContent}, '') <> ''
+        OR coalesce(${coloringPages.svgUrl}, '') <> ''
+      )`,
+    })
+    .from(coloringPages)
+    .where(eq(coloringPages.isPublished, true));
+}
+
+export async function getSitemapBlogPosts() {
+  return db
+    .select({
+      slug: blogPosts.slug,
+      publishedAt: blogPosts.publishedAt,
+      featuredImage: blogPosts.featuredImage,
+    })
+    .from(blogPosts)
+    .where(eq(blogPosts.isPublished, true));
 }
 
 /* =========================================================
