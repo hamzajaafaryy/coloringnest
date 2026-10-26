@@ -1,3 +1,5 @@
+import CollectionSheetsField from "@/components/admin/CollectionSheetsField";
+import { getAdditionalSheets } from "@/db/coloring-sheets";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
@@ -19,6 +21,7 @@ export default async function EditColoringPage({ params }: { params: Promise<{ i
   if (!page) notFound();
 
   const categoryRows = await db.select({ id: categories.id, name: categories.name }).from(categories).orderBy(categories.name);
+  const sheets = await getAdditionalSheets(pageId);
   const update = updateColoringPage.bind(null, pageId);
   const remove = deleteColoringPage.bind(null, pageId);
 
@@ -42,6 +45,8 @@ export default async function EditColoringPage({ params }: { params: Promise<{ i
           <ImageUploadField label="Coloring image" name="imageUrl" slugField="slug" kind="image" profile="coloring" defaultValue={page.imageUrl} required />
           <ImageUploadField label="SVG line art" name="svgUrl" slugField="slug" kind="svg" defaultValue={page.svgUrl} />
         </section>
+
+        <CollectionSheetsField initial={sheets} />
 
         <TextArea label="Description" name="description" defaultValue={page.description} rows={5} />
         <TextArea label="SVG content" name="svgContent" defaultValue={page.svgContent} rows={8} />

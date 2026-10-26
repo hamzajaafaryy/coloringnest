@@ -19,7 +19,7 @@ import {
 /**
  * Get one published coloring page by slug
  */
-export async function getColoringPageBySlug(slug: string) {
+export const getColoringPageBySlug = cache(async (slug: string) => {
   const result = await db
     .select({
       id: coloringPages.id,
@@ -41,6 +41,7 @@ export async function getColoringPageBySlug(slug: string) {
       featured: coloringPages.featured,
       popular: coloringPages.popular,
       publishedAt: coloringPages.publishedAt,
+      updatedAt: coloringPages.updatedAt,
       categoryName: categories.name,
       categorySlug: categories.slug,
     })
@@ -58,16 +59,16 @@ export async function getColoringPageBySlug(slug: string) {
     .limit(1);
 
   return result[0] ? await canonicalizePage(result[0]) : null;
-}
+});
 
 /**
  * Get one published coloring page
  * using both category slug and page slug
  */
-export async function getColoringPageByCategoryAndSlug(
+export const getColoringPageByCategoryAndSlug = cache(async (
   categorySlug: string,
   slug: string
-) {
+) => {
   const result = await db
     .select({
       id: coloringPages.id,
@@ -89,6 +90,7 @@ export async function getColoringPageByCategoryAndSlug(
       featured: coloringPages.featured,
       popular: coloringPages.popular,
       publishedAt: coloringPages.publishedAt,
+      updatedAt: coloringPages.updatedAt,
       categoryName: categories.name,
       categorySlug: categories.slug,
     })
@@ -107,7 +109,7 @@ export async function getColoringPageByCategoryAndSlug(
     .limit(1);
 
   return result[0] ? await canonicalizePage(result[0]) : null;
-}
+});
 
 /* =========================================================
    COLORING PAGE FAQs
@@ -168,6 +170,7 @@ export async function getRelatedColoringPages(
           featured: coloringPages.featured,
           popular: coloringPages.popular,
           publishedAt: coloringPages.publishedAt,
+      updatedAt: coloringPages.updatedAt,
         })
         .from(coloringPages)
         .leftJoin(
@@ -215,6 +218,7 @@ export async function getRelatedColoringPages(
       featured: coloringPages.featured,
       popular: coloringPages.popular,
       publishedAt: coloringPages.publishedAt,
+      updatedAt: coloringPages.updatedAt,
     })
     .from(coloringPages)
     .leftJoin(
@@ -248,6 +252,8 @@ export async function getRelatedColoringPages(
 export async function getSitemapColoringPages() {
   return db
     .select({
+      id: coloringPages.id,
+      updatedAt: coloringPages.updatedAt,
       slug: coloringPages.slug,
       categoryId: coloringPages.categoryId,
       imageUrl: coloringPages.imageUrl,
@@ -287,6 +293,7 @@ export async function getAllPublishedColoringPages() {
       slug: coloringPages.slug,
       categoryId: coloringPages.categoryId,
       publishedAt: coloringPages.publishedAt,
+      updatedAt: coloringPages.updatedAt,
     })
     .from(coloringPages)
     .where(eq(coloringPages.isPublished, true))
@@ -319,6 +326,7 @@ export async function getAllPublishedColoringPagesWithCategory() {
       featured: coloringPages.featured,
       popular: coloringPages.popular,
       publishedAt: coloringPages.publishedAt,
+      updatedAt: coloringPages.updatedAt,
     })
     .from(coloringPages)
     .leftJoin(
@@ -432,6 +440,7 @@ export async function getPublishedColoringPagesByCategorySlug(
       featured: coloringPages.featured,
       popular: coloringPages.popular,
       publishedAt: coloringPages.publishedAt,
+      updatedAt: coloringPages.updatedAt,
     })
     .from(coloringPages)
     .leftJoin(

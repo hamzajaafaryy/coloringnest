@@ -73,6 +73,8 @@ export const coloringPages = pgTable("coloring_pages", {
   seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
 
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+
   isPublished: boolean("is_published"),
 
   altText: text("alt_text"),
@@ -162,3 +164,15 @@ export const faqs = pgTable("faqs", {
 export const categoriesTable = categories;
 export const coloringPagesTable = coloringPages;
 export const blogPostsTable = blogPosts;
+
+// Additional artwork in a post. The existing image remains the first sheet.
+export const coloringSheets = pgTable("coloring_sheets", {
+  id: text("id").primaryKey(),
+  coloringPageId: bigint("coloring_page_id", { mode: "number" }).notNull().references(() => coloringPages.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  altText: text("alt_text").notNull(),
+  imageUrl: text("image_url").notNull(),
+  svgUrl: text("svg_url"),
+  sortOrder: bigint("sort_order", { mode: "number" }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

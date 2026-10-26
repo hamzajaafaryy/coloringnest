@@ -57,7 +57,7 @@ export function validateStudioSeo(value: unknown): { seo: StudioSeo | null; issu
     const count = fieldCount(seo[rule.key], rule.unit);
     if (count < rule.min || count > rule.max) issues.push(`${rule.label}: ${count}; expected ${rule.min}–${rule.max} ${rule.unit}.`);
   }
-  if (!seo.title.endsWith("Coloring Page")) issues.push("Page title must end in Coloring Page.");
+  if (!/Coloring Pages?$/.test(seo.title)) issues.push("Page title must end in Coloring Page or Coloring Pages.");
   if (!seo.seoTitle.endsWith("| CraftColoring")) issues.push("SEO title must end in | CraftColoring.");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(seo.slug)) issues.push("Slug must use lowercase words separated by hyphens.");
   if (!STUDIO_CATEGORIES.includes(seo.category)) issues.push("Choose an approved category.");

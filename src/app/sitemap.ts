@@ -1,3 +1,4 @@
+import { getAllCollectionImages } from "@/db/coloring-sheets";
 import type { MetadataRoute } from "next";
 import { getAllPublishedCategories, getSitemapBlogPosts, getSitemapColoringPages } from "@/db/queries";
 import { buildCanonicalUrl, SITE_CONFIG } from "@/lib/seo";
@@ -45,22 +46,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     routes.push({ url: buildCanonicalUrl(`/coloring-pages/${category.slug}`) });
   }
 
+  const collectionImages = await getAllCollectionImages(pages.map(page => page.id));
+  const byPage = new Map<number, typeof collectionImages>();
+  for (const image of collectionImages) byPage.set(image.pageId, [...(byPage.get(image.pageId) || []), image]);
   for (const page of pages) {
     const categorySlug =
       page.categoryId === null ? undefined : categorySlugById.get(page.categoryId);
     if (!page.slug || !categorySlug) continue;
 
-    // publishedAt is the last trustworthy date stored by the current schema.
-    // Don't invent newer lastmod values on every sitemap request.
-    const modified = page.publishedAt ? { lastModified: page.publishedAt } : {};
+    const extra = byPage.get(page.id) || [];
+    const dates = [page.updatedAt, page.publishedAt, ...extra.map(image => image.updatedAt)].filter((date): date is Date => Boolean(date));
+    const modified = dates.length ? { lastModified: new Date(Math.max(...dates.map(date => date.getTime()))) } : {};
+    const images = [...new Set([page.imageUrl, ...extra.map(image => image.imageUrl)].filter((url): url is string => Boolean(url)))].map(absoluteImageUrl);
     routes.push({
       url: buildCanonicalUrl(`/coloring-pages/${categorySlug}/${page.slug}`),
       ...modified,
-      ...(page.imageUrl ? { images: [absoluteImageUrl(page.imageUrl)] } : {}),
+      ...(images.length ? { images } : {}),
     });
 
     // Online editor is a distinct interactive page, not a copy of the printable page.
-    if (page.hasOnlineVersion) {
+    if (page.imageUrl || page.hasOnlineVersion) {
       routes.push({
         url: buildCanonicalUrl(`/color-online/${page.slug}`),
         ...modified,

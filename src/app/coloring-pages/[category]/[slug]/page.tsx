@@ -9,7 +9,7 @@ type Props = { params: Promise<{ category: string; slug: string }> };
 export async function generateMetadata({ params }: Props) {
   const { category, slug } = await params;
   const page = await getColoringPageByCategoryAndSlug(category, slug);
-  if (!page) return constructMetadata({ title: "Coloring Page Not Found", noindex: true });
+  if (!page) notFound();
   return constructMetadata({
     title: page.seoTitle || page.title,
     description: page.seoDescription || `Print ${page.title.toLowerCase()} for a little coloring time at home or school.`,

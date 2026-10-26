@@ -1,5 +1,7 @@
 "use server";
 
+import { parseSheetInputs } from "@/lib/coloring-sheets";
+import { coloringSheets } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -62,20 +64,33 @@ function validatePublishablePage(formData: FormData, published: boolean) {
   }
 }
 
+function collectionInput(formData: FormData) {
+  const raw = String(formData.get("collectionSheets") || "[]");
+  if (raw.length > 60000) throw new Error("Collection data is too large.");
+  const parsed = JSON.parse(raw);
+  if (Array.isArray(parsed) && !parsed.length) return [];
+  return parseSheetInputs(parsed, process.env.SUPABASE_URL || "");
+}
+
 export async function createColoringPage(formData: FormData) {
   await requireAdmin();
   const title = text(formData, "title"); if (!title) return;
+  const sheets = collectionInput(formData);
   const published = checkbox(formData, "isPublished");
   const slug = normalizedSlug(formData, title);
   validatePublishablePage(formData, published);
   await assertUniqueColoringSlug(slug);
-  await db.insert(coloringPages).values({ title, slug, description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null });
+  await db.transaction(async tx => {
+  const [created] = await tx.insert(coloringPages).values({ title, slug, description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null }).returning({ id: coloringPages.id });
+    if (sheets.length) await tx.insert(coloringSheets).values(sheets.map((sheet, sortOrder) => ({ ...sheet, imageUrl: sheet.imageUrl!, coloringPageId: created.id, sortOrder })));
+  });
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
 }
 
 export async function updateColoringPage(id: number, formData: FormData) {
   await requireAdmin();
   const title = text(formData, "title"); if (!title) return;
+  const sheets = collectionInput(formData);
   const published = checkbox(formData, "isPublished");
   const slug = normalizedSlug(formData, title);
   validatePublishablePage(formData, published);
@@ -84,9 +99,13 @@ export async function updateColoringPage(id: number, formData: FormData) {
   const publishedAt = published ? existing[0]?.publishedAt ?? new Date() : existing[0]?.publishedAt ?? null;
   const nextImageUrl = text(formData, "imageUrl");
   const nextSvgUrl = text(formData, "svgUrl");
-  await db.update(coloringPages).set({ title, slug, description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
-  if (existing[0]?.imageUrl && existing[0].imageUrl !== nextImageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
-  if (existing[0]?.svgUrl && existing[0].svgUrl !== nextSvgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
+  await db.transaction(async tx => {
+  await tx.update(coloringPages).set({ updatedAt: new Date(), title, slug, description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
+    await tx.delete(coloringSheets).where(eq(coloringSheets.coloringPageId, id));
+    if (sheets.length) await tx.insert(coloringSheets).values(sheets.map((sheet, sortOrder) => ({ ...sheet, imageUrl: sheet.imageUrl!, coloringPageId: id, sortOrder })));
+  });
+  // Keep replaced artwork: another collection may still reference it.
+
   revalidatePath("/");
   revalidatePath("/coloring-pages/");
   revalidatePath("/coloring-pages/[category]/[slug]", "page");
@@ -97,13 +116,11 @@ export async function updateColoringPage(id: number, formData: FormData) {
 
 export async function deleteColoringPage(id: number) {
   await requireAdmin();
-  const existing = await db.select({ imageUrl: coloringPages.imageUrl, svgUrl: coloringPages.svgUrl }).from(coloringPages).where(eq(coloringPages.id, id)).limit(1);
   await db.transaction(async (tx) => {
     await tx.delete(faqs).where(eq(faqs.coloringPageId, id));
     await tx.delete(coloringPages).where(eq(coloringPages.id, id));
   });
-  if (existing[0]?.imageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
-  if (existing[0]?.svgUrl) await deleteCraftColoringStorageUrl(existing[0].svgUrl);
+  // Shared artwork is retained; remove storage objects only after a reference audit.
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
 }
 

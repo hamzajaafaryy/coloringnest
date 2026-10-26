@@ -16,6 +16,8 @@ export function ImageUploadField({
   profile = "general",
   defaultValue = "",
   required = false,
+  onUploaded,
+  onUploadingChange,
 }: {
   label: string;
   name: string;
@@ -24,6 +26,8 @@ export function ImageUploadField({
   profile?: "general" | "coloring";
   defaultValue?: string | null;
   required?: boolean;
+  onUploaded?: (url: string) => void;
+  onUploadingChange?: (uploading: boolean) => void;
 }) {
   const [url, setUrl] = useState(defaultValue ?? "");
   const [status, setStatus] = useState("");
@@ -34,6 +38,7 @@ export function ImageUploadField({
     if (!file) return;
 
     setUploading(true);
+    onUploadingChange?.(true);
     setSelectedName(file.name);
     setStatus("Preparing file…");
     try {
@@ -78,11 +83,13 @@ export function ImageUploadField({
       }
 
       setUrl(data.url);
+      onUploaded?.(data.url);
       setStatus(`Uploaded${data.width && data.height ? ` • ${data.width} × ${data.height}` : ""} • ${formatBytes(data.size ?? prepared.size)}${data.warning ? ` • ${data.warning}` : ""}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Upload failed.");
     } finally {
       setUploading(false);
+      onUploadingChange?.(false);
     }
   }
 
@@ -92,6 +99,7 @@ export function ImageUploadField({
     <div className="block">
       <span className="mb-2 block text-sm font-medium text-slate-700">{label}</span>
 
+      <input aria-label={`${label} upload status`} className="sr-only" tabIndex={-1} required value={uploading || (required && !url) ? "" : "ready"} onChange={() => {}} />
       <input
         type="hidden"
         name={name}

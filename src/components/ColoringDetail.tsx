@@ -1,3 +1,7 @@
+import { getAdditionalSheets } from "@/db/coloring-sheets";
+import { primarySheet } from "@/lib/coloring-sheets";
+import ColoringCollection from "./ColoringCollection";
+import CollectionDownloadButton from "./CollectionDownloadButton";
 import Link from "next/link";
 import { Download, Heart, Palette, Printer, Sparkles } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -24,7 +28,9 @@ export default async function ColoringDetail({ page, printable = false }: { page
   const image = page.imageUrl || null;
   const imageAssets = image ? getColoringImageAssets(image) : null;
   const canDownload = Boolean(svg || image);
-  const canColor = Boolean(svg);
+  const canColor = Boolean(svg || image);
+  const sheets = [primarySheet({ ...page, svgContent: svg }), ...await getAdditionalSheets(page.id)];
+  const isCollection = sheets.length > 1;
   const [dbFaqs, related] = await Promise.all([
     getColoringPageFaqs(page.id), getRelatedColoringPages(page.id, page.categoryId, 6),
   ]);
@@ -38,17 +44,28 @@ export default async function ColoringDetail({ page, printable = false }: { page
     .map((faq) => ({ question: faq.question!, answer: faq.answer! }));
   const fallbackFaqs = [
     { question: "Is this coloring page free?", answer: "Yes. You can print this picture for personal and classroom coloring activities without an account. See our Terms of Use for sharing details." },
-    { question: "How do I print this picture?", answer: "Select Print Coloring Sheet, choose your printer and paper size, and use the fit-to-page option in your browser's print settings." },
-    ...(canDownload ? [{ question: "How do I save this picture?", answer: `Select ${image ? "Download Image" : "Download Printable PNG"} to save the artwork to your device, then open the saved file whenever you want to print it.` }] : []),
+    { question: "How do I print this picture?", answer: isCollection ? "Choose A4 or US Letter, download the complete PDF or an individual drawing, then open the PDF and print the pages you want." : "Select Print Coloring Sheet, choose your printer and paper size, and use the fit-to-page option in your browser's print settings." },
+    ...(canDownload ? [{ question: "How do I save this picture?", answer: isCollection ? "Choose Download all PDF to save the collection, or Download PDF below a drawing to save just that page." : `Select ${image ? "Download Image" : "Download Printable PNG"} to save the artwork to your device, then open the saved file whenever you want to print it.` }] : []),
   ];
-  const intro = canColor
+  const intro = isCollection ? `Choose from ${sheets.length} free coloring pages. Download the complete PDF or color each drawing online.` : canColor
     ? "Print a fresh sheet or color right here in your browser. Pick your favorite way to play."
     : "Print a fresh sheet and make it your own with crayons, pencils, or markers.";
   return (
     <div className="bg-[#fffdfa] text-[#38294d]">
       <article className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-9">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateBreadcrumbSchema(breadcrumbs)) }} />
-        {image && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateImageObjectSchema({ title: page.title, description: page.seoDescription || intro, url: image, category: page.categoryName || "Coloring Pages" })) }} />}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateBreadcrumbSchema(breadcrumbs)).replace(/</g, "\\u003c") }} />
+        {image && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateImageObjectSchema({ title: page.title, description: page.seoDescription || intro, url: image, category: page.categoryName || "Coloring Pages" })).replace(/</g, "\\u003c") }} />}
+        {isCollection && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org", "@type": "CollectionPage",
+          "@id": buildCanonicalUrl(`/coloring-pages/${page.categorySlug}/${page.slug}/`),
+          name: page.title, description: page.seoDescription || intro,
+          mainEntity: { "@type": "ItemList", numberOfItems: sheets.length, itemListElement: sheets.map((sheet, index) => ({
+            "@type": "ListItem", position: index + 1,
+            item: { "@type": "ImageObject", name: sheet.title, caption: sheet.altText,
+              contentUrl: sheet.imageUrl ? new URL(sheet.imageUrl, buildCanonicalUrl("/")).href : undefined,
+              url: `${buildCanonicalUrl(`/coloring-pages/${page.categorySlug}/${page.slug}/`)}#sheet-${sheet.id}` }
+          })) }
+        }).replace(/</g, "\\u003c") }} />}
         <Breadcrumbs items={breadcrumbs} />
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2 text-xs font-bold">
@@ -60,12 +77,15 @@ export default async function ColoringDetail({ page, printable = false }: { page
           <p className="max-w-3xl text-sm leading-7 text-[#73677d] sm:text-base">{intro}</p>
         </div>
 
+        {isCollection ? <ColoringCollection sheets={sheets} slug={page.slug!} /> : <>
         <div id="print" aria-label="Print, download or color this picture" className="no-print grid scroll-mt-28 grid-cols-2 items-start gap-2.5 sm:gap-3 lg:grid-cols-4">
           {(svg || image) && <PrintButton title={page.title} imageUrl={image || undefined} />}
           {canColor && <Link href={`/color-online/${page.slug}/`} className="cc-btn cc-btn-primary min-h-14 w-full bg-linear-to-r from-violet-700 via-fuchsia-700 to-rose-700 px-3"><Palette aria-hidden="true" className="h-4 w-4 shrink-0" /> Color Online</Link>}
           {image ? <ImageDownloadButton imageUrl={image} slug={page.slug!} /> : svg ? <DownloadButton slug={page.slug!} svgContent={svg} title={page.title} /> : null}
           {svg && <SvgDownloadButton svgContent={svg} slug={page.slug!} />}
         </div>
+
+        {canDownload && <div className="no-print max-w-md"><CollectionDownloadButton sheets={sheets} slug={page.slug!} label="Download PDF" /></div>}
 
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-7">
           <div className="min-w-0 rounded-[2rem] border border-[#e9dfef] bg-[#f6f0fa] p-3 sm:p-5">
@@ -90,9 +110,11 @@ export default async function ColoringDetail({ page, printable = false }: { page
           </aside>
         </div>
 
+        </>}
+
         <SocialShare title={page.title} url={buildCanonicalUrl(`${base}/${page.categorySlug}/${page.slug}/`)} imageUrl={image || undefined} />
         {page.description && <section className="space-y-4 rounded-3xl border border-[#eee5ef] bg-white p-5 sm:p-8 lg:px-12">
-          <h2 className="text-2xl font-black">About this coloring picture</h2>
+          <h2 className="text-2xl font-black">About {isCollection ? "this coloring collection" : "this coloring picture"}</h2>
           {page.description.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index} className="max-w-3xl text-sm leading-8 text-[#73677d] sm:text-base">{paragraph}</p>)}
         </section>}
         <FAQ items={faqs.length ? faqs : fallbackFaqs} title="Before you get your crayons" />

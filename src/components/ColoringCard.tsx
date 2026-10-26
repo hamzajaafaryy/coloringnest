@@ -27,7 +27,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
   // Printable cards still have a Print CTA, but link to the single canonical page.
   const pageUrl = `/coloring-pages/${categorySlug}/${pageSlug}`;
   const onlineUrl = `/color-online/${pageSlug}/`;
-  const canColorOnline = Boolean(svgContent || ("svgUrl" in page && page.svgUrl));
+  const canColorOnline = Boolean(("imageUrl" in page && page.imageUrl) || svgContent || ("svgUrl" in page && page.svgUrl));
   const cardLabel = isPrintable ? `Open printable ${page.title}` : `View ${page.title}`;
 
   return (

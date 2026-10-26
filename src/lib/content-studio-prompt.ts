@@ -1,6 +1,6 @@
 import { STUDIO_CATEGORIES } from "./content-studio-seo";
 
-export function buildStudioPrompt(canColorOnline: boolean) {
+export function buildStudioPrompt(hasSvg: boolean, sheets: { title: string; altText: string }[] = []) {
   return `You are the English editor for CraftColoring, a free printable coloring-page website for children, parents, and teachers. Study the attached artwork and return ONE valid JSON object only. No Markdown fences, commentary, HTML, or extra fields.
 
 GOAL AND SEARCH INTENT
@@ -10,14 +10,14 @@ VISUAL ACCURACY
 Identify the main subject, action or pose, setting, and 2–4 clear visible details. Describe only what the image actually shows. Never invent names, characters, objects, print resolution, paper compatibility, file formats, artist experience, licensing, age testing, or medical/educational results. Do not call a generic character a copyrighted character. If an important detail is unclear, describe it neutrally or leave it out.
 
 ACTUAL PAGE FEATURES
-The page has a printable preview image, Print Coloring Sheet, and Download Image. ${canColorOnline ? "An optional vector SVG will also be supplied. The page will offer Download SVG and a separate Color Online button. Explain that downloading saves a file, whereas Color Online opens the browser coloring tools." : "No SVG is supplied. Do NOT mention or promise SVG downloads, online coloring, a browser coloring editor, paint buckets, or digital coloring tools."}
-No PDF download is offered. Never promise PDF. No account is required to print or download. Mention only the features listed here. Do not place feature claims in image alt text.
+This post contains ${sheets.length + 1} coloring drawing(s). The first attached image is the cover. ${sheets.length ? `The other drawings, in display order, are: ${JSON.stringify(sheets)}. Discuss the collection as a whole and the differences between its drawings. Never describe them as a single scene. Mention the exact count only when it matches the supplied artwork.` : "Describe this one drawing."}
+Visitors can download an individual PDF, choose A4 or US Letter, and use Color Online on each drawing. ${sheets.length ? "Download all PDF saves the entire collection as a multipage PDF." : "The page also offers Print Coloring Sheet and Download Image."} ${hasSvg && !sheets.length ? "Download SVG is also available for the supplied cover SVG." : "Do not promise SVG downloads."} Downloading saves a file; Color Online opens browser coloring tools. No account is required. Do not place feature claims in image alt text.
 
 KEYWORD AND TITLE PLAN
 Choose one specific search phrase of 3–7 words based on the actual subject and visible distinguishing details. Use it naturally in the H1, near the start of the article, and in the SEO title or meta where readable. Provide 4–6 distinct related phrases relevant to THIS picture; do not repeat the same keyword mechanically or list keywords in prose. Keywords are editorial topic labels, not a meta-keywords ranking mechanism.
 
 EXACT JSON FIELDS
-- title: 35–75 characters. A clear descriptive H1 ending exactly in "Coloring Page". Avoid redundant wording such as "Coloring Page Coloring Page".
+- title: 35–75 characters. A clear descriptive H1 ending exactly in "${sheets.length ? "Coloring Pages" : "Coloring Page"}". Avoid redundant wording such as "Coloring Page Coloring Page".
 - slug: 15–85 characters; descriptive lowercase ASCII words joined by hyphens. No date, random suffix, domain, leading slash, or extension.
 - seoTitle: 45–60 characters including spaces and the suffix " | CraftColoring". Clear, unique and faithful to the image; put the subject first. Do not append the brand twice.
 - seoDescription: 140–160 characters. One natural, useful summary mentioning the subject and a reason to print or color it. This is also the card summary. Avoid clickbait and keyword lists.

@@ -1,3 +1,4 @@
+import { parseSheetInputs } from "@/lib/coloring-sheets";
 import { validateStudioSeo } from "@/lib/content-studio-seo";
 import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 import { validateColoringSvg } from "@/lib/coloring/validateSvg";
@@ -7,7 +8,7 @@ import {NextResponse} from "next/server";
 import {eq,inArray,and} from "drizzle-orm";
 import {revalidatePath} from "next/cache";
 import {db} from "@/db";
-import {categories,coloringPages,faqs} from "@/db/schema";
+import {categories,coloringPages,coloringSheets,faqs} from "@/db/schema";
 import {isAdminAuthenticated} from "@/lib/admin-auth";
 export const dynamic="force-dynamic";
 export async function GET(){if(!await isAdminAuthenticated())return NextResponse.json({error:"Unauthorized"},{status:401});const [drafts,cats]=await Promise.all([db.select({id:coloringPages.id,title:coloringPages.title,description:coloringPages.description,imageUrl:coloringPages.imageUrl,categoryId:coloringPages.categoryId}).from(coloringPages).where(eq(coloringPages.isPublished,false)).limit(250),db.select({id:categories.id,name:categories.name}).from(categories)]);return NextResponse.json({drafts,categories:cats});}
@@ -18,6 +19,10 @@ export async function POST(request:Request){if(!await isAdminAuthenticated())ret
 async function importSeo(body: Record<string, unknown>) {
   const { seo, issues } = validateStudioSeo(body.seo);
   if (!seo || issues.length) return NextResponse.json({ error: issues.join("; "), issues }, { status: 400 });
+  let sheets;
+  try { sheets = parseSheetInputs(body.sheets ?? [], process.env.SUPABASE_URL || "http://localhost"); }
+  catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid collection." }, { status: 400 }); }
+  if (sheets.length && !seo.title.endsWith("Coloring Pages")) return NextResponse.json({ error: "Use Coloring Pages (plural) at the end of a collection title." }, { status: 400 });
   const duplicate = await db.select({ id: coloringPages.id }).from(coloringPages).where(eq(coloringPages.slug, seo.slug)).limit(1);
   if (duplicate.length) return NextResponse.json({ error: "This slug already exists. Change it in the JSON before uploading." }, { status: 409 });
   const existingCategory = await getCategoryBySlugFromDb(canonicalCategorySlug(seo.category));
@@ -56,8 +61,9 @@ async function importSeo(body: Record<string, unknown>) {
       seoTitle: seo.seoTitle, seoDescription: seo.seoDescription, altText: seo.altText,
       tags: [...new Set([...seo.tags, seo.primaryKeyword, ...seo.keywords])].slice(0, 12),
       ageRange: seo.ageRange, difficulty: seo.difficulty,
-      isPublished: published, publishedAt: published ? new Date() : null,
+      isPublished: published, publishedAt: published ? new Date() : null, updatedAt: new Date(),
     }).returning({ id: coloringPages.id });
+    if (sheets.length) await tx.insert(coloringSheets).values(sheets.map((sheet, index) => ({ id: sheet.id, coloringPageId: created[0].id, title: sheet.title, altText: sheet.altText, imageUrl: sheet.imageUrl!, svgUrl: sheet.svgUrl, sortOrder: index })));
     await tx.insert(faqs).values(seo.faqs.map((faq, index) => ({ coloringPageId: created[0].id, question: faq.question, answer: faq.answer, sortOrder: index + 1 })));
     return created[0];
   });
