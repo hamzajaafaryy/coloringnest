@@ -53,3 +53,8 @@ test('trimmed inputs and array duplicates are validated consistently on client a
   assert.deepEqual(result.seo.tags, ['cat']);
   assert.ok(result.issues.some(issue => issue.includes('Tags')));
 });
+
+ test('collection titles accept the plural without breaking single pages', () => {
+  assert.deepEqual(validateStudioSeo({ ...valid(), title: 'Cute Royal Princess Cat Coloring Pages' }).issues, []);
+  assert.ok(validateStudioSeo({ ...valid(), title: 'Cute Royal Princess Cat Collection Book' }).issues.some(issue => issue.includes('Page title')));
+});

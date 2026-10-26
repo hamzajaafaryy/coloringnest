@@ -1,3 +1,4 @@
+import CollectionSheetsField from "@/components/admin/CollectionSheetsField";
 import Link from "next/link";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
@@ -30,6 +31,8 @@ export default async function NewColoringPage() {
           <ImageUploadField label="Coloring image" name="imageUrl" slugField="slug" kind="image" profile="coloring" required />
           <ImageUploadField label="SVG line art" name="svgUrl" slugField="slug" kind="svg" />
         </section>
+
+        <CollectionSheetsField />
 
         <TextArea label="Description" name="description" rows={5} placeholder="Write useful, original page content for visitors and search engines." />
         <TextArea label="SVG content" name="svgContent" rows={8} placeholder="Optional inline SVG markup when the editor needs it." />

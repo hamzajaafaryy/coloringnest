@@ -23,6 +23,7 @@ interface ColoringEditorProps {
   slug: string;
   title: string;
   svgContent: string;
+  imageUrl?: string | null;
 }
 
 const MAX_HISTORY_STATES = 16;
@@ -180,7 +181,7 @@ function floodFillCanvas(
   return true;
 }
 
-export default function ColoringEditor({ slug, title, svgContent }: ColoringEditorProps) {
+export default function ColoringEditor({ slug, title, svgContent, imageUrl }: ColoringEditorProps) {
   const [selectedColor, setSelectedColor] = useState("#EC4899");
   const [activeTool, setActiveTool] = useState<Tool>("fill");
   const [brushSize, setBrushSize] = useState(12);
@@ -192,9 +193,10 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [rasterRatio, setRasterRatio] = useState<number | null>(null);
   const aspectRatio = useMemo(() => getSvgAspectRatio(svgContent), [svgContent]);
   const preparedSvgContent = useMemo(() => prepareColoringSvg(svgContent), [svgContent]);
-  const svgVersion = useMemo(() => getSvgVersion(preparedSvgContent), [preparedSvgContent]);
+  const svgVersion = useMemo(() => getSvgVersion(preparedSvgContent || imageUrl || ""), [preparedSvgContent, imageUrl]);
   const storageKey = useMemo(() => `craftcoloring_canvas_${slug}_${svgVersion}`, [slug, svgVersion]);
 
   const saveCanvasState = useCallback(() => {
@@ -228,37 +230,30 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const width = 1600;
-    const height = Math.max(900, Math.round(width / aspectRatio));
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, width, height);
-
-    const blob = new Blob([preparedSvgContent], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
+    const blobUrl = preparedSvgContent ? URL.createObjectURL(new Blob([preparedSvgContent], { type: "image/svg+xml;charset=utf-8" })) : null;
+    const source = blobUrl || imageUrl;
+    if (!source) throw new Error("No artwork supplied.");
     try {
       const image = new Image();
+      image.crossOrigin = "anonymous";
       image.decoding = "async";
-      image.src = url;
+      image.src = source;
       await image.decode();
-
-      const scale = Math.min(width / image.width, height / image.height);
-      const drawWidth = image.width * scale;
-      const drawHeight = image.height * scale;
-      const offsetX = (width - drawWidth) / 2;
-      const offsetY = (height - drawHeight) / 2;
-
-      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+      const ratio = image.naturalWidth / image.naturalHeight || aspectRatio;
+      setRasterRatio(ratio);
+      const width = Math.min(1600, Math.round(2000 * ratio));
+      const height = Math.round(width / ratio);
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas unavailable.");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(image, 0, 0, width, height);
     } finally {
-      URL.revokeObjectURL(url);
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
     }
-  }, [aspectRatio, preparedSvgContent]);
+  }, [aspectRatio, preparedSvgContent, imageUrl]);
 
   useEffect(() => {
     let cancelled = false;
@@ -288,6 +283,14 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
     init();
     return () => { cancelled = true; };
   }, [renderSvgToCanvas, restoreCanvasState, saveCanvasState, storageKey]);
+
+  useEffect(() => {
+    const current = history[historyIndex];
+    if (!current) return;
+    const persist = () => { try { localStorage.setItem(storageKey, current); } catch { /* Explicit Save remains available if storage is full. */ } };
+    const timer = window.setTimeout(persist, 350);
+    return () => { window.clearTimeout(timer); persist(); };
+  }, [history, historyIndex, storageKey]);
 
   const pushHistory = useCallback(() => {
     const current = saveCanvasState();
@@ -463,7 +466,7 @@ export default function ColoringEditor({ slug, title, svgContent }: ColoringEdit
       <div className="printable-artwork relative min-h-[320px] min-w-0 overflow-auto rounded-2xl bg-white p-2 shadow-inner sm:min-h-[420px] sm:p-4">
         <div
           className="relative mx-auto w-full max-w-3xl"
-          style={{ aspectRatio: String(aspectRatio), transform: `scale(${zoomLevel})`, transformOrigin: "center" }}
+          style={{ aspectRatio: String(rasterRatio || aspectRatio), transform: `scale(${zoomLevel})`, transformOrigin: "center" }}
         >
           <canvas
             ref={canvasRef}

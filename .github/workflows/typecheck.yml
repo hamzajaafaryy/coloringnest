@@ -43,6 +43,10 @@ jobs:
       - name: Verify category aliases and studio JSON validation
         run: node --test tests/*.test.mjs
       - run: npm run typecheck
+      - name: Install browser for collection acceptance tests
+        run: npx playwright install --with-deps chromium
+      - name: Verify collections, PDF downloads, coloring, admin and SEO
+        run: node tests/collections-browser.mjs
       - name: Build app against disposable CI PostgreSQL
         run: npm run build
       - name: Verify Preview build does not require database access or admin secrets
