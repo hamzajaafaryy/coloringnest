@@ -6,9 +6,9 @@ import { Clock, User, ArrowLeft } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedColoringPages from "@/components/RelatedColoringPages";
 import AdPlaceholder from "@/components/AdPlaceholder";
+import ArticleContent from "@/components/ArticleContent";
 
 import {
-  getAllPublishedBlogPosts,
   getBlogPostBySlugFromDb,
   getAllPublishedColoringPagesWithCategory,
 } from "@/db/queries";
@@ -18,6 +18,8 @@ import {
   generateBreadcrumbSchema,
   generateArticleSchema,
   SITE_CONFIG,
+  buildCanonicalUrl,
+  serializeJsonLd,
 } from "@/lib/seo";
 
 interface BlogPostPageProps {
@@ -46,6 +48,7 @@ export async function generateMetadata({
     title: post.seoTitle || post.title,
     description: post.seoDescription || post.excerpt || "",
     path: `/blog/${slug}/`,
+    image: post.featuredImage || undefined,
     type: "article",
   });
 }
@@ -84,16 +87,12 @@ export default async function BlogPostDetailPage({
     ? new Date(post.publishedAt).toISOString()
     : undefined;
 
-  const articleImage = post.featuredImage
-    ? post.featuredImage.startsWith("http")
-      ? post.featuredImage
-      : `${SITE_CONFIG.domain}${post.featuredImage}`
-    : SITE_CONFIG.ogImage;
+  const articleImage = new URL(post.featuredImage || SITE_CONFIG.ogImage, `${SITE_CONFIG.domain}/`).href;
 
   const articleSchema = generateArticleSchema({
     title: post.title,
-    description: post.excerpt || "",
-    url: `${SITE_CONFIG.domain}/blog/${slug}/`,
+    description: post.seoDescription || post.excerpt || "",
+    url: buildCanonicalUrl(`/blog/${slug}`),
     datePublished: publishedDate,
     authorName: post.author || "CraftColoring",
     image: articleImage,
@@ -104,14 +103,14 @@ export default async function BlogPostDetailPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
+          __html: serializeJsonLd(breadcrumbSchema),
         }}
       />
 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(articleSchema),
+          __html: serializeJsonLd(articleSchema),
         }}
       />
 
@@ -177,45 +176,7 @@ export default async function BlogPostDetailPage({
         format="horizontal"
       />
 
-      <div className="prose prose-indigo max-w-none text-slate-700 leading-relaxed text-base sm:text-lg space-y-6">
-        {(post.content || "")
-          .split("\n\n")
-          .map((paragraph, idx) => {
-            if (paragraph.startsWith("### ")) {
-              return (
-                <h3
-                  key={idx}
-                  className="text-2xl font-bold text-slate-900 mt-6 mb-2"
-                >
-                  {paragraph.replace("### ", "")}
-                </h3>
-              );
-            }
-
-            if (paragraph.startsWith("- ")) {
-              const items = paragraph.split("\n- ");
-
-              return (
-                <ul
-                  key={idx}
-                  className="list-disc pl-6 space-y-2 text-base"
-                >
-                  {items.map((item, i) => (
-                    <li key={i}>
-                      {item.replace("- ", "")}
-                    </li>
-                  ))}
-                </ul>
-              );
-            }
-
-            return (
-              <p key={idx}>
-                {paragraph}
-              </p>
-            );
-          })}
-      </div>
+      <ArticleContent content={post.content || ""} />
 
       <RelatedColoringPages
         pages={recommendedPages}

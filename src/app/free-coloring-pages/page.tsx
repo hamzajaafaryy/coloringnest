@@ -13,6 +13,7 @@ import {
 import {
   constructMetadata,
   generateBreadcrumbSchema,
+  serializeJsonLd,
 } from "@/lib/seo";
 
 export const metadata = constructMetadata({
@@ -44,7 +45,7 @@ export default async function FreeColoringPagesPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
+          __html: serializeJsonLd(breadcrumbSchema),
         }}
       />
 

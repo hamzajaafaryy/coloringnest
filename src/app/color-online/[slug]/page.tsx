@@ -17,6 +17,7 @@ import {
 import {
   constructMetadata,
   generateBreadcrumbSchema,
+  serializeJsonLd,
 } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -102,7 +103,7 @@ export default async function ColorOnlinePage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
+          __html: serializeJsonLd(breadcrumbSchema),
         }}
       />
 

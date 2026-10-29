@@ -9,7 +9,7 @@ import {
   getAllPublishedCategories, getCategoryBySlugFromDb,
   getCategoryFaqs, getPublishedColoringPagesByCategorySlug,
 } from "@/db/queries";
-import { generateBreadcrumbSchema } from "@/lib/seo";
+import { generateBreadcrumbSchema, generateCollectionPageSchema, serializeJsonLd } from "@/lib/seo";
 
 export default async function CategoryCollection({ slug, printable = false }: { slug: string; printable?: boolean }) {
   const category = await getCategoryBySlugFromDb(slug);
@@ -31,7 +31,13 @@ export default async function CategoryCollection({ slug, printable = false }: { 
   return (
     <div className="bg-[#fffdfa] text-[#38294d]">
       <div className="mx-auto max-w-7xl space-y-8 px-4 py-7 sm:px-6 sm:py-10">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateBreadcrumbSchema(breadcrumbs)) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateBreadcrumbSchema(breadcrumbs)) }} />
+        {pages.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateCollectionPageSchema({
+          title: category.name,
+          description: category.seoDescription || category.description || "Choose a coloring picture to print or color online.",
+          path: `/coloring-pages/${category.slug}`,
+          items: pages.filter(page => page.slug).map(page => ({ title: page.title, path: `/coloring-pages/${category.slug}/${page.slug}`, image: page.imageUrl })),
+        })) }} />}
         <Breadcrumbs items={breadcrumbs} />
         <section className="grid items-center gap-6 rounded-[2rem] border border-[#eadff1] bg-gradient-to-br from-[#f5eaff] via-[#fffbf3] to-[#e5f6ef] p-6 sm:p-9 md:grid-cols-[1fr_160px]">
           <div>

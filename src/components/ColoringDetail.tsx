@@ -16,7 +16,7 @@ import { getColoringPageByCategoryAndSlug, getColoringPageFaqs, getRelatedColori
 import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
 import { getColoringImageAssets } from "@/lib/coloring-image-assets";
-import { buildCanonicalUrl, generateBreadcrumbSchema, generateImageObjectSchema } from "@/lib/seo";
+import { buildCanonicalUrl, generateBreadcrumbSchema, generateImageObjectSchema, serializeJsonLd } from "@/lib/seo";
 
 type Page = NonNullable<Awaited<ReturnType<typeof getColoringPageByCategoryAndSlug>>>;
 
@@ -31,6 +31,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
   const canColor = Boolean(svg || image);
   const sheets = [primarySheet({ ...page, svgContent: svg }), ...await getAdditionalSheets(page.id)];
   const isCollection = sheets.length > 1;
+  const canonicalUrl = buildCanonicalUrl(`/coloring-pages/${page.categorySlug}/${page.slug}`);
   const [dbFaqs, related] = await Promise.all([
     getColoringPageFaqs(page.id), getRelatedColoringPages(page.id, page.categoryId, 6),
   ]);
@@ -53,19 +54,21 @@ export default async function ColoringDetail({ page, printable = false }: { page
   return (
     <div className="bg-[#fffdfa] text-[#38294d]">
       <article className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-9">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateBreadcrumbSchema(breadcrumbs)).replace(/</g, "\\u003c") }} />
-        {image && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateImageObjectSchema({ title: page.title, description: page.seoDescription || intro, url: image, category: page.categoryName || "Coloring Pages" })).replace(/</g, "\\u003c") }} />}
-        {isCollection && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          "@context": "https://schema.org", "@type": "CollectionPage",
-          "@id": buildCanonicalUrl(`/coloring-pages/${page.categorySlug}/${page.slug}/`),
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateBreadcrumbSchema(breadcrumbs)) }} />
+        {image && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateImageObjectSchema({ title: page.title, description: page.seoDescription || intro, url: image, category: page.categoryName || "Coloring Pages", pageUrl: canonicalUrl })) }} />}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd({
+          "@context": "https://schema.org", "@type": isCollection ? "CollectionPage" : "WebPage",
+          "@id": canonicalUrl,
+          url: canonicalUrl,
           name: page.title, description: page.seoDescription || intro,
-          mainEntity: { "@type": "ItemList", numberOfItems: sheets.length, itemListElement: sheets.map((sheet, index) => ({
+          ...(image ? { primaryImageOfPage: { "@id": `${canonicalUrl}#artwork` } } : {}),
+          ...(isCollection ? { mainEntity: { "@type": "ItemList", numberOfItems: sheets.length, itemListElement: sheets.map((sheet, index) => ({
             "@type": "ListItem", position: index + 1,
             item: { "@type": "ImageObject", name: sheet.title, caption: sheet.altText,
-              contentUrl: sheet.imageUrl ? new URL(sheet.imageUrl, buildCanonicalUrl("/")).href : undefined,
-              url: `${buildCanonicalUrl(`/coloring-pages/${page.categorySlug}/${page.slug}/`)}#sheet-${sheet.id}` }
-          })) }
-        }).replace(/</g, "\\u003c") }} />}
+              contentUrl: sheet.imageUrl ? new URL(sheet.imageUrl, `${buildCanonicalUrl("/")}/`).href : undefined,
+              url: `${canonicalUrl}#sheet-${sheet.id}` }
+          })) } } : {}),
+        }) }} />
         <Breadcrumbs items={breadcrumbs} />
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2 text-xs font-bold">
@@ -112,7 +115,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
 
         </>}
 
-        <SocialShare title={page.title} url={buildCanonicalUrl(`${base}/${page.categorySlug}/${page.slug}/`)} imageUrl={image || undefined} />
+        <SocialShare title={page.title} url={canonicalUrl} imageUrl={image || undefined} />
         {page.description && <section className="space-y-4 rounded-3xl border border-[#eee5ef] bg-white p-5 sm:p-8 lg:px-12">
           <h2 className="text-2xl font-black">About {isCollection ? "this coloring collection" : "this coloring picture"}</h2>
           {page.description.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index} className="max-w-3xl text-sm leading-8 text-[#73677d] sm:text-base">{paragraph}</p>)}

@@ -1,8 +1,9 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { getColoringImageAssets } from "./coloring-image-assets";
+import { canonicalSiteUrl, resolveSiteOrigin } from "./site-urls";
+export { serializeJsonLd } from "./structured-data";
 
-const configuredSite = process.env.NEXT_PUBLIC_SITE_URL || "https://coloringnest.vercel.app";
-const SITE_ROOT = configuredSite.endsWith("/") ? configuredSite.slice(0, -1) : configuredSite;
+const SITE_ROOT = resolveSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL);
 
 export const SITE_CONFIG = {
   name: "CraftColoring",
@@ -16,9 +17,7 @@ export const SITE_CONFIG = {
 };
 
 export function buildCanonicalUrl(path: string): string {
-  const cleanPath = path.startsWith("/") ? path : `/${path}`;
-  const trimmed = cleanPath === "/" ? "" : cleanPath.replace(/\/+$/, "");
-  return `${SITE_CONFIG.domain}${trimmed}`;
+  return canonicalSiteUrl(path, SITE_CONFIG.domain);
 }
 
 interface MetadataParams {
@@ -48,7 +47,7 @@ export function constructMetadata({
   // Keep one preferred URL when a printable route mirrors a coloring page.
   const canonical = buildCanonicalUrl(canonicalPath ?? path);
   const imageAssets = image ? getColoringImageAssets(image) : null;
-  const imageUrl = imageAssets?.previewUrl || SITE_CONFIG.ogImage;
+  const imageUrl = new URL(imageAssets?.previewUrl || SITE_CONFIG.ogImage, `${SITE_CONFIG.domain}/`).href;
   const imageDimensions = imageAssets?.width
     ? { width: imageAssets.width, height: imageAssets.height }
     : image ? {} : { width: 1200, height: 630 };
@@ -57,6 +56,9 @@ export function constructMetadata({
     title: metaTitle,
     description: metaDescription,
     metadataBase: new URL(SITE_CONFIG.domain),
+    ...(process.env.GOOGLE_SITE_VERIFICATION?.trim()
+      ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION.trim() } }
+      : {}),
     alternates: {
       canonical,
     },
@@ -103,9 +105,11 @@ export function generateWebSiteSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${SITE_CONFIG.domain}/#website`,
     name: SITE_CONFIG.name,
     alternateName: "CraftColoring",
     url: SITE_CONFIG.domain,
+    publisher: { "@id": `${SITE_CONFIG.domain}/#organization` },
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -121,6 +125,7 @@ export function generateOrganizationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${SITE_CONFIG.domain}/#organization`,
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.domain,
     logo: `${SITE_CONFIG.domain}/icon.svg`,
@@ -142,9 +147,7 @@ export function generateBreadcrumbSchema(items: BreadcrumbInputItem[]) {
     itemListElement: items.map((item, index) => {
       const name = item.label || item.name || "";
       const path = item.href || item.item || "";
-      const fullUrl = path.startsWith("http")
-        ? path
-        : `${SITE_CONFIG.domain}${path.startsWith("/") ? "" : "/"}${path}`;
+      const fullUrl = buildCanonicalUrl(path);
 
       return {
         "@type": "ListItem",
@@ -161,22 +164,63 @@ export function generateImageObjectSchema({
   description,
   url,
   category,
+  pageUrl,
 }: {
   title: string;
   description: string;
   url: string;
   category: string;
+  pageUrl?: string;
 }) {
   return {
     "@context": "https://schema.org",
     "@type": "ImageObject",
-    contentUrl: url,
-    license: `${SITE_CONFIG.domain}/terms/`,
-    acquireLicensePage: `${SITE_CONFIG.domain}/terms/`,
+    ...(pageUrl ? {
+      "@id": `${buildCanonicalUrl(pageUrl)}#artwork`,
+      mainEntityOfPage: { "@id": buildCanonicalUrl(pageUrl) },
+    } : {}),
+    contentUrl: new URL(url, `${SITE_CONFIG.domain}/`).href,
+    thumbnailUrl: new URL(getColoringImageAssets(url).previewUrl, `${SITE_CONFIG.domain}/`).href,
+    license: buildCanonicalUrl("/terms"),
+    acquireLicensePage: buildCanonicalUrl("/terms"),
     name: title,
     caption: description,
     description,
     genre: category,
+  };
+}
+
+export function generateCollectionPageSchema({
+  title, description, path, items,
+}: {
+  title: string;
+  description: string;
+  path: string;
+  items: { title: string; path: string; image?: string | null }[];
+}) {
+  const url = buildCanonicalUrl(path);
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": url,
+    url,
+    name: title,
+    description,
+    isPartOf: { "@id": `${SITE_CONFIG.domain}/#website` },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: items.length,
+      itemListElement: items.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "WebPage",
+          name: item.title,
+          url: buildCanonicalUrl(item.path),
+          ...(item.image ? { image: new URL(getColoringImageAssets(item.image).previewUrl, `${SITE_CONFIG.domain}/`).href } : {}),
+        },
+      })),
+    },
   };
 }
 
@@ -204,6 +248,7 @@ export function generateArticleSchema({
   datePublished,
   authorName,
   image,
+  dateModified,
 }: {
   title: string;
   description: string;
@@ -211,20 +256,26 @@ export function generateArticleSchema({
   datePublished?: string;
   authorName: string;
   image: string;
+  dateModified?: string;
 }) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
+    "@id": `${buildCanonicalUrl(url)}#article`,
+    url: buildCanonicalUrl(url),
     headline: title,
     description,
-    image,
+    image: new URL(image, `${SITE_CONFIG.domain}/`).href,
     ...(datePublished ? { datePublished } : {}),
+    ...(dateModified ? { dateModified } : {}),
     author: {
-      "@type": "Person",
+      "@type": authorName === SITE_CONFIG.name ? "Organization" : "Person",
       name: authorName,
+      ...(authorName === SITE_CONFIG.name ? { "@id": `${SITE_CONFIG.domain}/#organization` } : {}),
     },
     publisher: {
       "@type": "Organization",
+      "@id": `${SITE_CONFIG.domain}/#organization`,
       name: SITE_CONFIG.name,
       logo: {
         "@type": "ImageObject",
@@ -233,7 +284,7 @@ export function generateArticleSchema({
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": url,
+      "@id": buildCanonicalUrl(url),
     },
   };
 }

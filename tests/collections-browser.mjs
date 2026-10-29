@@ -27,6 +27,10 @@ const ids=['11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-22222
 for(let i=0;i<2;i++) await db.query('INSERT INTO coloring_sheets(id,coloring_page_id,title,alt_text,image_url,sort_order) VALUES ($1,1,$2,$3,$4,$5)',[ids[i],['Happy penguin','Baby octopus'][i],['A happy penguin.','A baby octopus.'][i], origin+'/collection-test/'+['penguin.png','octopus.png'][i],i]);
 await db.query('INSERT INTO coloring_pages(title,slug,category_id,image_url,alt_text,is_published,published_at) VALUES ($1,$2,1,$3,$4,true,now())', ['Single cat','single-cat',image,'One cat.']);
 await db.query('INSERT INTO coloring_pages(title,slug,category_id,image_url,is_published) VALUES ($1,$2,1,$3,false)', ['Private draft','private-draft',image]);
+const blogTitle = 'Printing </script><script id="article-title-injected">window.__titleInjected=true</script>';
+const blogContent = '## Pick your picture\n\nChoose [animal collection](/coloring-pages/animals/test-collection) and **print it**.\n\n1. Open the picture\n2. Check the preview\n\n- Crayons\n- Paper\n\n[unsafe](javascript:alert)\n\n<script id="article-injected">window.__articleInjected=true</script>';
+await db.query('INSERT INTO blog_posts(title,slug,content,author,featured_image,excerpt,is_published,published_at) VALUES ($1,$2,$3,$4,$5,$6,true,now())', [blogTitle,'printing-test',blogContent,'CraftColoring',image,'Printing a coloring collection.']);
+await db.query('INSERT INTO blog_posts(title,slug,content,is_published) VALUES ($1,$2,$3,false)', ['Draft article','draft-article','Private article']);
 console.log('Fixtures ready');
 
 console.log('Database TCP ready');
@@ -37,6 +41,8 @@ try{
  for(let i=0;i<90;i++){try{if((await fetch(origin+'/robots.txt',{signal:AbortSignal.timeout(3000)})).ok)break;}catch{} await new Promise(r=>setTimeout(r,500));if(i===89)throw Error(serverLog);}
  browser=await playwright.launch({headless:true});
  const context=await browser.newContext({viewport:{width:390,height:844},acceptDownloads:true});
+ // Fixtures use HTTP loopback only; keep third-party advertising out of acceptance tests.
+ await context.route('https://**/*', route => route.abort());
  const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  const url=origin+'/coloring-pages/animals/test-collection';
  const raw=await (await fetch(url)).text();assert.ok(raw.includes('A happy penguin.'));assert.ok(raw.includes('CollectionPage'));assert.ok(raw.includes('Baby octopus'));console.log('PASS: server HTML includes all drawings and structured data');
@@ -53,6 +59,32 @@ try{
  assert.equal((await fetch(origin+'/coloring-pages/animals/private-draft')).status,404);assert.equal((await fetch(origin+'/printable-coloring-pages/animals/test-collection',{redirect:'manual'})).status,308);
  const sitemap=await (await fetch(origin+'/sitemap.xml')).text();assert.ok(sitemap.includes('penguin.png'));assert.ok(!sitemap.includes('private-draft'));assert.ok(!sitemap.includes('/printable-coloring-pages/animals/test-collection'));console.log('PASS: old single page, private draft, redirect and sitemap');
  await page.setViewportSize({width:1440,height:1000});await page.goto(url);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.screenshot({path:qa+'/desktop.png',fullPage:true});
+ await page.goto(origin+'/blog/printing-test');
+ await page.getByRole('heading',{level:2,name:'Pick your picture',exact:true}).waitFor();
+ assert.equal(await page.getByRole('link',{name:'animal collection',exact:true}).getAttribute('href'),'/coloring-pages/animals/test-collection');
+ assert.equal(await page.locator('article strong').filter({hasText:'print it'}).count(),1);
+ assert.equal(await page.locator('article ol li').count(),2);assert.equal(await page.locator('article ul li').count(),2);
+ assert.equal(await page.getByRole('link',{name:'unsafe',exact:true}).count(),0);
+ assert.equal(await page.locator('#article-injected,#article-title-injected').count(),0);
+ assert.equal(await page.evaluate(()=>window.__articleInjected || window.__titleInjected),undefined);
+ const blogSchemas=await page.locator('script[type="application/ld+json"]').evaluateAll(nodes=>nodes.map(node=>JSON.parse(node.textContent)));
+ const articleSchema=blogSchemas.find(schema=>schema['@type']==='Article');
+ assert.equal(articleSchema.headline,blogTitle);assert.equal(articleSchema.url,origin+'/blog/printing-test');assert.equal(articleSchema.author['@type'],'Organization');
+ assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'),articleSchema.url);
+ assert.equal(await page.locator('meta[property="og:image"]').getAttribute('content'),image);
+ assert.ok(sitemap.includes('/blog/printing-test'));assert.ok(!sitemap.includes('draft-article'));
+ assert.equal((await fetch(origin+'/blog/draft-article')).status,404);
+ await page.getByRole('link',{name:'animal collection',exact:true}).click();await page.getByRole('heading',{name:'3 free coloring pages',exact:true}).waitFor();
+ const artworkSchemas=await page.locator('script[type="application/ld+json"]').evaluateAll(nodes=>nodes.map(node=>JSON.parse(node.textContent)));
+ const artworkSchema=artworkSchemas.find(schema=>schema['@type']==='ImageObject');
+ assert.equal(artworkSchema.mainEntityOfPage['@id'],url);assert.equal(artworkSchema.license,origin+'/terms');
+ assert.equal(artworkSchemas.find(schema=>schema['@type']==='CollectionPage').primaryImageOfPage['@id'],artworkSchema['@id']);
+ await page.goto(origin+'/coloring-pages/animals');
+ const categorySchemas=await page.locator('script[type="application/ld+json"]').evaluateAll(nodes=>nodes.map(node=>JSON.parse(node.textContent)));
+ const categorySchema=categorySchemas.find(schema=>schema['@type']==='CollectionPage');
+ assert.equal(categorySchema.url,origin+'/coloring-pages/animals');assert.equal(categorySchema.mainEntity.numberOfItems,2);
+ assert.ok(categorySchema.mainEntity.itemListElement.every(item=>!item.item.url.endsWith('/')));
+ console.log('PASS: crawlable article links, headings, lists, safe JSON-LD/HTML, article preview image, drafts, sitemap, artwork and category Schema');
  await page.goto(origin+'/admin/coloring-pages/1');assert.ok(page.url().includes('/admin/login'));
  const payload=Buffer.from(JSON.stringify({username:'fixture',exp:Date.now()+600000})).toString('base64url');const signature=createHmac('sha256','fixture-secret').update(payload).digest('hex');await context.addCookies([{name:'craftcoloring_admin',value:`${payload}.${signature}`,domain:'localhost',path:'/'}]);
  await page.goto(origin+'/admin/coloring-pages/1');await page.getByRole('heading',{name:'Collection sheets',exact:true}).waitFor();assert.equal(await page.locator('fieldset').count(),2);
