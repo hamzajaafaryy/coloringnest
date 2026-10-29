@@ -25,6 +25,7 @@ export default async function EditBlogPost({ params }: { params: Promise<{ id: s
     </section>
     <TextArea label="Excerpt" name="excerpt" defaultValue={post.excerpt} rows={4} />
     <TextArea label="Content" name="content" defaultValue={post.content} rows={18} />
+    <p className="text-sm text-slate-500">Use ## for headings, - or 1. for lists, **bold** for emphasis, and [link text](/coloring-pages/animals) for links. HTML is displayed as text.</p>
     <Field label="Tags" name="tags" defaultValue={post.tags?.join(", ")} />
     <section className="grid gap-5 md:grid-cols-2"><Field label="SEO title" name="seoTitle" defaultValue={post.seoTitle} /><Field label="SEO description" name="seoDescription" defaultValue={post.seoDescription} /></section>
     <Check label="Published" name="isPublished" defaultChecked={post.isPublished ?? false} />

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { categoryRedirectRules } from "./src/lib/category-catalog";
+import { resolveSiteOrigin, siteRedirectRules } from "./src/lib/site-urls";
 
 const nextConfig: NextConfig = {
   // Resolve metadata before streaming so missing posts return an HTTP 404.
@@ -9,7 +10,10 @@ const nextConfig: NextConfig = {
     "/api/admin/upload": ["./node_modules/@img/sharp-*/**/*"],
   },
   async redirects() {
-    return categoryRedirectRules();
+    return [
+      ...siteRedirectRules(resolveSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL), process.env.SITE_REDIRECT_FROM_HOSTS),
+      ...categoryRedirectRules(),
+    ];
   },
 };
 

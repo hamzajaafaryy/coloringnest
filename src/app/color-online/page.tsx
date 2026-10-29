@@ -2,7 +2,7 @@ import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ColoringGrid from "@/components/ColoringGrid";
 import { getAllPublishedColoringPagesWithCategory } from "@/db/queries";
-import { constructMetadata, generateBreadcrumbSchema } from "@/lib/seo";
+import { constructMetadata, generateBreadcrumbSchema, serializeJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,7 @@ export default async function ColorOnlineDirectoryPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbSchema) }}
       />
 
       <Breadcrumbs items={breadcrumbItems} />

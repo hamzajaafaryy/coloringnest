@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { constructMetadata, generateOrganizationSchema, generateWebSiteSchema } from "@/lib/seo";
+import { constructMetadata, generateOrganizationSchema, generateWebSiteSchema, serializeJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = constructMetadata();
 
@@ -19,11 +19,11 @@ export default function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteSchema) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(orgSchema) }}
         />
       </head>
       <body className="bg-white text-slate-900 antialiased selection:bg-indigo-500 selection:text-white flex flex-col min-h-screen">

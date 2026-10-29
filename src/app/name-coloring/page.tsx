@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Download, PencilLine, Sparkles, WandSparkles } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import NameColoringStudio from "@/components/name-coloring/NameColoringStudio";
-import { constructMetadata, generateBreadcrumbSchema, generateFAQSchema } from "@/lib/seo";
+import { constructMetadata, generateBreadcrumbSchema, generateFAQSchema, serializeJsonLd } from "@/lib/seo";
 
 export const metadata = constructMetadata({
   title: "Name Coloring Page Generator",
@@ -22,8 +22,8 @@ const faqs = [
 export default function NameColoringPage() {
   return <div className="name-coloring-print-root min-w-0 bg-[#fffdfa] text-[#38294d]">
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-4 sm:px-6 sm:pb-16 sm:pt-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateBreadcrumbSchema(breadcrumbs)) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(generateFAQSchema(faqs)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateBreadcrumbSchema(breadcrumbs)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateFAQSchema(faqs)) }} />
       <Breadcrumbs items={breadcrumbs} />
       <header className="mb-7 mt-6 max-w-3xl sm:mb-9">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e9d9f4] bg-[#f4eafb] px-3 py-1.5 text-[11px] font-extrabold tracking-wide text-[#7c43ab]"><Sparkles aria-hidden="true" className="h-3.5 w-3.5" /> Free name coloring page generator</span>
