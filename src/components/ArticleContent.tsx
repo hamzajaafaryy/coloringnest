@@ -16,7 +16,7 @@ function inline(text: string) {
 }
 
 export default function ArticleContent({ content }: { content: string }) {
-  return <div className="prose prose-indigo max-w-none space-y-6 break-words text-base leading-relaxed text-slate-700 sm:text-lg">
+  return <div data-article-content className="prose prose-indigo max-w-none space-y-6 break-words text-base leading-relaxed text-slate-700 sm:text-lg">
     {parseArticleContent(content).map((block, index) => {
       if (block.type === "heading") {
         const Heading = `h${block.level}` as "h2" | "h3" | "h4" | "h5" | "h6";

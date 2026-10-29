@@ -63,7 +63,7 @@ try{
  await page.getByRole('heading',{level:2,name:'Pick your picture',exact:true}).waitFor();
  assert.equal(await page.getByRole('link',{name:'animal collection',exact:true}).getAttribute('href'),'/coloring-pages/animals/test-collection');
  assert.equal(await page.locator('article strong').filter({hasText:'print it'}).count(),1);
- assert.equal(await page.locator('article ol li').count(),2);assert.equal(await page.locator('article ul li').count(),2);
+ assert.equal(await page.locator('[data-article-content] ol li').count(),2);assert.equal(await page.locator('[data-article-content] ul li').count(),2);
  assert.equal(await page.getByRole('link',{name:'unsafe',exact:true}).count(),0);
  assert.equal(await page.locator('#article-injected,#article-title-injected').count(),0);
  assert.equal(await page.evaluate(()=>window.__articleInjected || window.__titleInjected),undefined);
