@@ -12,7 +12,7 @@ Delivery-management **MVP** for Moroccan last-mile couriers (MAD / COD). Built w
 - CSV export, audit events, responsive French-language interface.
 
 ## Requirements
-Node 22+, a Supabase project, and environment variables in `.env.local`.
+Node 24, a Supabase project, and environment variables in `.env.local`.
 
 ## Install
 1. `npm install`
@@ -21,7 +21,7 @@ Node 22+, a Supabase project, and environment variables in `.env.local`.
 4. Create your organization and first admin profile with the bootstrap SQL example at the end of the migration. Use real UUIDs, **not** the example placeholders.
 5. Copy `.env.example` to `.env.local` and set the public URL, publishable key and **server-only** service-role key.
 6. Run `npm run dev`, then open http://localhost:3000/login.
-7. Run `npm run test && npm run typecheck && npm run lint && npm run build`.
+7. Run `npm run test && npm run typecheck && npm run lint && npm run build`. The build also re-runs unit tests.
 8. On Vercel set the same 3 environment values. Keep service role key server-side only.
 
 ## User provisioning
