@@ -16,7 +16,7 @@ export default async function DashboardLayout({children}:{children:React.ReactNo
  const {profile}=await session();
  return <div className="app">
   <aside className="sidebar"><Link className="brand" href="/dashboard"><span className="brand-mark"><Truck size={19}/></span>Atlas Delivery</Link>
-    <nav className="nav" aria-label="Navigation principale">{menu.filter(x=>!x.roles||x.roles.includes(profile.role)).map(({href,label,Icon})=><Link key={href} href={href}><Icon size={18}/>{label}</Link>)}
+    <nav className="nav" aria-label="Navigation principale">{menu.filter(x=>!x.roles||x.roles.some(role=>role===profile.role)).map(({href,label,Icon})=><Link key={href} href={href}><Icon size={18}/>{label}</Link>)}
       <Link href="/track"><ScanSearch size={18}/>Suivi public</Link>
     </nav>
     <div className="sidebar-bottom"><div style={{color:"#fff",fontWeight:700}}>{profile.full_name}</div><div className="muted-on-dark">{profile.role.replaceAll("_"," ")}</div></div>

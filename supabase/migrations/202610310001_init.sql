@@ -191,7 +191,7 @@ create policy shipments_insert on public.shipments for insert to authenticated
     and (
       public.app_role() in ('super_admin','admin','manager','dispatcher')
       or (public.app_role()='merchant' and merchant_id=public.app_merchant_id()
-        and delivery_fee_mad=(select default_fee_mad from public.merchants where id=merchant_id and organization_id=public.app_org_id()))
+        and delivery_fee_mad=(select default_fee_mad from public.merchants where id=shipments.merchant_id and organization_id=public.app_org_id()))
     ));
 create policy events_read on public.shipment_events for select to authenticated
   using (organization_id=public.app_org_id()
