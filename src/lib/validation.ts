@@ -3,7 +3,7 @@ export const uuid = z.string().uuid();
 export const shipmentInput = z.object({
   merchant_id: uuid,
   recipient_name: z.string().trim().min(2).max(100),
-  recipient_phone: z.string().trim().regex(/^\\+?[0-9 ]{9,16}$/, "Téléphone invalide"),
+  recipient_phone: z.string().trim().regex(/^\+?[0-9 ]{9,16}$/, "Téléphone invalide"),
   destination_city: z.string().trim().min(2).max(80),
   delivery_address: z.string().trim().min(5).max(350),
   cod_amount_mad: z.coerce.number().min(0).max(1000000),
