@@ -176,7 +176,7 @@ export function generateColoringCreativeWorkSchema({
   ageRange?: string | null;
 }) {
   const url = buildCanonicalUrl(path);
-  const match = ageRange?.match(/\\b(\\d{1,2})\\s*[-–—]\\s*(\\d{1,2})\\b/);
+  const match = ageRange?.match(/\b(\d{1,2})\s*[-–—]\s*(\d{1,2})\b/);
   const low = match ? Number(match[1]) : NaN;
   const high = match ? Number(match[2]) : NaN;
   const normalizedAgeRange =
@@ -212,7 +212,7 @@ export function buildColoringMetaDescription({
 }): string {
   const details = [
     category ? `${category} theme` : null,
-    ageRange ? ageRange.replace(/^suggested\\s+/i, "Suggested ") : null,
+    ageRange ? ageRange.replace(/^suggested\s+/i, "Suggested ") : null,
     difficulty ? `${difficulty} difficulty` : null,
   ].filter(Boolean);
   return `Print or download ${title.toLowerCase()} for free.${details.length ? ` ${details.join(" · ")}.` : ""} Enjoy coloring at home or school.`;
