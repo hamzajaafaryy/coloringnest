@@ -5,22 +5,25 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import CategoryCard from "@/components/CategoryCard";
 import ColoringGrid from "@/components/ColoringGrid";
 import FAQ from "@/components/FAQ";
+import PaginationLinks from "@/components/PaginationLinks";
+import { getPublishedCardPage } from "@/db/page-cards";
 import {
   getAllPublishedCategories, getCategoryBySlugFromDb,
-  getCategoryFaqs, getPublishedColoringPagesByCategorySlug,
+  getCategoryFaqs,
 } from "@/db/queries";
 import { generateBreadcrumbSchema, generateCollectionPageSchema, serializeJsonLd } from "@/lib/seo";
 
-export default async function CategoryCollection({ slug, printable = false }: { slug: string; printable?: boolean }) {
+export default async function CategoryCollection({ slug, printable = false, page = 1 }: { slug: string; printable?: boolean; page?: number }) {
   const category = await getCategoryBySlugFromDb(slug);
   if (!category) notFound();
   const base = printable ? "/printable-coloring-pages" : "/coloring-pages";
   if (slug !== category.slug) permanentRedirect(`${base}/${category.slug}/`);
-  const [pages, allCategories, faqs] = await Promise.all([
-    getPublishedColoringPagesByCategorySlug(category.slug),
+  const [listing, allCategories, faqs] = await Promise.all([
+    getPublishedCardPage({ categorySlug: category.slug, page }),
     getAllPublishedCategories(),
     getCategoryFaqs(category.id, category.sourceIds),
   ]);
+  const pages = listing.pages;
   const related = allCategories.filter((cat) => cat.slug !== category.slug && cat.pageCount > 0).slice(0, 4);
   const faqItems = faqs.filter((faq) => faq.question && faq.answer)
     .map((faq) => ({ question: faq.question!, answer: faq.answer! }));
@@ -46,7 +49,7 @@ export default async function CategoryCollection({ slug, printable = false }: { 
             </span>
             <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{printable ? "Printable " : ""}{category.name}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#6e6179]">{category.description || "Choose a picture, grab your crayons, and enjoy a little creative time."}</p>
-            <p className="mt-3 text-xs font-bold text-[#8050a8]">{pages.length} {pages.length === 1 ? "picture" : "pictures"} available</p>
+            <p className="mt-3 text-xs font-bold text-[#8050a8]">{listing.total} {listing.total === 1 ? "picture" : "pictures"} available</p>
           </div>
           {category.imageUrl && <img src={category.imageUrl} alt={category.name} className="mx-auto hidden h-36 w-36 rounded-3xl bg-white p-3 object-contain shadow-sm md:block" />}
         </section>
@@ -61,6 +64,7 @@ export default async function CategoryCollection({ slug, printable = false }: { 
             </div>
           )}
         </section>
+        <PaginationLinks path={`/coloring-pages/${category.slug}`} page={listing.page} pageCount={listing.pageCount} />
         {related.length > 0 && <section className="space-y-5 pb-3">
           <h2 className="text-2xl font-black">More themes with pictures to color</h2>
           <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">{related.map((cat) => <CategoryCard key={cat.id} category={cat} variant={printable ? "printable" : "coloring"} />)}</div>

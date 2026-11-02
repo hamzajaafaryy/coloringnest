@@ -7,14 +7,16 @@ import ColoringGrid from "@/components/ColoringGrid";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 import {
-  getAllPublishedColoringPagesWithCategory,
   getAllPublishedCategories,
 } from "@/db/queries";
 
 import { constructMetadata } from "@/lib/seo";
+import { getPublishedCardPage } from "@/db/page-cards";
+import { parsePage } from "@/lib/paging";
+import PaginationLinks from "@/components/PaginationLinks";
 
 interface SearchPageProps {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }
 
 export async function generateMetadata({}: SearchPageProps) {
@@ -30,30 +32,16 @@ export async function generateMetadata({}: SearchPageProps) {
 export default async function SearchPage({
   searchParams,
 }: SearchPageProps) {
-  const { q } = await searchParams;
+  const { q, page: pageParam } = await searchParams;
 
-  const query = q ? q.trim().toLowerCase() : "";
+  const query = (q || "").trim().slice(0, 80);
 
-  const [allPages, allCategories] = await Promise.all([
-    getAllPublishedColoringPagesWithCategory(),
+  const [listing, allCategories] = await Promise.all([
+    getPublishedCardPage({ query: query || undefined, page: query ? parsePage(pageParam) : 1, limit: query ? 24 : 12 }),
     getAllPublishedCategories(),
   ]);
 
-  const results = query
-    ? allPages.filter((page) => {
-        const title = page.title?.toLowerCase() ?? "";
-        const description = page.description?.toLowerCase() ?? "";
-        const categoryName = page.categoryName?.toLowerCase() ?? "";
-        const categorySlug = page.categorySlug?.toLowerCase() ?? "";
-
-        return (
-          title.includes(query) ||
-          description.includes(query) ||
-          categoryName.includes(query) ||
-          categorySlug.includes(query)
-        );
-      })
-    : [];
+  const results = query ? listing.pages : [];
 
   const matchedCategories = query
     ? allCategories.filter((category) => {
@@ -67,9 +55,7 @@ export default async function SearchPage({
       })
     : [];
 
-  const displayPages = query
-    ? results
-    : allPages.slice(0, 12);
+  const displayPages = listing.pages;
 
   const breadcrumbItems = [
     {
@@ -128,7 +114,7 @@ export default async function SearchPage({
       <section className="space-y-4">
         <h2 className="text-xl font-bold text-slate-900">
           {query
-            ? `Found ${results.length} Coloring ${results.length === 1 ? "Page" : "Pages"}`
+            ? `Found ${listing.total} Coloring ${listing.total === 1 ? "Page" : "Pages"}`
             : "Popular Coloring Pages"}
         </h2>
 
@@ -140,6 +126,7 @@ export default async function SearchPage({
               : "Start by searching for a coloring page."
           }
         />
+        {query && <PaginationLinks path="/search" page={listing.page} pageCount={listing.pageCount} query={query} />}
       </section>
     </div>
   );

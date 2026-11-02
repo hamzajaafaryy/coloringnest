@@ -5,24 +5,31 @@ import ColoringGrid from "@/components/ColoringGrid";
 import SearchBar from "@/components/SearchBar";
 import {
   getAllPublishedCategories,
-  getAllPublishedColoringPagesWithCategory,
 } from "@/db/queries";
-import { constructMetadata } from "@/lib/seo";
+import { constructMetadata, buildCanonicalUrl } from "@/lib/seo";
+import { getPublishedCardPage } from "@/db/page-cards";
+import { parsePage } from "@/lib/paging";
+import PaginationLinks from "@/components/PaginationLinks";
 
 export const dynamic = "force-dynamic";
-export const metadata = constructMetadata({
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = parsePage((await searchParams).page);
+  const metadata = constructMetadata({
   title: "Free Coloring Pages for Kids",
   description:
     "Explore free coloring pages for kids by theme. Find animals, dinosaurs, unicorns, and more, then print a picture for a little creative time.",
   path: "/coloring-pages/",
 });
+  return page > 1 ? { ...metadata, alternates: { canonical: `${buildCanonicalUrl("/coloring-pages")}?page=${page}` } } : metadata;
+}
 
-export default async function ColoringPagesDirectory() {
-  const [allCategories, allPages] = await Promise.all([
+export default async function ColoringPagesDirectory({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const [allCategories, listing] = await Promise.all([
     getAllPublishedCategories(),
-    getAllPublishedColoringPagesWithCategory(),
+    getPublishedCardPage({ page: parsePage((await searchParams).page) }),
   ]);
-  const categories = allCategories.filter((cat) => Boolean(cat.slug))
+  const allPages = listing.pages;
+  const categories = allCategories.filter((cat) => Boolean(cat.slug && cat.pageCount > 0))
     .sort((a, b) => Number(b.pageCount > 0) - Number(a.pageCount > 0) || Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || a.name.localeCompare(b.name));
   const pages = allPages.filter((page) => Boolean(page.slug && page.categorySlug));
 
@@ -74,7 +81,7 @@ export default async function ColoringPagesDirectory() {
             </div>
             <Link href="/printable-coloring-pages/" className="inline-flex items-center gap-2 text-sm font-bold text-[#7840b6] hover:underline">Looking for printables? <ArrowRight className="h-4 w-4" /></Link>
           </div>
-          {pages.length ? <ColoringGrid pages={pages} /> : (
+          {pages.length ? <><ColoringGrid pages={pages} /><PaginationLinks path="/coloring-pages" page={listing.page} pageCount={listing.pageCount} /></> : (
             <div className="rounded-3xl border border-[#e5dced] bg-white px-6 py-12 text-center">
               <Palette className="mx-auto h-10 w-10 text-[#9b66cf]" />
               <h3 className="mt-4 text-xl font-black text-[#49345e]">New pictures are on the way</h3>
