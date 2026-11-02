@@ -16,7 +16,7 @@ import { getColoringPageByCategoryAndSlug, getColoringPageFaqs, getRelatedColori
 import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
 import { getColoringImageAssets } from "@/lib/coloring-image-assets";
-import { buildCanonicalUrl, generateBreadcrumbSchema, generateImageObjectSchema, serializeJsonLd } from "@/lib/seo";
+import { buildCanonicalUrl, generateBreadcrumbSchema, generateImageObjectSchema, generateColoringCreativeWorkSchema, serializeJsonLd } from "@/lib/seo";
 
 type Page = NonNullable<Awaited<ReturnType<typeof getColoringPageByCategoryAndSlug>>>;
 
@@ -69,6 +69,14 @@ export default async function ColoringDetail({ page, printable = false }: { page
               url: `${canonicalUrl}#sheet-${sheet.id}` }
           })) } } : {}),
         }) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(generateColoringCreativeWorkSchema({
+          title: page.title,
+          description: page.description || page.seoDescription || intro,
+          path: `/coloring-pages/${page.categorySlug}/${page.slug}`,
+          image,
+          category: page.categoryName,
+          ageRange: page.ageRange,
+        })) }} />
         <Breadcrumbs items={breadcrumbs} />
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2 text-xs font-bold">
@@ -78,6 +86,16 @@ export default async function ColoringDetail({ page, printable = false }: { page
           </div>
           <h1 className="max-w-4xl text-3xl font-black leading-tight tracking-tight sm:text-4xl">{page.title}</h1>
           <p className="max-w-3xl text-sm leading-7 text-[#73677d] sm:text-base">{intro}</p>
+          {(page.categoryName || page.ageRange || page.difficulty) && (
+            <section aria-label="Coloring page details" className="max-w-3xl rounded-2xl border border-[#e9dfef] bg-white p-4 sm:p-5">
+              <h2 className="mb-3 text-base font-black text-[#4c355f]">Coloring page details</h2>
+              <dl className="grid gap-3 text-sm sm:grid-cols-3">
+                {page.categoryName && <div><dt className="font-semibold text-[#73677d]">Category</dt><dd className="mt-1 font-bold text-[#4c355f]"><Link href={`/coloring-pages/${page.categorySlug}/`} className="underline underline-offset-2">{page.categoryName}</Link></dd></div>}
+                {page.ageRange && <div><dt className="font-semibold text-[#73677d]">Suggested ages</dt><dd className="mt-1 font-bold text-[#4c355f]">{page.ageRange.replace(/^Suggested ages?\\s*/i, "")}</dd></div>}
+                {page.difficulty && <div><dt className="font-semibold text-[#73677d]">Difficulty</dt><dd className="mt-1 font-bold text-[#4c355f]">{page.difficulty}</dd></div>}
+              </dl>
+            </section>
+          )}
         </div>
 
         {isCollection ? <ColoringCollection sheets={sheets} slug={page.slug!} /> : <>
