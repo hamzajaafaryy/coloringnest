@@ -4,24 +4,31 @@ import CategoryCard from "@/components/CategoryCard";
 import ColoringGrid from "@/components/ColoringGrid";
 import {
   getAllPublishedCategories,
-  getAllPublishedColoringPagesWithCategory,
 } from "@/db/queries";
-import { constructMetadata } from "@/lib/seo";
+import { constructMetadata, buildCanonicalUrl } from "@/lib/seo";
+import { getPublishedCardPage } from "@/db/page-cards";
+import { parsePage } from "@/lib/paging";
+import PaginationLinks from "@/components/PaginationLinks";
 
 export const dynamic = "force-dynamic";
-export const metadata = constructMetadata({
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = parsePage((await searchParams).page);
+  const metadata = constructMetadata({
   title: "Free Printable Coloring Pages for Kids",
   description:
     "Choose a free printable coloring page for kids. Browse our easy-to-print pictures for home, school, and fun afternoons with crayons.",
   path: "/printable-coloring-pages/",
 });
+  return page > 1 ? { ...metadata, alternates: { canonical: `${buildCanonicalUrl("/printable-coloring-pages")}?page=${page}` } } : metadata;
+}
 
-export default async function PrintableDirectory() {
-  const [allCategories, allPages] = await Promise.all([
+export default async function PrintableDirectory({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const [allCategories, listing] = await Promise.all([
     getAllPublishedCategories(),
-    getAllPublishedColoringPagesWithCategory(),
+    getPublishedCardPage({ page: parsePage((await searchParams).page) }),
   ]);
-  const categories = allCategories.filter((cat) => Boolean(cat.slug))
+  const allPages = listing.pages;
+  const categories = allCategories.filter((cat) => Boolean(cat.slug && cat.pageCount > 0))
     .sort((a, b) => Number(b.pageCount > 0) - Number(a.pageCount > 0) || Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || a.name.localeCompare(b.name));
   const pages = allPages.filter((page) => Boolean(page.slug && page.categorySlug));
 
@@ -71,7 +78,7 @@ export default async function PrintableDirectory() {
             <p className="mt-2 text-sm leading-7 text-[#756a7f]">Open a picture and use the Print option to get started.</p>
           </div>
         </div>
-        {pages.length ? <ColoringGrid pages={pages} variant="printable" /> : (
+        {pages.length ? <><ColoringGrid pages={pages} variant="printable" /><PaginationLinks path="/printable-coloring-pages" page={listing.page} pageCount={listing.pageCount} /></> : (
           <div className="rounded-3xl border-2 border-dashed border-[#f0dfd6] bg-[#fffaf4] px-6 py-12 text-center text-[#866c76]">
             Printable pictures will appear here as soon as they are published.
           </div>

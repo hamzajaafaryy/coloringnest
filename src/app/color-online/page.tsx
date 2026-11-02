@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ColoringGrid from "@/components/ColoringGrid";
-import { getAllPublishedColoringPagesWithCategory } from "@/db/queries";
+import { getPublishedCardPage } from "@/db/page-cards";
+import { parsePage } from "@/lib/paging";
+import PaginationLinks from "@/components/PaginationLinks";
 import { constructMetadata, generateBreadcrumbSchema, serializeJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -13,8 +15,9 @@ export const metadata = constructMetadata({
   path: "/color-online/",
 });
 
-export default async function ColorOnlineDirectoryPage() {
-  const pages = (await getAllPublishedColoringPagesWithCategory()).filter(page => Boolean(page.imageUrl || page.svgContent || page.svgUrl));
+export default async function ColorOnlineDirectoryPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const listing = await getPublishedCardPage({ onlineOnly: true, page: parsePage((await searchParams).page) });
+  const pages = listing.pages;
 
   const breadcrumbItems = [
     { label: "Color Online", href: "/color-online/" },
@@ -63,6 +66,7 @@ export default async function ColorOnlineDirectoryPage() {
           pages={pages}
           emptyMessage="Online coloring pages are being added soon."
         />
+        <PaginationLinks path="/color-online" page={listing.page} pageCount={listing.pageCount} />
       </section>
 
       <section className="max-w-3xl prose prose-indigo text-slate-700">
