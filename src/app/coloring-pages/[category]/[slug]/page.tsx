@@ -1,7 +1,7 @@
 import { notFound, permanentRedirect } from "next/navigation";
 import ColoringDetail from "@/components/ColoringDetail";
 import { getColoringPageByCategoryAndSlug } from "@/db/queries";
-import { constructMetadata } from "@/lib/seo";
+import { buildColoringMetaDescription, constructMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ category: string; slug: string }> };
@@ -12,7 +12,10 @@ export async function generateMetadata({ params }: Props) {
   if (!page) notFound();
   return constructMetadata({
     title: page.seoTitle || page.title,
-    description: page.seoDescription || `Print ${page.title.toLowerCase()} for a little coloring time at home or school.`,
+    description: page.seoDescription || buildColoringMetaDescription({
+      title: page.title, category: page.categoryName,
+      ageRange: page.ageRange, difficulty: page.difficulty,
+    }),
     path: `/coloring-pages/${page.categorySlug}/${page.slug}/`,
     image: page.imageUrl || undefined,
   });
