@@ -31,7 +31,7 @@ export async function getPublishedCardPage({
   const size = Math.min(48, Math.max(1, Math.trunc(limit) || CARD_PAGE_SIZE));
   const requestedPage = Math.min(10000, Math.max(1, Math.trunc(page) || 1));
   const term = (query || "").trim().slice(0, 80);
-  const searchPattern = `%${term.replace(/[\%_]/g, "\"\\$&"")}%`;
+  const searchPattern = "%" + term.replace(/[%_\\]/g, char => "\\" + char) + "%";
   const filter = and(
     eq(coloringPages.isPublished, true),
     ...(categorySlug ? [inArray(categories.slug, categorySlugs(categorySlug))] : []),
