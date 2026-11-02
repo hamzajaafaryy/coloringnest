@@ -128,7 +128,7 @@ export function generateOrganizationSchema() {
     "@id": `${SITE_CONFIG.domain}/#organization`,
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.domain,
-    logo: `${SITE_CONFIG.domain}/icon.svg`,
+    logo: `${SITE_CONFIG.domain}/icons/craftcoloring-512.png`,
     description: SITE_CONFIG.defaultDescription,
   };
 }
@@ -279,7 +279,7 @@ export function generateArticleSchema({
       name: SITE_CONFIG.name,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_CONFIG.domain}/icon.svg`,
+        url: `${SITE_CONFIG.domain}/icons/craftcoloring-512.png`,
       },
     },
     mainEntityOfPage: {
