@@ -91,7 +91,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
               <h2 className="mb-3 text-base font-black text-[#4c355f]">Coloring page details</h2>
               <dl className="grid gap-3 text-sm sm:grid-cols-3">
                 {page.categoryName && <div><dt className="font-semibold text-[#73677d]">Category</dt><dd className="mt-1 font-bold text-[#4c355f]"><Link href={`/coloring-pages/${page.categorySlug}/`} className="underline underline-offset-2">{page.categoryName}</Link></dd></div>}
-                {page.ageRange && <div><dt className="font-semibold text-[#73677d]">Suggested ages</dt><dd className="mt-1 font-bold text-[#4c355f]">{page.ageRange.replace(/^Suggested ages?\\s*/i, "")}</dd></div>}
+                {page.ageRange && <div><dt className="font-semibold text-[#73677d]">Suggested ages</dt><dd className="mt-1 font-bold text-[#4c355f]">{page.ageRange.replace(/^Suggested ages?\s*/i, "")}</dd></div>}
                 {page.difficulty && <div><dt className="font-semibold text-[#73677d]">Difficulty</dt><dd className="mt-1 font-bold text-[#4c355f]">{page.difficulty}</dd></div>}
               </dl>
             </section>
