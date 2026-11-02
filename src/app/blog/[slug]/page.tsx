@@ -7,10 +7,10 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import RelatedColoringPages from "@/components/RelatedColoringPages";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import ArticleContent from "@/components/ArticleContent";
+import { getPublishedCardPage } from "@/db/page-cards";
 
 import {
   getBlogPostBySlugFromDb,
-  getAllPublishedColoringPagesWithCategory,
 } from "@/db/queries";
 
 import {
@@ -64,10 +64,7 @@ export default async function BlogPostDetailPage({
     notFound();
   }
 
-  const allColoringPages =
-    await getAllPublishedColoringPagesWithCategory();
-
-  const recommendedPages = allColoringPages.slice(0, 4);
+  const { pages: recommendedPages } = await getPublishedCardPage({ limit: 4 });
 
   const breadcrumbItems = [
     {

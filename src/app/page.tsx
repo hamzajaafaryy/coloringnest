@@ -19,9 +19,9 @@ import HeroArtwork from "@/components/home/HeroArtwork";
 import NameColoringTeaser from "@/components/name-coloring/NameColoringTeaser";
 import {
   getAllPublishedCategories,
-  getAllPublishedColoringPagesWithCategory,
 } from "@/db/queries";
 import { constructMetadata } from "@/lib/seo";
+import { getPublishedCardPage } from "@/db/page-cards";
 
 export const dynamic = "force-dynamic";
 
@@ -78,10 +78,11 @@ const questions = [
 ];
 
 export default async function HomePage() {
-  const [allPages, allCategories] = await Promise.all([
-    getAllPublishedColoringPagesWithCategory(),
+  const [listing, allCategories] = await Promise.all([
+    getPublishedCardPage({ limit: 8, sort: "newest" }),
     getAllPublishedCategories(),
   ]);
+  const allPages = listing.pages;
 
   const pages = allPages.filter((page) => page.slug && page.categorySlug);
   const categories = allCategories.filter((category) => category.slug);

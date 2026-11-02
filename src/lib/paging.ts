@@ -1,6 +1,6 @@
 export function parsePage(value?: string | string[] | null): number {
   const raw = Array.isArray(value) ? "" : (value || "");
-  if (!/^[1-9]\\d{0,3}$/.test(raw)) return 1;
+  if (!/^[1-9]\d{0,3}$/.test(raw)) return 1;
   return Math.min(10000, Number(raw));
 }
 export function pageUrl(path: string, page: number, query?: string) {
