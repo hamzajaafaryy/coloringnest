@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import sharp from "sharp";
 import { prepareImage } from "../src/lib/prepare-image.ts";
-import { getColoringImageAssets, coloringImagePaths } from "../src/lib/coloring-image-assets.ts";
+import { getColoringImageAssets, coloringImagePaths, canOptimizeLegacyImage } from "../src/lib/coloring-image-assets.ts";
 import { prepareImageFile, MAX_IMAGE_SOURCE_BYTES } from "../src/lib/image-upload.ts";
 
 const image = (width, height, background = "#ffffff") =>
@@ -139,4 +139,23 @@ test("files that fit the request keep their original bytes; oversized sources ar
   assert.equal(await prepareImageFile(original), original);
   await assert.rejects(prepareImageFile(new File([], "empty.png", { type: "image/png" })));
   await assert.rejects(prepareImageFile(new File([new Uint8Array(MAX_IMAGE_SOURCE_BYTES + 1)], "large.png", { type: "image/png" })), /20 MB/);
+});
+
+
+test("only legacy public raster images on this exact storage origin use WebP resizing", () => {
+  const origin = "https://site.supabase.co";
+  const base = origin + "/storage/v1/object/public/coloring-pages/";
+  assert.equal(canOptimizeLegacyImage(base + "images/cat-old.png", origin), true);
+  assert.equal(canOptimizeLegacyImage(base + "images/cat-old.webp", origin), true);
+  assert.equal(canOptimizeLegacyImage(base + "images/optimized-v1/cat/2550x3300/print.png", origin), false);
+  for (const src of [
+    base + "images/cat.svg",
+    base + "images/cat.png?token=private",
+    base + "images/cat.png#ref",
+    "https://other.supabase.co/storage/v1/object/public/coloring-pages/images/cat.png",
+    origin + "/storage/v1/object/sign/coloring-pages/images/cat.png",
+    "http://site.supabase.co/storage/v1/object/public/coloring-pages/images/cat.png",
+    "/images/cat.png",
+  ]) assert.equal(canOptimizeLegacyImage(src, origin), false, src);
+  assert.equal(canOptimizeLegacyImage(base + "images/cat-old.png", null), false);
 });

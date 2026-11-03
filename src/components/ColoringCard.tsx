@@ -1,11 +1,12 @@
 import Link from "next/link";
+import LegacyResponsiveImage from "@/components/LegacyResponsiveImage";
 import FavoriteButton from "@/components/FavoriteButton";
 import { ArrowUpRight, Sparkles, Printer } from "lucide-react";
 
 import type { ColoringPage } from "@/lib/data/coloringPages";
 import type { DbColoringPageCard } from "@/types/coloring";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
-import { getColoringImageAssets } from "@/lib/coloring-image-assets";
+import { canOptimizeLegacyImage, getColoringImageAssets } from "@/lib/coloring-image-assets";
 
 interface ColoringCardProps {
   page: ColoringPage | DbColoringPageCard;
@@ -22,6 +23,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
   const svgContent = page.svgContent ? sanitizeSvg(page.svgContent) : "";
   const imageUrl = isDbPage ? page.imageUrl : null;
   const imageAssets = imageUrl ? getColoringImageAssets(imageUrl) : null;
+  const optimizeLegacy = imageUrl ? canOptimizeLegacyImage(imageUrl, process.env.SUPABASE_URL) : false;
   const altText = isDbPage ? page.altText || page.title : page.altText;
   const difficulty = page.difficulty || null;
   // Printable cards still have a Print CTA, but link to the single canonical page.
@@ -47,7 +49,12 @@ export default function ColoringCard({ page, priority = false, variant = "colori
 
         <div className="relative z-[1] flex h-full w-full items-center justify-center p-2 transition duration-500 group-hover:scale-[1.045] group-hover:rotate-1 sm:p-3">
           {imageAssets ? (
-            <img src={imageAssets.thumbnailUrl} width={imageAssets.thumbnailWidth} height={imageAssets.thumbnailHeight} alt={altText || page.title} className="cc-media max-h-full drop-shadow-[0_12px_14px_rgba(15,23,42,0.08)]" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} />
+            optimizeLegacy ? (
+              <LegacyResponsiveImage src={imageAssets.thumbnailUrl} alt={altText || page.title} fill quality={85}
+                sizes="(min-width: 1280px) 285px, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"
+                className="object-contain p-2 drop-shadow-[0_12px_14px_rgba(15,23,42,0.08)]"
+                loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} />
+            ) : <img src={imageAssets.thumbnailUrl} width={imageAssets.thumbnailWidth} height={imageAssets.thumbnailHeight} alt={altText || page.title} className="cc-media max-h-full drop-shadow-[0_12px_14px_rgba(15,23,42,0.08)]" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} />
           ) : svgContent ? (
             <div className="flex h-full w-full items-center justify-center overflow-hidden [&>svg]:block [&>svg]:h-full [&>svg]:w-full [&>svg]:max-h-full [&>svg]:max-w-full" dangerouslySetInnerHTML={{ __html: svgContent }} />
           ) : (

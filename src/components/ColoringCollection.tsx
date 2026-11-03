@@ -1,8 +1,9 @@
 import Link from "next/link";
+import LegacyResponsiveImage from "@/components/LegacyResponsiveImage";
 import { Palette } from "lucide-react";
 import CollectionDownloadButton from "./CollectionDownloadButton";
 import ArtworkPreview from "./ArtworkPreview";
-import { getColoringImageAssets } from "@/lib/coloring-image-assets";
+import { canOptimizeLegacyImage, getColoringImageAssets } from "@/lib/coloring-image-assets";
 import { sheetEditorUrl, type ColoringSheet } from "@/lib/coloring-sheets";
 
 export default function ColoringCollection({ sheets, slug }: { sheets: ColoringSheet[]; slug: string }) {
@@ -15,9 +16,16 @@ export default function ColoringCollection({ sheets, slug }: { sheets: ColoringS
       {sheets.map((sheet, index) => {
         const image = sheet.imageUrl || sheet.svgUrl;
         const assets = image ? getColoringImageAssets(image) : null;
+        const optimizeLegacy = image ? canOptimizeLegacyImage(image, process.env.SUPABASE_URL) : false;
         return <article id={`sheet-${sheet.id}`} key={sheet.id} className="min-w-0 scroll-mt-24 overflow-hidden rounded-3xl border border-[#e9dfef] bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
           <div className="mb-3 flex items-center justify-between text-xs font-bold text-violet-700"><span className="rounded-full bg-violet-50 px-3 py-1">Sheet {index + 1}</span><a href={`#sheet-${sheet.id}`} aria-label={`Link to ${sheet.title}`}># {index + 1}</a></div>
-          {assets ? <ArtworkPreview src={assets.previewUrl} title={sheet.title}><img src={assets.previewUrl} srcSet={assets.srcSet} sizes="(min-width:1280px) 350px, (min-width:768px) 45vw, 90vw" width={assets.width || 850} height={assets.height || 1100} alt={sheet.altText} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} className="aspect-[17/22] w-full rounded-xl bg-white object-contain p-2" /></ArtworkPreview> : sheet.svgContent ? <div role="img" aria-label={sheet.altText} className="aspect-[17/22] overflow-hidden [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: sheet.svgContent }} /> : null}
+          {assets ? <ArtworkPreview src={assets.previewUrl} title={sheet.title}>
+            {optimizeLegacy ? <span className="relative block aspect-[17/22] w-full">
+              <LegacyResponsiveImage src={assets.previewUrl} alt={sheet.altText} fill quality={85} sizes="(min-width:1280px) 350px, (min-width:768px) 45vw, 90vw"
+                loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"}
+                className="rounded-xl bg-white object-contain p-2" />
+            </span> : <img src={assets.previewUrl} srcSet={assets.srcSet} sizes="(min-width:1280px) 350px, (min-width:768px) 45vw, 90vw" width={assets.width || 850} height={assets.height || 1100} alt={sheet.altText} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} className="aspect-[17/22] w-full rounded-xl bg-white object-contain p-2" />}
+          </ArtworkPreview> : sheet.svgContent ? <div role="img" aria-label={sheet.altText} className="aspect-[17/22] overflow-hidden [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: sheet.svgContent }} /> : null}
           <h3 className="mb-4 mt-4 text-lg font-bold leading-snug">{sheet.title}</h3>
           <Link href={sheetEditorUrl(slug, sheet.id)} className="cc-btn cc-btn-primary mb-3 min-h-12 w-full"><Palette aria-hidden="true" className="h-4 w-4" />Color Online</Link>
           <CollectionDownloadButton sheets={[sheet]} slug={`${slug}-${index + 1}`} label="Download PDF" />
