@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import LegacyResponsiveImage from "@/components/LegacyResponsiveImage";
 import { Palette } from "lucide-react";
 import CollectionDownloadButton from "./CollectionDownloadButton";
 import ArtworkPreview from "./ArtworkPreview";
@@ -21,7 +21,7 @@ export default function ColoringCollection({ sheets, slug }: { sheets: ColoringS
           <div className="mb-3 flex items-center justify-between text-xs font-bold text-violet-700"><span className="rounded-full bg-violet-50 px-3 py-1">Sheet {index + 1}</span><a href={`#sheet-${sheet.id}`} aria-label={`Link to ${sheet.title}`}># {index + 1}</a></div>
           {assets ? <ArtworkPreview src={assets.previewUrl} title={sheet.title}>
             {optimizeLegacy ? <span className="relative block aspect-[17/22] w-full">
-              <Image src={assets.previewUrl} alt={sheet.altText} fill quality={85} sizes="(min-width:1280px) 350px, (min-width:768px) 45vw, 90vw"
+              <LegacyResponsiveImage src={assets.previewUrl} alt={sheet.altText} fill quality={85} sizes="(min-width:1280px) 350px, (min-width:768px) 45vw, 90vw"
                 loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"}
                 className="rounded-xl bg-white object-contain p-2" />
             </span> : <img src={assets.previewUrl} srcSet={assets.srcSet} sizes="(min-width:1280px) 350px, (min-width:768px) 45vw, 90vw" width={assets.width || 850} height={assets.height || 1100} alt={sheet.altText} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} className="aspect-[17/22] w-full rounded-xl bg-white object-contain p-2" />}

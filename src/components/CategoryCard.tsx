@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import LegacyResponsiveImage from "@/components/LegacyResponsiveImage";
 import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
 import CategoryArtwork from "@/components/home/CategoryArtwork";
 import { canOptimizeLegacyImage } from "@/lib/coloring-image-assets";
@@ -40,7 +40,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
         <span className="absolute -left-6 -top-6 h-24 w-24 rounded-full border-[12px] border-white/40" aria-hidden="true" />
         <span className="absolute -bottom-7 -right-5 h-24 w-24 rounded-full border-[12px] border-white/35" aria-hidden="true" />
         {category.imageUrl ? (
-          optimizeLegacy ? <Image src={category.imageUrl} alt={category.name} fill quality={85}
+          optimizeLegacy ? <LegacyResponsiveImage src={category.imageUrl} alt={category.name} fill quality={85}
             sizes="(min-width: 1024px) 23vw, (min-width: 640px) 48vw, 48vw"
             className="z-10 object-contain p-2 drop-shadow-[0_8px_14px_rgba(60,37,73,0.08)] transition-transform duration-500 group-hover:scale-[1.045] sm:p-3"
             loading="lazy" /> :

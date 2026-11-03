@@ -3,7 +3,7 @@ import { primarySheet } from "@/lib/coloring-sheets";
 import ColoringCollection from "./ColoringCollection";
 import CollectionDownloadButton from "./CollectionDownloadButton";
 import Link from "next/link";
-import Image from "next/image";
+import LegacyResponsiveImage from "@/components/LegacyResponsiveImage";
 import { Download, Heart, Palette, Printer, Sparkles } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DownloadButton from "@/components/DownloadButton";
@@ -115,7 +115,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
             <figure className="printable-artwork flex min-h-64 items-center justify-center overflow-hidden rounded-2xl bg-white p-3 shadow-sm sm:p-5">
               {imageAssets ? <picture className="block w-full">
                 <source media="print" srcSet={imageAssets.printUrl} />
-                {optimizeLegacy ? <Image src={imageAssets.previewUrl} alt={page.altText || page.title}
+                {optimizeLegacy ? <LegacyResponsiveImage src={imageAssets.previewUrl} alt={page.altText || page.title}
                   width={1200} height={1553} quality={85} sizes="(min-width: 1024px) 700px, 100vw"
                   fetchPriority="high" loading="eager" className="max-h-[65vh] h-auto w-full object-contain" /> :
                   <img src={imageAssets.previewUrl} srcSet={imageAssets.srcSet} sizes="(min-width: 1024px) 700px, 100vw" width={imageAssets.width} height={imageAssets.height} alt={page.altText || page.title} fetchPriority="high" className="max-h-[65vh] w-full object-contain" />}

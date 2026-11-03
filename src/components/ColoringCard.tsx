@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import LegacyResponsiveImage from "@/components/LegacyResponsiveImage";
 import FavoriteButton from "@/components/FavoriteButton";
 import { ArrowUpRight, Sparkles, Printer } from "lucide-react";
 
@@ -50,7 +50,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
         <div className="relative z-[1] flex h-full w-full items-center justify-center p-2 transition duration-500 group-hover:scale-[1.045] group-hover:rotate-1 sm:p-3">
           {imageAssets ? (
             optimizeLegacy ? (
-              <Image src={imageAssets.thumbnailUrl} alt={altText || page.title} fill quality={85}
+              <LegacyResponsiveImage src={imageAssets.thumbnailUrl} alt={altText || page.title} fill quality={85}
                 sizes="(min-width: 1280px) 285px, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"
                 className="object-contain p-2 drop-shadow-[0_12px_14px_rgba(15,23,42,0.08)]"
                 loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} />
