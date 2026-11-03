@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getColoringImageAssets } from "./coloring-image-assets";
+import { craftColoringImageAttribution } from "./image-attribution";
 import { canonicalSiteUrl, resolveSiteOrigin } from "./site-urls";
 export { serializeJsonLd } from "./structured-data";
 
@@ -195,6 +196,7 @@ export function generateColoringCreativeWorkSchema({
     inLanguage: "en",
     isAccessibleForFree: true,
     publisher: { "@id": `${SITE_CONFIG.domain}/#organization` },
+    creator: { "@id": `${SITE_CONFIG.domain}/#organization` },
     ...(category ? { genre: category } : {}),
     ...(normalizedAgeRange ? { typicalAgeRange: normalizedAgeRange } : {}),
     ...(image ? { image: new URL(getColoringImageAssets(image).previewUrl, `${SITE_CONFIG.domain}/`).href } : {}),
@@ -240,6 +242,7 @@ export function generateImageObjectSchema({
     } : {}),
     contentUrl: new URL(url, `${SITE_CONFIG.domain}/`).href,
     thumbnailUrl: new URL(getColoringImageAssets(url).previewUrl, `${SITE_CONFIG.domain}/`).href,
+    ...craftColoringImageAttribution(SITE_CONFIG.domain),
     license: buildCanonicalUrl("/terms"),
     acquireLicensePage: buildCanonicalUrl("/terms"),
     name: title,
