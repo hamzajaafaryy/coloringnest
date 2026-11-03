@@ -54,3 +54,21 @@ export function getColoringImageAssets(imageUrl: string) {
     thumbnailHeight: Math.max(1, Math.round(height * thumbnailWidth / width)),
   };
 }
+
+// Only public raster images on our configured Supabase origin can use Next's
+// cached WebP resizing. Other/external/signed URLs remain direct <img> sources.
+// Newly uploaded optimized-v1 families already have smaller WebP siblings.
+export function canOptimizeLegacyImage(imageUrl: string, storageOrigin?: string | null): boolean {
+  if (!storageOrigin) return false;
+  try {
+    const image = new URL(imageUrl);
+    const storage = new URL(storageOrigin);
+    if (storage.protocol !== "https:" || image.protocol !== "https:") return false;
+    if (image.origin !== storage.origin || image.search || image.hash) return false;
+    if (!image.pathname.startsWith(STORAGE_MARKER)) return false;
+    const path = image.pathname.slice(STORAGE_MARKER.length);
+    return /\.(?:png|jpe?g|webp)$/i.test(path) && !FAMILY.test(path);
+  } catch {
+    return false;
+  }
+}

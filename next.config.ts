@@ -2,7 +2,29 @@ import type { NextConfig } from "next";
 import { categoryRedirectRules } from "./src/lib/category-catalog";
 import { resolveSiteOrigin, siteRedirectRules } from "./src/lib/site-urls";
 
+// Restrict on-demand legacy image optimization to this project's public storage.
+// In secretless CI previews the allowlist is empty and raw images still work.
+const publicStorageOrigin = (() => {
+  try {
+    const configured = process.env.SUPABASE_URL;
+    if (!configured) return null;
+    const url = new URL(configured);
+    return url.protocol === "https:" ? url : null;
+  } catch { return null; }
+})();
+
 const nextConfig: NextConfig = {
+  images: {
+    formats: ["image/webp"],
+    qualities: [75, 85],
+    remotePatterns: publicStorageOrigin ? [{
+      protocol: "https",
+      hostname: publicStorageOrigin.hostname,
+      port: publicStorageOrigin.port,
+      pathname: "/storage/v1/object/public/coloring-pages/**",
+      search: "",
+    }] : [],
+  },
   // Resolve metadata before streaming so missing posts return an HTTP 404.
   htmlLimitedBots: /.*/,
   // Sharp loads libvips dynamically; include its shared libraries in the upload function.
