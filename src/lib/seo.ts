@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getColoringImageAssets } from "./coloring-image-assets";
+import { craftColoringImageAttribution } from "./image-attribution";
 import { canonicalSiteUrl, resolveSiteOrigin } from "./site-urls";
 export { serializeJsonLd } from "./structured-data";
 
@@ -241,13 +242,7 @@ export function generateImageObjectSchema({
     } : {}),
     contentUrl: new URL(url, `${SITE_CONFIG.domain}/`).href,
     thumbnailUrl: new URL(getColoringImageAssets(url).previewUrl, `${SITE_CONFIG.domain}/`).href,
-    creator: {
-      "@type": "Organization",
-      "@id": `${SITE_CONFIG.domain}/#organization`,
-      name: SITE_CONFIG.name,
-    },
-    creditText: "Artwork by CraftColoring",
-    copyrightNotice: "© 2026 CraftColoring. All rights reserved.",
+    ...craftColoringImageAttribution(SITE_CONFIG.domain),
     license: buildCanonicalUrl("/terms"),
     acquireLicensePage: buildCanonicalUrl("/terms"),
     name: title,

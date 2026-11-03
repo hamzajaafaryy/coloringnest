@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="a b">
+<title id="a">Anna Bloom, fictional CraftColoring creative character</title><desc id="b">Friendly illustration of a smiling brunette woman wearing a purple blouse and artist apron.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#e8d5fb"/><stop offset="1" stop-color="#fff3d9"/></linearGradient></defs>
+<rect width="400" height="400" rx="32" fill="url(#bg)"/>
+<path d="M43 70l17 4 8 19 8-19 17-4-17-8-8-20-8 20zM332 71l9 15 14 6-14 6-9 15-6-15-15-6 15-6z" fill="#f1b82d"/>
+<path d="M74 400q4-106 126-118Q325 294 331 400" fill="#ae80d1"/>
+<path d="M136 400l30-97 34 24 36-24 32 97" fill="#ffefcf" stroke="#dbba90" stroke-width="5"/>
+<path d="M120 156c-20-70 5-122 56-139 15-19 54-21 80-6 37 11 47 38 42 63 39 50 19 155-15 193l-156-1z" fill="#61392f"/>
+<path d="M135 155q-12-12-19 5-7 22 15 35m145-39q12-14 20 3 8 20-18 35" fill="#e4a27c" stroke="#bb7e64" stroke-width="4"/>
+<path d="M127 112q9-66 76-69t79 72l-5 107q-22 72-73 79-56-8-74-77z" fill="#f0b48e"/>
+<path d="M119 147Q105 59 166 34q57-23 92 8 29 23 32 85-25-8-33-32-30 37-116 44z" fill="#61392f"/>
+<path d="M141 104q20-52 78-46m-50 37q47 0 76-39" fill="none" stroke="#86533e" stroke-width="10" stroke-linecap="round"/>
+<path d="M154 177q15-9 28 0m44 0q15-9 28 0" fill="none" stroke="#623c32" stroke-width="5" stroke-linecap="round"/>
+<circle cx="170" cy="185" r="5" fill="#402a31"/><circle cx="240" cy="185" r="5" fill="#402a31"/>
+<path d="M207 189l-7 25 8 4" fill="none" stroke="#c7846d" stroke-width="4"/>
+<path d="M183 237q21 17 43 0" fill="none" stroke="#9c4f61" stroke-width="5" stroke-linecap="round"/>
+<ellipse cx="153" cy="213" rx="13" ry="8" fill="#e99e92" opacity=".6"/>
+<ellipse cx="258" cy="213" rx="13" ry="8" fill="#e99e92" opacity=".6"/>
+<path d="M159 316l45 39 39-39" fill="none" stroke="#d8b387" stroke-width="10" stroke-linecap="round"/>
+<g transform="translate(207 377) rotate(-25)"><rect x="-8" y="-19" width="16" height="42" rx="4" fill="#ffc74c" stroke="#7d4ab2" stroke-width="3"/><path d="M-8-19l8-17 8 17z" fill="#e1b27f" stroke="#7d4ab2" stroke-width="3"/></g>
+</svg>
