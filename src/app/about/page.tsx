@@ -23,7 +23,10 @@ export default function About() {
 
         <section className="grid items-center gap-8 rounded-[2rem] border border-[#eadff1] bg-gradient-to-br from-[#f3eaff] via-white to-[#fff3d9] p-6 sm:p-9 md:grid-cols-[200px_1fr]" aria-labelledby="anna-heading">
           <div className="mx-auto w-full max-w-[200px] overflow-hidden rounded-[1.5rem] border-4 border-white bg-[#e8d8f6] shadow-lg">
-            <img src="/images/anna-bloom-photo.webp" width="176" height="176" alt="AI-generated portrait of the fictional CraftColoring creative character Anna Bloom, seated in an art studio with coloring drawings" className="aspect-square h-auto w-full object-cover" loading="lazy" />
+            <picture className="block">
+              <source srcSet="/images/anna-bloom-640-v2.avif" type="image/avif" />
+              <img src="/images/anna-bloom-photo.webp" width="640" height="640" alt="AI-generated portrait of Anna Bloom, the fictional CraftColoring creative character, sitting at an art table with coloring pages" className="aspect-square h-auto w-full object-cover" loading="lazy" decoding="async" />
+            </picture>
           </div>
           <div className="space-y-3">
             <p className="text-xs font-black uppercase tracking-[0.14em] text-[#8654a7]">Meet our creative character</p>
