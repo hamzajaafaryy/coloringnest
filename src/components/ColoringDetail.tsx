@@ -3,6 +3,7 @@ import { primarySheet } from "@/lib/coloring-sheets";
 import ColoringCollection from "./ColoringCollection";
 import CollectionDownloadButton from "./CollectionDownloadButton";
 import Link from "next/link";
+import Image from "next/image";
 import { Download, Heart, Palette, Printer, Sparkles } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DownloadButton from "@/components/DownloadButton";
@@ -15,7 +16,7 @@ import RelatedColoringPages from "@/components/RelatedColoringPages";
 import { getColoringPageByCategoryAndSlug, getColoringPageFaqs, getRelatedColoringPages } from "@/db/queries";
 import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
-import { getColoringImageAssets } from "@/lib/coloring-image-assets";
+import { canOptimizeLegacyImage, getColoringImageAssets } from "@/lib/coloring-image-assets";
 import { buildCanonicalUrl, generateBreadcrumbSchema, generateImageObjectSchema, generateColoringCreativeWorkSchema, serializeJsonLd } from "@/lib/seo";
 
 type Page = NonNullable<Awaited<ReturnType<typeof getColoringPageByCategoryAndSlug>>>;
@@ -27,6 +28,7 @@ export default async function ColoringDetail({ page, printable = false }: { page
   } catch { /* A malformed SVG must not hide an otherwise printable image. */ }
   const image = page.imageUrl || null;
   const imageAssets = image ? getColoringImageAssets(image) : null;
+  const optimizeLegacy = image ? canOptimizeLegacyImage(image, process.env.SUPABASE_URL) : false;
   const canDownload = Boolean(svg || image);
   const canColor = Boolean(svg || image);
   const sheets = [primarySheet({ ...page, svgContent: svg }), ...await getAdditionalSheets(page.id)];
@@ -113,7 +115,10 @@ export default async function ColoringDetail({ page, printable = false }: { page
             <figure className="printable-artwork flex min-h-64 items-center justify-center overflow-hidden rounded-2xl bg-white p-3 shadow-sm sm:p-5">
               {imageAssets ? <picture className="block w-full">
                 <source media="print" srcSet={imageAssets.printUrl} />
-                <img src={imageAssets.previewUrl} srcSet={imageAssets.srcSet} sizes="(min-width: 1024px) 700px, 100vw" width={imageAssets.width} height={imageAssets.height} alt={page.altText || page.title} fetchPriority="high" className="max-h-[65vh] w-full object-contain" />
+                {optimizeLegacy ? <Image src={imageAssets.previewUrl} alt={page.altText || page.title}
+                  width={1200} height={1553} quality={85} sizes="(min-width: 1024px) 700px, 100vw"
+                  fetchPriority="high" loading="eager" className="max-h-[65vh] h-auto w-full object-contain" /> :
+                  <img src={imageAssets.previewUrl} srcSet={imageAssets.srcSet} sizes="(min-width: 1024px) 700px, 100vw" width={imageAssets.width} height={imageAssets.height} alt={page.altText || page.title} fetchPriority="high" className="max-h-[65vh] w-full object-contain" />}
               </picture> : svg ? <div role="img" aria-label={page.altText || page.title} className="flex w-full items-center justify-center [&>svg]:max-h-[65vh] [&>svg]:w-full [&>svg]:object-contain" dangerouslySetInnerHTML={{ __html: svg }} /> : <p className="py-16 text-sm text-[#786b81]">This picture is being prepared. Please choose another coloring page below.</p>}
             </figure>
           </div>
