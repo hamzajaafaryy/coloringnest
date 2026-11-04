@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { PIN_SIZE, isPinTemplate, wrapPinHeadline, xmlEscape, type PinTemplate } from "./pinterest-studio";
+import { PIN_SIZE, isPinTemplate, wrapPinHeadline, xmlEscape, type PinTemplate } from "./pinterest-studio.ts";
 
 const STYLES = {
   editorial: { bg: "#FFF8EE", ink: "#56306F", accent: "#9B64BE", secondary: "#EFC955", soft: "#F4E2F6", paper: "#FFFFFF", label: "#FBEEFF" },

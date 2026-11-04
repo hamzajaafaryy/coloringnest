@@ -1,5 +1,5 @@
 /** Shared, deterministic Pinterest metadata. No paid LLM or fake ranking claims. */
-import { canonicalCategorySlug } from "./category-catalog";
+import { canonicalCategorySlug } from "./category-catalog.ts";
 
 export const PIN_SIZE = { width: 1000, height: 1500 } as const;
 export const PIN_TEMPLATES = ["editorial", "lilac", "sunshine", "midnight", "papercut"] as const;
