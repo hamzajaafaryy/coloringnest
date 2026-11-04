@@ -8,6 +8,7 @@ import {
   Palette,
   Images,
   Sparkles,
+  Pin,
 } from "lucide-react";
 
 import { isAdminAuthenticated } from "@/lib/admin-auth";
@@ -51,6 +52,12 @@ export default async function AdminProtectedLayout({
       label: "Content Studio",
       icon: Images,
       accent: "bg-fuchsia-100 text-fuchsia-700",
+    },
+    {
+      href: "/admin/pinterest-studio/",
+      label: "Pinterest Studio",
+      icon: Pin,
+      accent: "bg-rose-100 text-rose-700",
     },
     {
       href: "/admin/categories/",
