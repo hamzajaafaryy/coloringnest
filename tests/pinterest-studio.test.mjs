@@ -16,7 +16,7 @@ test("Pinterest SEO is grounded, valid, canonical and tracks organic traffic", (
   assert.ok(result.description.length <= 500);
   assert.ok(result.altText.length <= 500);
   assert.equal(result.board, "Princess & Fairy Tale Coloring Pages");
-  assert.match(result.destination, /^https:\/\/www\.craftcoloring\.com\/coloring-pages\/princess\/cute-princess-cat-coloring\?/);
+  assert.match(result.destination, /^https:\/\/www\.craftcoloring\.com\/coloring-pages\/princesses\/cute-princess-cat-coloring\?/);
   assert.match(result.destination, /utm_source=pinterest/);
   assert.match(result.description, /princess cat/i);
 });
