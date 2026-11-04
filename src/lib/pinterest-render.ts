@@ -1,5 +1,6 @@
 import sharp from "sharp";
-import { PIN_SIZE, isPinTemplate, wrapPinHeadline, xmlEscape, type PinTemplate } from "./pinterest-studio.ts";
+import { isPinTemplate, type PinTemplate } from "./pinterest-studio.ts";
+import { letterPaths, titleLetterPaths } from "./pinterest-lettering";
 
 const STYLES = {
   editorial: { bg: "#FFF8EE", ink: "#56306F", accent: "#9B64BE", secondary: "#EFC955", soft: "#F4E2F6", paper: "#FFFFFF", label: "#FBEEFF" },
@@ -55,15 +56,7 @@ export async function renderPinterestPin({
   }
   const c = STYLES[template];
   const title = headline.replace(/\s+/g, " ").trim().slice(0, 90) || "Free Printable Coloring Page";
-  const lines = wrapPinHeadline(title, 27, 3);
-  const longest = Math.max(...lines.map(x => x.length));
-  const fontSize = longest > 32 ? 52 : longest > 25 ? 57 : 66;
-  const startY = lines.length === 3 ? 214 : lines.length === 2 ? 255 : 292;
-  const headerLines = lines.map((line, index) =>
-    `<text x="500" y="${startY + index * (fontSize + 8)}" text-anchor="middle"
-      font-family="DejaVu Sans, Arial, sans-serif" font-size="${fontSize}"
-      font-weight="900" letter-spacing="-1.6" fill="${c.ink}">${xmlEscape(line)}</text>`
-  ).join("");
+  const headerLines = titleLetterPaths(title, c.ink);
   const cat = (category || "Coloring Pages").trim().slice(0, 50);
   const artX = 116, artY = 491, artW = 768, artH = 808;
   const paperTop = template === "papercut"
@@ -73,22 +66,17 @@ export async function renderPinterestPin({
     <rect width="1000" height="1500" fill="${c.bg}"/>
     ${decorate(template, c.accent, c.secondary)}
     <rect x="293" y="46" width="414" height="56" rx="28" fill="${c.label}"/>
-    <text x="500" y="83" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif"
-      font-size="23" font-weight="800" letter-spacing="2.2" fill="${template === "midnight" ? "#FFF7E6" : c.accent}">FREE PRINTABLE</text>
+    ${letterPaths("FREE PRINTABLE",{x:500,y:83,fontSize:23,maxWidth:380,color:template === "midnight" ? "#FFF7E6" : c.accent,align:"center"})}
     ${headerLines}
     ${paperTop}
     <rect x="78" y="457" width="844" height="878" rx="31" fill="#352C42" opacity=".10"/>
     <rect x="72" y="451" width="856" height="874" rx="29" fill="${c.paper}" stroke="#EDE3EB" stroke-width="5"/>
     <rect x="104" y="480" width="792" height="832" rx="13" fill="#FFFFFF"/>
     <rect x="68" y="1363" width="864" height="1" fill="${c.accent}" opacity=".26"/>
-    <text x="72" y="1423" font-family="DejaVu Sans, Arial, sans-serif"
-      font-size="30" font-weight="900" fill="${c.ink}">CraftColoring</text>
-    <text x="72" y="1460" font-family="DejaVu Sans, Arial, sans-serif"
-      font-size="19" font-weight="600" fill="${c.ink}" opacity=".74">FREE TO PRINT · FUN TO COLOR</text>
-    <text x="929" y="1414" text-anchor="end" font-family="DejaVu Sans, Arial, sans-serif"
-      font-size="19" font-weight="800" fill="${c.ink}" opacity=".85">${xmlEscape(cat.slice(0, 27))}</text>
-    <text x="929" y="1456" text-anchor="end" font-family="DejaVu Sans, Arial, sans-serif"
-      font-size="20" font-weight="600" fill="${c.ink}">craftcoloring.com</text>
+    ${letterPaths("CraftColoring",{x:72,y:1423,fontSize:30,maxWidth:490,color:c.ink})}
+    ${letterPaths("FREE TO PRINT · FUN TO COLOR",{x:72,y:1460,fontSize:19,maxWidth:470,color:c.ink})}
+    ${letterPaths(cat.slice(0, 34),{x:929,y:1414,fontSize:19,maxWidth:330,color:c.ink,align:"right"})}
+    ${letterPaths("craftcoloring.com",{x:929,y:1456,fontSize:20,maxWidth:330,color:c.ink,align:"right"})}
   </svg>`;
   const illustration = await sharp(source, {limitInputPixels: 40_000_000})
     .rotate().flatten({ background: "#FFFFFF" })
