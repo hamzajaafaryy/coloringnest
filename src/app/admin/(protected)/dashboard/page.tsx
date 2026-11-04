@@ -6,6 +6,7 @@ import {
   Palette,
   Sparkles,
   WandSparkles,
+  Pin,
 } from "lucide-react";
 
 import {
@@ -51,6 +52,13 @@ export default async function AdminDashboard() {
   ];
 
   const actions = [
+    {
+      href: "/admin/pinterest-studio/",
+      title: "Pinterest Studio",
+      text: "Generate premium Pins, board suggestions and SEO exports from published artwork.",
+      icon: Pin,
+      className: "bg-rose-50 text-rose-700 ring-rose-100",
+    },
     {
       href: "/admin/coloring-pages/",
       title: "Coloring Pages",

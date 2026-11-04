@@ -161,7 +161,10 @@ export default function ContentStudio() {
       <div className="flex flex-wrap gap-3"><button type="button" disabled={!valid || busy} onClick={() => void submit(false)} className="rounded-xl bg-slate-800 px-6 py-3 font-bold text-white disabled:opacity-40">Save Draft ({sheets.length + 1} drawings)</button><button type="button" disabled={!valid || busy} onClick={() => void submit(true)} className="rounded-xl bg-emerald-700 px-6 py-3 font-bold text-white disabled:opacity-40">Publish {sheets.length > 0 ? "Collection" : "Page"}</button></div>
     </fieldset>
     {message && <p role="status" className="rounded-xl bg-violet-50 p-4 text-sm font-medium text-violet-900">{message}</p>}
-    {publishedUrl && <Link href={publishedUrl} className="inline-block font-bold text-violet-700 underline">View published page →</Link>}
+    {publishedUrl && <div className="flex flex-wrap items-center gap-3">
+      <Link href={publishedUrl} className="inline-block font-bold text-violet-700 underline">View published page →</Link>
+      <Link href="/admin/pinterest-studio/" className="inline-block rounded-xl bg-rose-50 px-4 py-2 text-sm font-black text-rose-700">Create Pinterest Pin →</Link>
+    </div>}
     <section className="rounded-2xl border bg-white p-5"><h2 className="text-xl font-bold">Existing drafts ({drafts.length})</h2><div className="mt-3 grid gap-3 sm:grid-cols-2">{drafts.map(draft => <div key={draft.id} className="flex gap-3 rounded-xl border p-3">{draft.imageUrl && <img src={getColoringImageAssets(draft.imageUrl).thumbnailUrl} alt="" className="h-20 w-16 object-contain" />}<div><p className="text-sm font-bold">{draft.title}</p><Link href={`/admin/coloring-pages/${draft.id}/`} className="text-sm font-bold text-violet-700 underline">Review or edit draft</Link></div></div>)}</div></section>
   </main>;
 }
