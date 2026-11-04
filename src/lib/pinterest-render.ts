@@ -1,4 +1,3 @@
-import "server-only";
 import sharp from "sharp";
 import { PIN_SIZE, isPinTemplate, wrapPinHeadline, xmlEscape, type PinTemplate } from "./pinterest-studio";
 
