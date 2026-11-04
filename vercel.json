@@ -1,0 +1,1 @@
+{"crons":[{"path":"/api/cron/pinterest","schedule":"0 9 * * *"}]}

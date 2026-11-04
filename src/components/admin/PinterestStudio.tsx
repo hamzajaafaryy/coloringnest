@@ -12,6 +12,7 @@ import {
 } from "@/lib/pinterest-studio";
 import { getColoringImageAssets } from "@/lib/coloring-image-assets";
 import { makePinZip, seoCsvRow } from "@/lib/pinterest-zip";
+import PinterestPublisher from "@/components/admin/PinterestPublisher";
 
 type Catalog = {items:PinArtwork[];page:number;pageCount:number;total:number};
 const LABELS: Record<PinTemplate,{title:string;tag:string;swatch:string}> = {
@@ -330,9 +331,10 @@ export default function PinterestStudio(){
             <button type="button" onClick={()=>void copyAll()} disabled={!active} className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-extrabold text-violet-800 hover:bg-violet-100 disabled:opacity-40"><Clipboard size={16}/> Copy all Pinterest SEO</button>
             {active && <a href={seo.destination} target="_blank" rel="noopener noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50">Open destination <ExternalLink size={15}/></a>}
           </div>
+          <PinterestPublisher item={active} seo={seo} template={template} sheetId={sheetId} busy={previewBusy||exportBusy}/>
           <div className="mt-6 space-y-2 rounded-2xl bg-[#F7F5FA] p-4 text-xs leading-5 text-slate-600">
             <div className="flex items-center gap-2 font-black text-slate-800"><ShieldCheck size={16} className="text-emerald-700"/> Your publishing controls</div>
-            <p>Designs are exported as drafts. Nothing is posted to Pinterest automatically. Select a real Board and approve each Pin before publishing.</p>
+            <p>Pins are exported as drafts by default. Direct posting and daily scheduling only work after connecting Pinterest, choosing a real Board and explicitly approving the selected Pin.</p>
           </div>
         </section>
       </div>
