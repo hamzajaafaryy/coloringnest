@@ -1,5 +1,5 @@
 import { brotliDecompressSync } from "node:zlib";
-import { PINTEREST_GLYPHS_BROTLI } from "./pinterest-font-data";
+import { PINTEREST_GLYPHS_BROTLI } from "./pinterest-font-data.ts";
 
 /**
  * Reliable PIN PNG lettering via SVG outlines, not SVG <text> or host fonts.

@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import { isPinTemplate, type PinTemplate } from "./pinterest-studio.ts";
-import { letterPaths, titleLetterPaths } from "./pinterest-lettering";
+import { letterPaths, titleLetterPaths } from "./pinterest-lettering.ts";
 
 const STYLES = {
   editorial: { bg: "#FFF8EE", ink: "#56306F", accent: "#9B64BE", secondary: "#EFC955", soft: "#F4E2F6", paper: "#FFFFFF", label: "#FBEEFF" },
