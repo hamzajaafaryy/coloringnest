@@ -25,7 +25,7 @@ export default function About() {
           <div className="mx-auto w-full max-w-[200px] overflow-hidden rounded-[1.5rem] border-4 border-white bg-[#e8d8f6] shadow-lg">
             <picture className="block">
               <source srcSet="/images/anna-bloom-640-v2.avif" type="image/avif" />
-              <img src="/images/anna-bloom-photo.webp" width="640" height="640" alt="AI-generated portrait of Anna Bloom, the fictional CraftColoring creative character, sitting at an art table with coloring pages" className="aspect-square h-auto w-full object-cover" loading="lazy" decoding="async" />
+              <img src="/images/anna-bloom-photo.webp" width="640" height="640" alt="Portrait of Anna Bloom, CraftColoring creative character, sitting at an art table with coloring pages" className="aspect-square h-auto w-full object-cover" loading="lazy" decoding="async" />
             </picture>
           </div>
           <div className="space-y-3">
@@ -36,9 +36,6 @@ export default function About() {
               Anna Bloom is a friendly fictional character who represents our love of imagination,
               creativity and sharing printable art. You'll see her as the welcoming face of
               CraftColoring, while the artwork is created under the CraftColoring brand.
-            </p>
-            <p className="text-xs leading-6 text-[#786b81]">
-              Anna is not a real person or a claimed artist or founder. Her portrait is AI-generated.
             </p>
           </div>
         </section>
