@@ -5,9 +5,9 @@ import { CalendarClock,CheckCircle2,ExternalLink,Link2,LoaderCircle,Send,ShieldC
 import type {PinArtwork,PinSeo,PinTemplate} from "@/lib/pinterest-studio";
 
 type Board={id:string;name:string;privacy?:string};
-type Job={id:string;page_id:string;sheet_id:string;title:string;board_id:string;
+type Job={id:string;page_id:string;sheet_id:string;title:string;board_id:string;api_environment:"production"|"sandbox";
  status:string;scheduled_at:string;published_at:string|null;pinterest_pin_id:string|null;error_message:string|null};
-type Account={configured:boolean;connected:boolean;boards:Board[];jobs:Job[];scheduleEnabled?:boolean;warning?:string;error?:string;readCheck?:"ok"|"failed";auth?:{scopes:string[];scopeKnown:boolean;pinWrite:boolean|null;boardWrite:boolean|null;publishReady:boolean|null;expiresAt:string|null}};
+type Account={configured:boolean;connected:boolean;boards:Board[];jobs:Job[];environment?:"sandbox"|"production";standardAccess?:boolean;publishingAllowed?:boolean;scheduleEnabled?:boolean;warning?:string;error?:string;readCheck?:"ok"|"failed";auth?:{scopes:string[];scopeKnown:boolean;pinWrite:boolean|null;boardWrite:boolean|null;publishReady:boolean|null;expiresAt:string|null}};
 type Props={item:PinArtwork|null;seo:PinSeo;template:PinTemplate;sheetId:string;busy:boolean};
 const tomorrow=()=>{const date=new Date();date.setUTCDate(date.getUTCDate()+1);return date.toISOString().slice(0,10);};
 
@@ -41,9 +41,10 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
    const data=await r.json();
    if(!r.ok)throw Error(data.error||"Pinterest action failed");
    if(payload.action==="publishNow"){
-    setNotice(data.status==="published"?"Pin published! Pinterest ID: "+data.pinId:
+    setNotice(data.status==="published"?(account?.environment==="sandbox"?"Sandbox test Pin created! ID: ":"Pin published! Pinterest ID: ")+data.pinId:
       "Publishing did not complete. Check the queue and your Pinterest account before retrying.");
    }else if(payload.action==="approve")setNotice("Pin approved for daily publishing. It will not post before its selected date.");
+   else if(payload.action==="createSandboxBoard")setNotice("Your private Pinterest Sandbox test Board is ready. Choose it from the list.");
    else if(payload.action==="cancel")setNotice("This queued Pin was cancelled.");
    else if(payload.action==="disconnect"){setNotice("Pinterest disconnected. Pending scheduled Pins cancelled.");setBoardId("");}
    await refresh();
@@ -62,7 +63,7 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
   try{
    const pin=selectedPin();
    const board=account?.boards.find(b=>b.id===boardId)?.name||"this Board";
-   if(!window.confirm(`Publish this specific Pin NOW to "${board}"? This sends the artwork to your Pinterest account.`))return;
+   if(!window.confirm(account?.environment==="sandbox"?`Create this test Pin in Pinterest Sandbox on "${board}"? Only you will see it.`:`Publish this specific Pin NOW to "${board}"? This creates a public Pin.`))return;
    await action({...pin,action:"publishNow"});
   }catch(e){setError(e instanceof Error?e.message:"Invalid Pin");}
  }
@@ -81,7 +82,16 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
    <h3 className="flex items-center gap-2 text-base font-black text-[#392554]"><Send size={18}/> Pinterest Auto-Publisher</h3>
    <button type="button" onClick={()=>refresh().catch(e=>setError(e.message))} className="rounded-lg bg-white p-2 text-violet-700" aria-label="Refresh Pinterest connection"><RefreshCcw size={16}/></button>
   </div>
-  <p className="text-xs leading-5 text-slate-600">Publish directly via official Pinterest API or schedule approved Pins. Only the specific Pin you select and approve will be posted.</p>
+  <p className="text-xs leading-5 text-slate-600">Create and approve Pins with Pinterest's official API. Production publishing requires Standard Access.</p>
+  {account?.environment==="sandbox"&&<div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-xs leading-5 text-indigo-900">
+    <p className="font-black">SANDBOX TEST MODE — creator-visible only</p>
+    <p>Sandbox needs its own OAuth connection, Boards, and tokens. Tests here do not create public Pins or drive traffic. After your Standard Access upgrade, switch the app to Production and authorize again.</p>
+  </div>}
+  {account?.environment==="production"&&!account?.publishingAllowed&&<div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+    <p className="font-black">Production publishing is blocked for Trial Access</p>
+    <p>Code 29: Pinterest permits API Pin creation only in Sandbox until your app is approved for Standard Access. Ask for Standard Access in Pinterest Developers.</p>
+    <a href="https://developers.pinterest.com/apps/" target="_blank" rel="noopener noreferrer" className="font-bold underline">Request Standard Access</a>
+  </div>}
   {!account&&<div className="flex items-center gap-2 text-sm text-violet-700"><LoaderCircle size={16} className="animate-spin"/>Loading Pinterest connection…</div>}
   {account&&!account.configured&&<div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
     <p className="font-black">Developer app setup required</p>
@@ -93,7 +103,7 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
     <a href="/api/admin/pinterest/connect" className="flex items-center justify-center gap-2 rounded-xl bg-[#BD1E44] px-4 py-3 text-sm font-black text-white hover:bg-[#9E1637]">
       <Link2 size={17}/> Connect Pinterest securely
     </a>
-    <p className="text-xs text-slate-500">Uses OAuth. We never ask for your Pinterest password.</p>
+    <p className="text-xs text-slate-500">Uses OAuth for the selected API environment. Sandbox and Production require separate tokens. We never ask for your Pinterest password.</p>
   </div>}
   {account?.connected&&<>
     <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800"><CheckCircle2 size={16}/> Pinterest account connected</div>
@@ -113,16 +123,19 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
         {account.boards.map(board=><option value={board.id} key={board.id}>{board.name}</option>)}
       </select>
     </label>
-    {account.boards.length===0&&<p className="text-xs text-amber-700">No boards returned. Check the connection and your boards:read permission.</p>}
-    <button type="button" disabled={!boardId||!item||busy||loading||account.auth?.publishReady===false} onClick={()=>void publishNow()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#BD1E44] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
-     {loading?<LoaderCircle size={16} className="animate-spin"/>:<Send size={16}/>} Publish selected Pin now
+    {account.boards.length===0&&<p className="text-xs text-amber-700">No Boards returned for this API environment. Sandbox Boards are separate from your public Pinterest Boards.</p>}
+    {account.environment==="sandbox"&&<button type="button" disabled={loading||busy} onClick={()=>{
+      if(window.confirm("Create one private Pinterest Sandbox test Board? Only you can see it."))void action({action:"createSandboxBoard"});
+    }} className="flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-black text-indigo-700 disabled:opacity-40">Create or find Sandbox test Board</button>}
+    <button type="button" disabled={!boardId||!item||busy||loading||!account.publishingAllowed||account.auth?.publishReady===false} onClick={()=>void publishNow()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#BD1E44] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
+     {loading?<LoaderCircle size={16} className="animate-spin"/>:<Send size={16}/>} {account.environment==="sandbox"?"Test selected Pin in Sandbox":"Publish selected Pin now"}
     </button>
     <div className="rounded-xl border border-violet-100 bg-white p-3">
       <p className="mb-2 flex items-center gap-2 text-sm font-black text-slate-800"><CalendarClock size={17}/> Approve daily scheduling</p>
       <label className="block text-xs font-semibold text-slate-600">Publication day (09:00 UTC, within the following hour on Hobby)</label>
       <input type="date" min={tomorrow()} value={date} onChange={e=>setDate(e.target.value)} className="my-3 w-full rounded-xl border border-slate-200 p-3 text-sm"/>
       {!account.scheduleEnabled&&<p className="mb-2 text-xs font-bold text-amber-700">Add CRON_SECRET in Vercel to enable scheduled publishing.</p>}
-      <button type="button" disabled={!account.scheduleEnabled||!boardId||!item||busy||loading||account.auth?.publishReady===false} onClick={()=>void schedule()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#57338B] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
+      <button type="button" disabled={!account.scheduleEnabled||!boardId||!item||busy||loading||!account.publishingAllowed||account.auth?.publishReady===false} onClick={()=>void schedule()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#57338B] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
        <CalendarClock size={16}/> Approve & schedule this Pin
       </button>
       <p className="mt-2 text-[11px] leading-5 text-slate-500">Up to 3 approved Pins are sent per daily run. No automatic retries after ambiguous network errors. Public visibility requires Pinterest Standard API access.</p>
@@ -133,8 +146,8 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
       <div className="max-h-64 space-y-2 overflow-y-auto">
         {account.jobs.map(job=><div key={job.id} className="rounded-lg border border-slate-100 bg-slate-50 p-2 text-xs">
           <p className="line-clamp-1 font-bold text-slate-800">{job.title}</p>
-          <p className="mt-1 text-slate-600">{job.status} · {new Date(job.scheduled_at).toLocaleDateString("en-GB")}</p>
-          {job.pinterest_pin_id&&<a target="_blank" rel="noopener noreferrer" href={"https://www.pinterest.com/pin/"+encodeURIComponent(job.pinterest_pin_id)+"/"} className="mt-1 inline-flex items-center gap-1 font-bold text-violet-700">View Pin <ExternalLink size={12}/></a>}
+          <p className="mt-1 text-slate-600">{job.status} · {job.api_environment==="sandbox"?"Sandbox test":"Production"} · {new Date(job.scheduled_at).toLocaleDateString("en-GB")}</p>
+          {job.pinterest_pin_id&&<a target="_blank" rel="noopener noreferrer" href={"https://www.pinterest.com/pin/"+encodeURIComponent(job.pinterest_pin_id)+"/"} className="mt-1 inline-flex items-center gap-1 font-bold text-violet-700">{job.api_environment==="sandbox"?"View Sandbox Pin":"View Pin"} <ExternalLink size={12}/></a>}
           {job.error_message&&<p className="mt-1 text-red-700">{job.error_message}</p>}
           {job.status==="approved"&&<button type="button" disabled={loading} onClick={()=>void action({action:"cancel",id:job.id})} className="mt-1 font-bold text-rose-700">Cancel approval</button>}
         </div>)}

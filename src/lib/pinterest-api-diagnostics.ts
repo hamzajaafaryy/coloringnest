@@ -21,6 +21,7 @@ export function pinterestApiFailure(status: number, path: string, data: unknown)
     .slice(0, 150).trim();
   const suffix = [rawCode !== null ? "code " + rawCode : "", filtered].filter(Boolean).join(": ");
   const info = suffix ? " (" + suffix + ")" : "";
+  if (rawCode===29) return "Pinterest Trial Access cannot create Pins on the Production API. Switch CraftColoring Studio to Sandbox for private tests, or obtain Standard Access before public publishing.";
   if (status === 401) return "Pinterest returned HTTP 401 while " + context + info + ". This does not prove your login expired. Check token health and pins:write permissions; Reconnect only if necessary.";
   if (status === 403) return "Pinterest refused permission while " + context + info + ". Check app access tier, OAuth scopes and Board ownership.";
   if (status === 429) return "Pinterest rate limit reached while " + context + ". Check your Trial API limits.";
