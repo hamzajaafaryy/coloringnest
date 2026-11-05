@@ -172,14 +172,26 @@ export async function getPinterestAuthStatus(): Promise<PinterestAuthStatus> {
 export type PinterestBoard={id:string;name:string;privacy?:string};
 export async function listPinterestBoards():Promise<PinterestBoard[]>{
   const boards:PinterestBoard[]=[];let bookmark="";
-  for(let n=0;n<5;n++){
-    const url="/boards?page_size=100"+(bookmark?"&bookmark="+encodeURIComponent(bookmark):"");
+  for(let n=0;n<12;n++){
+    const url="/boards?page_size=250"+(bookmark?"&bookmark="+encodeURIComponent(bookmark):"");
     const result=await pinterestApi<{items:PinterestBoard[];bookmark?:string|null}>("GET",url);
     boards.push(...result.items.filter(b=>b.id&&b.name));
     if(!result.bookmark)break;
     bookmark=result.bookmark;
   }
   return boards;
+}
+export async function createPinterestSandboxBoard():Promise<PinterestBoard>{
+  if(pinterestEnvironment()!=="sandbox") throw Error("Sandbox Board creation is unavailable in Production");
+  const name="CraftColoring Sandbox Test";
+  const existing=await listPinterestBoards();
+  const match=existing.find(b=>b.name===name);
+  if(match)return match;
+  const board=await pinterestApi<PinterestBoard>("POST","/boards",{
+    name,description:"Test-only board for CraftColoring official Pinterest API review.",
+  });
+  if(!board.id)throw Error("Pinterest Sandbox did not return a Board ID");
+  return board;
 }
 async function checkBoard(id:string):Promise<void>{
   if(!/^\d{2,30}$/.test(id))throw Error("Choose an existing Board");
@@ -194,15 +206,16 @@ export async function disconnectPinterest():Promise<void>{
 export type PinterestQueueRow={
   id:string;page_id:string;sheet_id:string;title:string;board_id:string;
   status:string;scheduled_at:string;published_at:string|null;pinterest_pin_id:string|null;
-  error_message:string|null;
+  error_message:string|null;api_environment:PinterestEnvironment;
 };
 export async function listPinterestQueue():Promise<PinterestQueueRow[]>{
   await ensurePinterestTables();
   const r=await pool.query(`SELECT id,page_id,sheet_id,title,board_id,status,scheduled_at,published_at,
-   pinterest_pin_id,error_message FROM pinterest_publish_jobs ORDER BY approved_at DESC LIMIT 25`);
+   pinterest_pin_id,error_message,api_environment FROM pinterest_publish_jobs ORDER BY approved_at DESC LIMIT 25`);
   return r.rows as PinterestQueueRow[];
 }
 export async function approvePinterestPin(input:Record<string,unknown>):Promise<string>{
+  if(!pinterestPublishingAllowed())throw Error("Standard Access is required for public Production Pins. Use Sandbox with Trial Access.");
   if(!await pinterestConnected())throw Error("Connect Pinterest before approving Pins");
   const auth=await getPinterestAuthStatus();
   if(auth.publishReady===false)
@@ -220,17 +233,17 @@ export async function approvePinterestPin(input:Record<string,unknown>):Promise<
   await checkBoard(approved.boardId);
   const key=createHash("sha256").update([
     approved.pageId,approved.sheetId,approved.template,approved.boardId,
-    approved.headline,approved.title,approved.description,approved.altText,approved.destination
+    approved.headline,approved.title,approved.description,approved.altText,approved.destination,pinterestEnvironment()
   ].join("|")).digest("hex");
   const id=randomUUID();
   try{
     await pool.query(`INSERT INTO pinterest_publish_jobs
       (id,approval_key,page_id,sheet_id,board_id,template,headline,title,description,
-        alt_text,destination,scheduled_at,status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'approved')`,[
+        alt_text,destination,scheduled_at,status,api_environment)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'approved',$13)`,[
       id,key,approved.pageId,approved.sheetId,approved.boardId,approved.template,
       approved.headline,approved.title,approved.description,approved.altText,
-      approved.destination,approved.scheduledAt
+      approved.destination,approved.scheduledAt,pinterestEnvironment()
     ]);
   }catch(error){
     if((error as {code?:string}).code==="23505")
@@ -247,9 +260,10 @@ export async function cancelPinterestJob(id:string):Promise<boolean>{
 type Job={id:string;page_id:string;sheet_id:string;board_id:string;template:string;
   headline:string;title:string;description:string;alt_text:string;destination:string};
 export async function processPinterestJob(id:string):Promise<{status:"published"|"failed"|"skipped";pinId?:string}>{
+  if(!pinterestPublishingAllowed())throw Error("Pinterest Production posting is disabled until Standard Access is confirmed");
   await ensurePinterestTables();
   const result=await pool.query<Job>(`UPDATE pinterest_publish_jobs SET status='publishing',updated_at=now()
-    WHERE id=$1 AND status='approved' AND scheduled_at<=now() RETURNING *`,[id]);
+    WHERE id=$1 AND status='approved' AND scheduled_at<=now() AND api_environment=$2 RETURNING *`,[id,pinterestEnvironment()]);
   const job=result.rows[0];
   if(!job)return {status:"skipped"};
   try{
@@ -283,10 +297,10 @@ export async function processPinterestJob(id:string):Promise<{status:"published"
   }
 }
 export async function processDuePinterestJobs(max=3){
-  if(!await pinterestConnected())return [];
+  if(!pinterestPublishingAllowed()||!await pinterestConnected())return [];
   await ensurePinterestTables();
   const r=await pool.query<{id:string}>(`SELECT id FROM pinterest_publish_jobs
-    WHERE status='approved' AND scheduled_at<=now() ORDER BY scheduled_at,approved_at LIMIT $1`,[Math.max(1,Math.min(3,max))]);
+    WHERE status='approved' AND scheduled_at<=now() AND api_environment=$2 ORDER BY scheduled_at,approved_at LIMIT $1`,[Math.max(1,Math.min(3,max)),pinterestEnvironment()]);
   const processed=[];
   for(const row of r.rows)processed.push({id:row.id,...await processPinterestJob(row.id)});
   return processed;
