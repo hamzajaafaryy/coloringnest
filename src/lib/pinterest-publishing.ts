@@ -5,6 +5,7 @@ import { getPinterestArtwork } from "./pinterest-data";
 // Load the native Sharp renderer only when a specifically approved job is published.
 // OAuth / board / account routes must not load libvips at module initialization.
 import { makePinSeo, pinArtworkForSheet } from "./pinterest-studio";
+import {grantedPinterestScopes,pinterestApiFailure} from "./pinterest-api-diagnostics.ts";
 import {
   normalizeApprovedPin, pinterestErrorStatus, type ApprovedPin,
   PINTEREST_ORIGIN, PINTEREST_CALLBACK,
@@ -88,7 +89,7 @@ async function storeTokens(token:Tokens,oldRefresh=""):Promise<void>{
     refresh_token_cipher=EXCLUDED.refresh_token_cipher,
     expires_at=EXCLUDED.expires_at,scopes=EXCLUDED.scopes,updated_at=now()`,
     [encryptToken(token.access_token),encryptToken(refresh),
-      new Date(Date.now()+seconds*1000),token.scope||"boards:read pins:read pins:write"]);
+      new Date(Date.now()+seconds*1000),token.scope||"unknown"]);
 }
 export async function exchangePinterestAuthorization(code:string):Promise<void>{
   const token=await exchangeToken({grant_type:"authorization_code",code,redirect_uri:PINTEREST_CALLBACK});
@@ -119,8 +120,35 @@ async function pinterestApi<T>(method:"GET"|"POST",path:string,body?:unknown):Pr
       ...(body?{"Content-Type":"application/json"}:{})},
     ...(body?{body:JSON.stringify(body)}:{}),
   });
-  if(!response.ok)throw Error(pinterestErrorStatus(response.status));
+  if (!response.ok) {
+    let payload: unknown = null;
+    try { payload = await response.json(); } catch { /* Pinterest can send non-JSON errors */ }
+    const safe = pinterestApiFailure(response.status,path,payload);
+    console.warn("Pinterest API rejected", method, path, "HTTP", response.status);
+    throw Error(safe);
+  }
   return response.json() as Promise<T>;
+}
+export type PinterestAuthStatus = {
+  scopes: string[];
+  scopeKnown: boolean;
+  pinWrite: boolean | null;
+  expiresAt: string | null;
+};
+export async function getPinterestAuthStatus(): Promise<PinterestAuthStatus> {
+  await ensurePinterestTables();
+  const result=await pool.query<{scopes:string;expires_at:Date}>(
+    "SELECT scopes,expires_at FROM pinterest_connection WHERE account_key='primary' LIMIT 1");
+  const row=result.rows[0];
+  if(!row)return {scopes:[],scopeKnown:false,pinWrite:null,expiresAt:null};
+  const scopes=grantedPinterestScopes(row.scopes||"");
+  const scopeKnown=scopes.length>0;
+  return {
+    scopes,
+    scopeKnown,
+    pinWrite:scopeKnown?scopes.includes("pins:write"):null,
+    expiresAt:new Date(row.expires_at).toISOString(),
+  };
 }
 export type PinterestBoard={id:string;name:string;privacy?:string};
 export async function listPinterestBoards():Promise<PinterestBoard[]>{
