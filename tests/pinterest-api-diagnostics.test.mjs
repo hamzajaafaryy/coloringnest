@@ -18,3 +18,9 @@ test("never expose an OAuth token in third-party error descriptions", () => {
   assert.doesNotMatch(message, /supersecret|shouldnotleak/);
   assert.match(message, /redacted/);
 });
+
+test("OAuth requests all four documented scopes for creating a Pin on a Board", async () => {
+  const { PINTEREST_SCOPES } = await import("../src/lib/pinterest-publishing-validation.ts");
+  const granted = new Set(PINTEREST_SCOPES.split(","));
+  assert.deepEqual(granted, new Set(["boards:read","boards:write","pins:read","pins:write"]));
+});

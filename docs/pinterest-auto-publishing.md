@@ -8,7 +8,7 @@ Set Production **server-side** environment variables:
 Register this exact OAuth redirect URI:
 https://www.craftcoloring.com/api/admin/pinterest/connect/callback
 
-OAuth scopes: boards:read,pins:read,pins:write. Visit /admin/pinterest-studio, click Connect Pinterest, authorize, choose an existing board and approve each specific Pin before publishing. Access and refresh tokens are AES-256-GCM encrypted in private PostgreSQL. The first authorized Pinterest connection or queue call uses the idempotent CREATE TABLE IF NOT EXISTS statements in migrations/20261104_pinterest_publishing.sql; database user must be able to create tables. No existing content data changes.
+OAuth scopes: boards:read,boards:write,pins:read,pins:write (all four scopes listed in Pinterest's organic Pin creation guide). Existing connections must run **Reconnect Pinterest** to grant new scopes; refreshing a token cannot expand previously granted permissions. Visit /admin/pinterest-studio, click Connect Pinterest, authorize, choose an existing board and approve each specific Pin before publishing. Access and refresh tokens are AES-256-GCM encrypted in private PostgreSQL. The first authorized Pinterest connection or queue call uses the idempotent CREATE TABLE IF NOT EXISTS statements in migrations/20261104_pinterest_publishing.sql; database user must be able to create tables. No existing content data changes.
 
 Vercel Hobby's cron runs **once daily with hour precision**, at 09:00 UTC, and publishes at most 3 *explicitly approved* Pins. Use Publish now for immediate individual publishing. A failed or ambiguous API response is never retried automatically: check Pinterest before creating a new approval.
 
