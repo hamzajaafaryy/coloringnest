@@ -30,6 +30,10 @@ const nextConfig: NextConfig = {
   // Sharp loads libvips dynamically; include its shared libraries in the upload function.
   outputFileTracingIncludes: {
     "/api/admin/upload": ["./node_modules/@img/sharp-*/**/*"],
+    // Pin rendering needs the same Linux-native libvips binaries in Vercel Functions.
+    "/api/admin/pinterest/render": ["./node_modules/@img/sharp-*/**/*"],
+    "/api/admin/pinterest/actions": ["./node_modules/@img/sharp-*/**/*"],
+    "/api/cron/pinterest": ["./node_modules/@img/sharp-*/**/*"],
   },
   async redirects() {
     return [

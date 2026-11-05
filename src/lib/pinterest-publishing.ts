@@ -2,7 +2,8 @@ import "server-only";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
 import { pool } from "@/db";
 import { getPinterestArtwork } from "./pinterest-data";
-import { fetchPinterestArtworkImage, renderPinterestPin } from "./pinterest-render";
+// Load the native Sharp renderer only when a specifically approved job is published.
+// OAuth / board / account routes must not load libvips at module initialization.
 import { makePinSeo, pinArtworkForSheet } from "./pinterest-studio";
 import {
   normalizeApprovedPin, pinterestErrorStatus, type ApprovedPin,
@@ -206,6 +207,7 @@ export async function processPinterestJob(id:string):Promise<{status:"published"
     if(!item)throw Error("Source coloring page was unpublished");
     const artwork=pinArtworkForSheet(item,job.sheet_id);
     if(!artwork.imageUrl)throw Error("Artwork source missing");
+    const {fetchPinterestArtworkImage,renderPinterestPin}=await import("./pinterest-render");
     const source=await fetchPinterestArtworkImage(artwork.imageUrl);
     const png=await renderPinterestPin({
       template:job.template as ApprovedPin["template"],headline:job.headline,
