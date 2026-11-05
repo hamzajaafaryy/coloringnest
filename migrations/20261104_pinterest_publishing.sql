@@ -15,3 +15,7 @@ CREATE TABLE IF NOT EXISTS pinterest_publish_jobs (
  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS pinterest_jobs_due_idx ON pinterest_publish_jobs (status,scheduled_at);
+
+-- Safe upgrade for databases created before Pinterest Sandbox support.
+ALTER TABLE pinterest_connection ADD COLUMN IF NOT EXISTS api_environment TEXT NOT NULL DEFAULT 'production';
+ALTER TABLE pinterest_publish_jobs ADD COLUMN IF NOT EXISTS api_environment TEXT NOT NULL DEFAULT 'production';

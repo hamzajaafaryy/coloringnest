@@ -1,6 +1,6 @@
 import { NextRequest,NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { approvePinterestPin,cancelPinterestJob,disconnectPinterest,processPinterestJob } from "@/lib/pinterest-publishing";
+import { approvePinterestPin,cancelPinterestJob,disconnectPinterest,processPinterestJob,createPinterestSandboxBoard } from "@/lib/pinterest-publishing";
 export const runtime="nodejs";export const dynamic="force-dynamic";export const maxDuration=60;
 export async function POST(req:NextRequest){
  if(!await isAdminAuthenticated())return NextResponse.json({error:"Unauthorized"},{status:401});
@@ -15,6 +15,10 @@ export async function POST(req:NextRequest){
     const id=await approvePinterestPin({...data,scheduledAt:now?new Date().toISOString():data.scheduledAt});
     if(now)return NextResponse.json({id,...await processPinterestJob(id)});
     return NextResponse.json({id,status:"approved"});
+  }
+  if(data.action==="createSandboxBoard"){
+    const board=await createPinterestSandboxBoard();
+    return NextResponse.json({board});
   }
   if(data.action==="cancel")return NextResponse.json({cancelled:await cancelPinterestJob(String(data.id||""))});
   if(data.action==="disconnect"){await disconnectPinterest();return NextResponse.json({disconnected:true});}
