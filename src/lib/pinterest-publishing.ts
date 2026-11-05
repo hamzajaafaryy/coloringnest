@@ -11,7 +11,15 @@ import {
   PINTEREST_ORIGIN, PINTEREST_CALLBACK,
 } from "./pinterest-publishing-validation";
 
-const API = "https://api.pinterest.com/v5";
+/** Pinterest Trial cannot write to Production; use a separate Sandbox OAuth token. */
+export type PinterestEnvironment = "sandbox" | "production";
+export const pinterestEnvironment = ():PinterestEnvironment =>
+  process.env.PINTEREST_API_ENV === "production" ? "production" : "sandbox";
+export const pinterestHasStandardAccess = () => process.env.PINTEREST_ACCESS_TIER === "standard";
+export const pinterestPublishingAllowed = () => pinterestEnvironment() === "sandbox" || pinterestHasStandardAccess();
+const API = pinterestEnvironment() === "sandbox"
+  ? "https://api-sandbox.pinterest.com/v5"
+  : "https://api.pinterest.com/v5";
 export const pinterestConfigured = () => Boolean(
   process.env.PINTEREST_APP_ID &&
   process.env.PINTEREST_APP_SECRET &&
@@ -45,8 +53,10 @@ export async function ensurePinterestTables():Promise<void>{
       await pool.query(`CREATE TABLE IF NOT EXISTS pinterest_connection (
         account_key TEXT PRIMARY KEY CHECK(account_key='primary'),
         access_token_cipher TEXT NOT NULL,refresh_token_cipher TEXT NOT NULL,
-        expires_at TIMESTAMPTZ NOT NULL,scopes TEXT NOT NULL,updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        expires_at TIMESTAMPTZ NOT NULL,scopes TEXT NOT NULL,updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        api_environment TEXT NOT NULL DEFAULT 'production' CHECK(api_environment IN ('production','sandbox'))
       )`);
+      await pool.query("ALTER TABLE pinterest_connection ADD COLUMN IF NOT EXISTS api_environment TEXT NOT NULL DEFAULT 'production'");
       await pool.query(`CREATE TABLE IF NOT EXISTS pinterest_publish_jobs (
         id TEXT PRIMARY KEY,approval_key TEXT NOT NULL UNIQUE,page_id BIGINT NOT NULL,
         sheet_id TEXT NOT NULL,board_id TEXT NOT NULL,template TEXT NOT NULL,
@@ -55,8 +65,12 @@ export async function ensurePinterestTables():Promise<void>{
         status TEXT NOT NULL CHECK(status IN ('approved','publishing','published','failed','cancelled')),
         error_message TEXT,pinterest_pin_id TEXT,
         approved_at TIMESTAMPTZ NOT NULL DEFAULT now(),published_at TIMESTAMPTZ,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        api_environment TEXT NOT NULL DEFAULT 'production' CHECK(api_environment IN ('production','sandbox'))
       )`);
+      await pool.query("ALTER TABLE pinterest_publish_jobs ADD COLUMN IF NOT EXISTS api_environment TEXT NOT NULL DEFAULT 'production'");
+      if(pinterestEnvironment()==='sandbox' && !pinterestHasStandardAccess())
+        await pool.query("UPDATE pinterest_publish_jobs SET status='cancelled',updated_at=now() WHERE status='approved' AND api_environment='production'");
       await pool.query("CREATE INDEX IF NOT EXISTS pinterest_jobs_due_idx ON pinterest_publish_jobs (status,scheduled_at)");
     })().catch(err=>{tablesPromise=undefined;throw err});
   }
@@ -82,14 +96,15 @@ async function storeTokens(token:Tokens,oldRefresh=""):Promise<void>{
   const seconds=Math.max(60,Math.min(2592000,Number(token.expires_in)||3600));
   await ensurePinterestTables();
   await pool.query(`INSERT INTO pinterest_connection
-    (account_key,access_token_cipher,refresh_token_cipher,expires_at,scopes,updated_at)
-    VALUES ('primary',$1,$2,$3,$4,now())
+    (account_key,access_token_cipher,refresh_token_cipher,expires_at,scopes,updated_at,api_environment)
+    VALUES ('primary',$1,$2,$3,$4,now(),$5)
     ON CONFLICT(account_key) DO UPDATE SET
     access_token_cipher=EXCLUDED.access_token_cipher,
     refresh_token_cipher=EXCLUDED.refresh_token_cipher,
-    expires_at=EXCLUDED.expires_at,scopes=EXCLUDED.scopes,updated_at=now()`,
+    expires_at=EXCLUDED.expires_at,scopes=EXCLUDED.scopes,
+    api_environment=EXCLUDED.api_environment,updated_at=now()`,
     [encryptToken(token.access_token),encryptToken(refresh),
-      new Date(Date.now()+seconds*1000),token.scope||"unknown"]);
+      new Date(Date.now()+seconds*1000),token.scope||"unknown",pinterestEnvironment()]);
 }
 export async function exchangePinterestAuthorization(code:string):Promise<void>{
   const token=await exchangeToken({grant_type:"authorization_code",code,redirect_uri:PINTEREST_CALLBACK});
@@ -98,14 +113,14 @@ export async function exchangePinterestAuthorization(code:string):Promise<void>{
 export async function pinterestConnected():Promise<boolean>{
   if(!pinterestConfigured())return false;
   await ensurePinterestTables();
-  const r=await pool.query("SELECT account_key FROM pinterest_connection WHERE account_key='primary' LIMIT 1");
+  const r=await pool.query("SELECT account_key FROM pinterest_connection WHERE account_key='primary' AND api_environment=$1 LIMIT 1",[pinterestEnvironment()]);
   return r.rowCount===1;
 }
 export async function getPinterestAccessToken():Promise<string>{
   requireConfig();await ensurePinterestTables();
   const rows=await pool.query<{access_token_cipher:string;refresh_token_cipher:string;expires_at:Date}>(
-    "SELECT access_token_cipher,refresh_token_cipher,expires_at FROM pinterest_connection WHERE account_key='primary' LIMIT 1");
-  const row=rows.rows[0];if(!row)throw Error("Connect your Pinterest account first");
+    "SELECT access_token_cipher,refresh_token_cipher,expires_at FROM pinterest_connection WHERE account_key='primary' AND api_environment=$1 LIMIT 1",[pinterestEnvironment()]);
+  const row=rows.rows[0];if(!row)throw Error("Connect Pinterest Sandbox separately; Production and Sandbox tokens cannot be mixed.");
   if(new Date(row.expires_at).valueOf()>Date.now()+300000)return decryptToken(row.access_token_cipher);
   const refresh=decryptToken(row.refresh_token_cipher);
   const token=await exchangeToken({grant_type:"refresh_token",refresh_token:refresh});
@@ -140,7 +155,7 @@ export type PinterestAuthStatus = {
 export async function getPinterestAuthStatus(): Promise<PinterestAuthStatus> {
   await ensurePinterestTables();
   const result=await pool.query<{scopes:string;expires_at:Date}>(
-    "SELECT scopes,expires_at FROM pinterest_connection WHERE account_key='primary' LIMIT 1");
+    "SELECT scopes,expires_at FROM pinterest_connection WHERE account_key='primary' AND api_environment=$1 LIMIT 1",[pinterestEnvironment()]);
   const row=result.rows[0];
   if(!row)return {scopes:[],scopeKnown:false,pinWrite:null,boardWrite:null,publishReady:null,expiresAt:null};
   const scopes=grantedPinterestScopes(row.scopes||"");
