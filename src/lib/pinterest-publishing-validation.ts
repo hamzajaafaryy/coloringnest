@@ -1,7 +1,8 @@
 import { isPinTemplate, type PinTemplate } from "./pinterest-studio.ts";
 export const PINTEREST_ORIGIN = "https://www.craftcoloring.com";
 export const PINTEREST_CALLBACK = PINTEREST_ORIGIN + "/api/admin/pinterest/connect/callback";
-export const PINTEREST_SCOPES = "boards:read,pins:read,pins:write";
+// Official Pinterest Create Pin guide lists both board and Pin read/write permissions.
+export const PINTEREST_SCOPES = "boards:read,boards:write,pins:read,pins:write";
 export type ApprovedPin = { pageId:number; sheetId:string; template:PinTemplate; headline:string; title:string; description:string; altText:string; boardId:string; destination:string; scheduledAt:Date };
 export function normalizeApprovedPin(input:Record<string,unknown>,now=new Date()):ApprovedPin{
  const pageId=Number(input.pageId);

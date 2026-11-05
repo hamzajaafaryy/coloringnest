@@ -7,7 +7,7 @@ import type {PinArtwork,PinSeo,PinTemplate} from "@/lib/pinterest-studio";
 type Board={id:string;name:string;privacy?:string};
 type Job={id:string;page_id:string;sheet_id:string;title:string;board_id:string;
  status:string;scheduled_at:string;published_at:string|null;pinterest_pin_id:string|null;error_message:string|null};
-type Account={configured:boolean;connected:boolean;boards:Board[];jobs:Job[];scheduleEnabled?:boolean;warning?:string;error?:string;readCheck?:"ok"|"failed";auth?:{scopes:string[];scopeKnown:boolean;pinWrite:boolean|null;expiresAt:string|null}};
+type Account={configured:boolean;connected:boolean;boards:Board[];jobs:Job[];scheduleEnabled?:boolean;warning?:string;error?:string;readCheck?:"ok"|"failed";auth?:{scopes:string[];scopeKnown:boolean;pinWrite:boolean|null;boardWrite:boolean|null;publishReady:boolean|null;expiresAt:string|null}};
 type Props={item:PinArtwork|null;seo:PinSeo;template:PinTemplate;sheetId:string;busy:boolean};
 const tomorrow=()=>{const date=new Date();date.setUTCDate(date.getUTCDate()+1);return date.toISOString().slice(0,10);};
 
@@ -100,10 +100,11 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
     <div className="space-y-2 rounded-xl border border-violet-100 bg-white p-3 text-xs leading-5 text-slate-700">
       <p><strong>Boards API:</strong> {account.readCheck==="ok"?"Read access working":account.readCheck==="failed"?"Read access could not be verified":"Not checked"}</p>
       <p><strong>Granted Pin-writing scope:</strong> {account.auth?.pinWrite===true?"pins:write present":account.auth?.pinWrite===false?"pins:write NOT granted":"Not reported by Pinterest"}</p>
+      <p><strong>Granted Board-writing scope:</strong> {account.auth?.boardWrite===true?"boards:write present":account.auth?.boardWrite===false?"boards:write NOT granted":"Not reported by Pinterest"}</p>
       <p className="text-[11px] text-slate-500">A successful Board read does not prove publishing access. HTTP 401 can mean invalid credentials or a restricted operation; Trial Pins remain visible only to you.</p>
       <a href="/api/admin/pinterest/connect" className="inline-flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 font-black text-violet-800 hover:bg-violet-100"><Link2 size={14}/> Reconnect Pinterest (keep queue)</a>
     </div>
-    {account.auth?.pinWrite===false&&<p role="alert" className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">Reconnect and grant pins:write before publishing. Your account currently lacks that reported permission.</p>}
+    {account.auth?.publishReady===false&&<p role="alert" className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">Publishing requires both boards:write and pins:write. Reconnect and approve the new permissions. Your existing failed Pins will remain in the queue history.</p>}
     {account.warning&&<p role="alert" className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">{account.warning}</p>}
     <label className="block space-y-2 text-xs font-black text-slate-700">
       <span>Choose a real Board</span>
@@ -113,7 +114,7 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
       </select>
     </label>
     {account.boards.length===0&&<p className="text-xs text-amber-700">No boards returned. Check the connection and your boards:read permission.</p>}
-    <button type="button" disabled={!boardId||!item||busy||loading||account.auth?.pinWrite===false} onClick={()=>void publishNow()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#BD1E44] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
+    <button type="button" disabled={!boardId||!item||busy||loading||account.auth?.publishReady===false} onClick={()=>void publishNow()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#BD1E44] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
      {loading?<LoaderCircle size={16} className="animate-spin"/>:<Send size={16}/>} Publish selected Pin now
     </button>
     <div className="rounded-xl border border-violet-100 bg-white p-3">
@@ -121,7 +122,7 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
       <label className="block text-xs font-semibold text-slate-600">Publication day (09:00 UTC, within the following hour on Hobby)</label>
       <input type="date" min={tomorrow()} value={date} onChange={e=>setDate(e.target.value)} className="my-3 w-full rounded-xl border border-slate-200 p-3 text-sm"/>
       {!account.scheduleEnabled&&<p className="mb-2 text-xs font-bold text-amber-700">Add CRON_SECRET in Vercel to enable scheduled publishing.</p>}
-      <button type="button" disabled={!account.scheduleEnabled||!boardId||!item||busy||loading||account.auth?.pinWrite===false} onClick={()=>void schedule()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#57338B] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
+      <button type="button" disabled={!account.scheduleEnabled||!boardId||!item||busy||loading||account.auth?.publishReady===false} onClick={()=>void schedule()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#57338B] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
        <CalendarClock size={16}/> Approve & schedule this Pin
       </button>
       <p className="mt-2 text-[11px] leading-5 text-slate-500">Up to 3 approved Pins are sent per daily run. No automatic retries after ambiguous network errors. Public visibility requires Pinterest Standard API access.</p>

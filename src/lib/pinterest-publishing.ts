@@ -133,6 +133,8 @@ export type PinterestAuthStatus = {
   scopes: string[];
   scopeKnown: boolean;
   pinWrite: boolean | null;
+  boardWrite: boolean | null;
+  publishReady: boolean | null;
   expiresAt: string | null;
 };
 export async function getPinterestAuthStatus(): Promise<PinterestAuthStatus> {
@@ -140,13 +142,15 @@ export async function getPinterestAuthStatus(): Promise<PinterestAuthStatus> {
   const result=await pool.query<{scopes:string;expires_at:Date}>(
     "SELECT scopes,expires_at FROM pinterest_connection WHERE account_key='primary' LIMIT 1");
   const row=result.rows[0];
-  if(!row)return {scopes:[],scopeKnown:false,pinWrite:null,expiresAt:null};
+  if(!row)return {scopes:[],scopeKnown:false,pinWrite:null,boardWrite:null,publishReady:null,expiresAt:null};
   const scopes=grantedPinterestScopes(row.scopes||"");
   const scopeKnown=scopes.length>0;
   return {
     scopes,
     scopeKnown,
     pinWrite:scopeKnown?scopes.includes("pins:write"):null,
+    boardWrite:scopeKnown?scopes.includes("boards:write"):null,
+    publishReady:scopeKnown?scopes.includes("pins:write") && scopes.includes("boards:write"):null,
     expiresAt:new Date(row.expires_at).toISOString(),
   };
 }
@@ -186,7 +190,8 @@ export async function listPinterestQueue():Promise<PinterestQueueRow[]>{
 export async function approvePinterestPin(input:Record<string,unknown>):Promise<string>{
   if(!await pinterestConnected())throw Error("Connect Pinterest before approving Pins");
   const auth=await getPinterestAuthStatus();
-  if(auth.pinWrite===false)throw Error("The connected Pinterest token lacks pins:write. Use Reconnect Pinterest to authorize publishing.");
+  if(auth.publishReady===false)
+    throw Error("The connected Pinterest token is missing a required publishing permission (boards:write or pins:write). Use Reconnect Pinterest and grant both before publishing.");
   const approved=normalizeApprovedPin(input);
   const item=await getPinterestArtwork(approved.pageId);
   if(!item)throw Error("The coloring page is not published");
