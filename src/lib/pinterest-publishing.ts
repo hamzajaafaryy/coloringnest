@@ -185,6 +185,8 @@ export async function listPinterestQueue():Promise<PinterestQueueRow[]>{
 }
 export async function approvePinterestPin(input:Record<string,unknown>):Promise<string>{
   if(!await pinterestConnected())throw Error("Connect Pinterest before approving Pins");
+  const auth=await getPinterestAuthStatus();
+  if(auth.pinWrite===false)throw Error("The connected Pinterest token lacks pins:write. Use Reconnect Pinterest to authorize publishing.");
   const approved=normalizeApprovedPin(input);
   const item=await getPinterestArtwork(approved.pageId);
   if(!item)throw Error("The coloring page is not published");
