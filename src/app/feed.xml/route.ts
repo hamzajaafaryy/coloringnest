@@ -42,7 +42,7 @@ export async function GET() {
       "      <description>" + xml(description) + "</description>",
       "      <link>" + xml(link) + "</link>",
       "      <guid isPermaLink=\"true\">" + xml(link) + "</guid>",
-      "      <pubDate>" + xml(new Date(publishedAt).toUTCString()) + "</pubDate>",
+      "      <pubDate>" + xml(publishedAt instanceof Date ? publishedAt.toUTCString() : new Date(publishedAt).toUTCString()) + "</pubDate>",
       "      <enclosure url=\"" + xml(image) + "\" type=\"" + imageMimeType(image) + "\" length=\"0\" />",
       "      <media:content url=\"" + xml(image) + "\" medium=\"image\" />",
       "    </item>"].join("\n");
