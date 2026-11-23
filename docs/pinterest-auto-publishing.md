@@ -17,6 +17,15 @@ See https://developers.pinterest.com/docs/key-concepts/access-tiers/ and https:/
 
 Do not put credentials in GitHub, public Next.js env variables or chat. Disconnect from the Studio to delete the stored OAuth tokens and cancel future approvals. OAuth state is protected by short-lived httpOnly cookie; all other actions require the admin session.
 
+## RSS auto-publishing images
+
+The public RSS 2.0 feed is available at:
+https://www.craftcoloring.com/feed.xml
+
+Each published coloring page with a raster cover image gets one RSS item. Its `<enclosure>` and `<media:content>` both point to a public, generated 1000×1500 PNG at `/api/pinterest/pin/{pageId}`. The generated image uses the CraftColoring Pinterest editorial template; the original artwork image URL and the page itself are not modified. The public image endpoint only renders published pages and caches the generated PNG at the CDN for one day.
+
+The feed is request-time/dynamic (not frozen during build), includes the latest 50 raster-backed published pages, and orders those items oldest-to-newest within that rolling set. SVG-only pages are intentionally omitted because the public Pin renderer currently requires a raster cover image. Pinterest reads the item title and description and extracts images from the enclosure/media tags. After deploying, open the feed URL and confirm each item has both image tags before connecting or refreshing the feed in Pinterest.
+
 ## Trial API Sandbox vs public Production
 
 Pinterest error code 29 means **Trial apps cannot create Pins using https://api.pinterest.com**. Configure `PINTEREST_API_ENV=sandbox` and `PINTEREST_ACCESS_TIER=trial` in Vercel Production. Then **Reconnect Pinterest**: authorization tokens are tied to a particular environment and Pinterest requires using the sandbox OAuth token endpoint `https://api-sandbox.pinterest.com/v5/oauth/token`. Sandbox Boards are separate; use the Studio button to create or find a test Board. Every Sandbox Pin is creator-visible only and does not generate public reach. Existing Production queue entries are isolated and cannot be published accidentally in Sandbox.
