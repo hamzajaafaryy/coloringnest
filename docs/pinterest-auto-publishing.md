@@ -24,7 +24,7 @@ https://www.craftcoloring.com/feed.xml
 
 Each published coloring page with a raster cover image gets one RSS item. Its `<enclosure>` and `<media:content>` both point to a public, generated 1000×1500 PNG at `/api/pinterest/pin/{pageId}`. The generated image uses the CraftColoring Pinterest editorial template; the original artwork image URL and the page itself are not modified. The public image endpoint only renders published pages and caches the generated PNG at the CDN for one day.
 
-The feed is request-time/dynamic (not frozen during build), includes the latest 50 raster-backed published pages, and orders those items oldest-to-newest within that rolling set. SVG-only pages are intentionally omitted because the public Pin renderer currently requires a raster cover image. Pinterest reads the item title and description and extracts images from the enclosure/media tags. After deploying, open the feed URL and confirm each item has both image tags before connecting or refreshing the feed in Pinterest.
+The feed is request-time/dynamic (not frozen during build), includes the latest 50 raster-backed published pages, and orders those items oldest-to-newest within that rolling set. SVG-only pages are intentionally omitted because the public Pin renderer currently requires a raster cover image. Pinterest reads the item title and description and extracts images from the enclosure/media tags. After deploying, open the feed URL and confirm each item has both image tags. Also open one item's image URL directly and verify it returns a 1000×1500 PNG before connecting or refreshing the feed in Pinterest.
 
 ## Trial API Sandbox vs public Production
 
