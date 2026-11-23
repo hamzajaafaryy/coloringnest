@@ -64,10 +64,12 @@ test("minimum-size transparent line art is flattened to white without lossy outl
   const { files, warning } = await prepareImage(input, "coloring");
   assert.equal(warning, undefined);
   const expected = await sharp(input).flatten({ background: "#fff" }).removeAlpha().raw().toBuffer();
-  for (const file of files) {
-    assert.equal(file.width, 1200);
-    assert.equal(file.height, 1600);
-    assert.deepEqual(await sharp(file.data).removeAlpha().raw().toBuffer(), expected);
+  const expectedDimensions = [[1200, 1600], [1200, 1600], [600, 800]];
+  for (const [index, file] of files.entries()) {
+    assert.deepEqual([file.width, file.height], expectedDimensions[index]);
+    if (index < 2) {
+      assert.deepEqual(await sharp(file.data).removeAlpha().raw().toBuffer(), expected);
+    }
   }
 });
 
