@@ -9,6 +9,9 @@ export type PreparedImageFile = {
   height: number;
 };
 
+const MIN_COLORING_EDGE = 1200;
+const MIN_COLORING_PIXELS = 1_920_000;
+
 /** Decode once, preserve every edge, and never enlarge raster source pixels. */
 export async function prepareImage(input: Uint8Array, profile: ImageProfile = "general") {
   const image = sharp(input, { limitInputPixels: 40_000_000, failOn: "error" });
@@ -17,6 +20,19 @@ export async function prepareImage(input: Uint8Array, profile: ImageProfile = "g
     throw new Error("Use a valid PNG, JPG, or WebP image.");
   }
   if ((metadata.pages || 1) > 1) throw new Error("Use a still image rather than an animated image.");
+
+  // EXIF orientations 5–8 rotate the displayed dimensions by 90 degrees.
+  const rotated = [5, 6, 7, 8].includes(metadata.orientation || 1);
+  const sourceWidth = rotated ? metadata.height : metadata.width;
+  const sourceHeight = rotated ? metadata.width : metadata.height;
+
+  if (profile === "coloring" &&
+      (Math.min(sourceWidth, sourceHeight) < MIN_COLORING_EDGE ||
+       sourceWidth * sourceHeight < MIN_COLORING_PIXELS)) {
+    throw new Error(
+      "This drawing is too small for a sharp printable page. Upload an original image at least 1200 × 1600 pixels (or 1600 × 1200 for landscape). Do not enlarge a small image."
+    );
+  }
 
   const resized = image.autoOrient().resize({
     width: profile === "coloring" ? 2550 : 1600,
@@ -45,8 +61,5 @@ export async function prepareImage(input: Uint8Array, profile: ImageProfile = "g
     encode("preview.webp", "image/webp", pixels().resize({ width: 1200, withoutEnlargement: true }).webp({ lossless: true, effort: 4 })),
     encode("thumbnail.webp", "image/webp", pixels().resize({ width: 600, withoutEnlargement: true }).webp({ lossless: true, effort: 4 })),
   ]);
-  return {
-    files,
-    warning: width < 1200 ? "Small source image: kept at its original resolution. Use a larger image for sharper printing." : undefined,
-  };
+  return { files, warning: undefined };
 }

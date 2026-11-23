@@ -78,13 +78,15 @@ export async function renderPinterestPin({
     ${letterPaths(cat.slice(0, 34),{x:929,y:1414,fontSize:19,maxWidth:330,color:c.ink,align:"right"})}
     ${letterPaths("craftcoloring.com",{x:929,y:1456,fontSize:20,maxWidth:330,color:c.ink,align:"right"})}
   </svg>`;
-  const illustration = await sharp(source, {limitInputPixels: 40_000_000})
+  // Keep original pixels: shrink large artwork to fit, but never upscale small artwork.
+  const { data: illustration, info: illustrationInfo } = await sharp(source, {limitInputPixels: 40_000_000})
     .rotate().flatten({ background: "#FFFFFF" })
-    .resize(artW, artH, { fit: "contain", background: "#FFFFFF", withoutEnlargement: false })
-    .png().toBuffer();
-  // Keep the artwork on top of the blank paper, but never distort/crop it.
+    .resize(artW, artH, { fit: "contain", background: "#FFFFFF", withoutEnlargement: true })
+    .png().toBuffer({ resolveWithObject: true });
+  const left = artX + Math.round((artW - illustrationInfo.width) / 2);
+  const top = artY + Math.round((artH - illustrationInfo.height) / 2);
   return sharp(Buffer.from(svg))
-    .composite([{ input: illustration, left: artX, top: artY }])
+    .composite([{ input: illustration, left, top }])
     .png({ compressionLevel: 9, effort: 7 }).toBuffer();
 }
 

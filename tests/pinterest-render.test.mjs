@@ -5,7 +5,7 @@ import { renderPinterestPin } from "../src/lib/pinterest-render.ts";
 
 test("all templates output 1000x1500 PNG without cropping the original", async () => {
   const image = await sharp({
-    create:{width:340,height:440,channels:3,background:"#ffffff"},
+    create:{width:1340,height:1640,channels:3,background:"#ffffff"},
   }).png().toBuffer();
   for (const template of ["editorial","lilac","sunshine","midnight","papercut"]) {
     const output = await renderPinterestPin({template,headline:"Cute Cat and Flower Coloring Page",category:"Animals",image});
@@ -16,6 +16,17 @@ test("all templates output 1000x1500 PNG without cropping the original", async (
     assert.ok(output.length > 10000);
   }
 });
+
+test("small artwork is centered at its original pixel size instead of being enlarged", async () => {
+  const image = await sharp({create:{width:340,height:440,channels:3,background:"#ff0000"}}).png().toBuffer();
+  const output = await renderPinterestPin({template:"editorial",headline:"Small drawing",image});
+  const {data,info}=await sharp(output).removeAlpha().raw().toBuffer({resolveWithObject:true});
+  const pixel=(x,y)=>[...data.subarray((y*info.width+x)*3,(y*info.width+x)*3+3)];
+  assert.deepEqual(pixel(330,675),[255,0,0]);
+  assert.deepEqual(pixel(329,675),[255,255,255]);
+  assert.deepEqual(pixel(120,500),[255,255,255]);
+});
+
 test("renderer rejects unsupported files and oversized input", async () => {
   await assert.rejects(renderPinterestPin({template:"editorial",headline:"Cat",image:Buffer.from("not image")}), /Input buffer contains unsupported image format|unsupported|source/i);
 });

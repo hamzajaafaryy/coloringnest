@@ -51,27 +51,35 @@ test("landscape artwork keeps all four corners and its aspect ratio", async () =
   }
 });
 
-test("small transparent line art is flattened to white without enlargement or lossy outlines", async () => {
-  const input = await sharp(Buffer.from(`<svg width="320" height="480" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 20H300V460H20Z M40 60L280 420" fill="none" stroke="black" stroke-width="1"/>
+test("low-resolution artwork is rejected instead of being enlarged for printing", async () => {
+  await assert.rejects(prepareImage(await image(320, 480), "coloring"), /too small for a sharp printable page/);
+  await assert.rejects(prepareImage(await image(1000, 2200), "coloring"), /at least 1200 × 1600/);
+  await assert.rejects(prepareImage(await image(1100, 1700), "coloring"), /at least 1200 × 1600/);
+});
+
+test("minimum-size transparent line art is flattened to white without lossy outlines", async () => {
+  const input = await sharp(Buffer.from(`<svg width="1200" height="1600" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 20H1180V1580H20Z M40 60L1160 1540" fill="none" stroke="black" stroke-width="4"/>
   </svg>`)).png().toBuffer();
   const { files, warning } = await prepareImage(input, "coloring");
-  assert.match(warning, /original resolution/);
+  assert.equal(warning, undefined);
   const expected = await sharp(input).flatten({ background: "#fff" }).removeAlpha().raw().toBuffer();
-  for (const file of files) {
-    assert.equal(file.width, 320);
-    assert.equal(file.height, 480);
-    assert.deepEqual(await sharp(file.data).removeAlpha().raw().toBuffer(), expected);
+  const expectedDimensions = [[1200, 1600], [1200, 1600], [600, 800]];
+  for (const [index, file] of files.entries()) {
+    assert.deepEqual([file.width, file.height], expectedDimensions[index]);
+    if (index < 2) {
+      assert.deepEqual(await sharp(file.data).removeAlpha().raw().toBuffer(), expected);
+    }
   }
 });
 
 test("EXIF orientation is applied and source location metadata is discarded", async () => {
-  const input = await sharp(await image(1400, 1000)).jpeg().withMetadata({ orientation: 6 })
+  const input = await sharp(await image(1600, 1400)).jpeg().withMetadata({ orientation: 6 })
     .withExifMerge({ IFD0: { Artist: "PRIVATE-SOURCE-IDENTITY" }, IFD3: { GPSLatitudeRef: "N", GPSLatitude: "40/1 0/1 0/1" } }).toBuffer();
   assert.equal(hasGpsIfd((await sharp(input).metadata()).exif), true);
   const { files } = await prepareImage(input, "coloring");
-  assert.equal(files[0].width, 1000);
-  assert.equal(files[0].height, 1400);
+  assert.equal(files[0].width, 1400);
+  assert.equal(files[0].height, 1600);
   const metadata = await sharp(files[0].data).metadata();
   assert.equal(hasGpsIfd(metadata.exif), false);
   assert.doesNotMatch(metadata.exif?.toString() || "", /PRIVATE-SOURCE-IDENTITY/);
@@ -140,7 +148,6 @@ test("files that fit the request keep their original bytes; oversized sources ar
   await assert.rejects(prepareImageFile(new File([], "empty.png", { type: "image/png" })));
   await assert.rejects(prepareImageFile(new File([new Uint8Array(MAX_IMAGE_SOURCE_BYTES + 1)], "large.png", { type: "image/png" })), /20 MB/);
 });
-
 
 test("only legacy public raster images on this exact storage origin use WebP resizing", () => {
   const origin = "https://site.supabase.co";

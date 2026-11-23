@@ -128,7 +128,7 @@ export default function ContentStudio() {
         <label className="block text-sm font-bold">Printable preview image — required
           <input key={`image-${inputKey}`} aria-label="Coloring page image" type="file" accept="image/png,image/jpeg,image/webp" onChange={event => chooseImage(event.target.files?.[0])} className="mt-2 block w-full rounded-lg border p-3" />
         </label>
-        <p className="text-sm text-slate-500">PNG, JPG or WebP · max 20 MB. Print and lighter web copies are prepared automatically, preserving the whole drawing.</p>
+        <p className="text-sm text-slate-500">PNG, JPG or WebP · max 20 MB. Minimum 1200 × 1600 px (portrait) or 1600 × 1200 px (landscape). Smaller originals are rejected so printable pages stay sharp.</p>
         {preview && <img src={preview} alt="Selected artwork preview" className="max-h-64 max-w-full rounded-xl border object-contain" />}
         <label className="block text-sm font-bold">Vector SVG — optional
           <input ref={svgInput} key={`svg-${inputKey}`} aria-label="Coloring SVG file" type="file" accept=".svg,image/svg+xml" onChange={event => void chooseSvg(event.target.files?.[0])} className="mt-2 block w-full rounded-lg border p-3" />

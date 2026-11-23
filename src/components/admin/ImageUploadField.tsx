@@ -121,7 +121,7 @@ export function ImageUploadField({
         <p className="mt-2 text-xs text-slate-500">
           {kind === "image"
             ? profile === "coloring"
-              ? "Upload PNG, JPG or WebP up to 20 MB. Print and lighter web copies are prepared automatically, without cropping or stretching."
+              ? "Upload PNG, JPG or WebP up to 20 MB. Minimum 1200 × 1600 px (portrait) or 1600 × 1200 px (landscape). Smaller originals are rejected; artwork is never enlarged."
               : "Upload PNG, JPG or WebP up to 20 MB. Images are automatically fitted within 1600px without cropping or stretching."
             : "SVG is kept as vector. Maximum file size: 2 MB."}
         </p>
