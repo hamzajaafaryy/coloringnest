@@ -23,7 +23,7 @@ test("small artwork is centered at its original pixel size instead of being enla
   const {data,info}=await sharp(output).removeAlpha().raw().toBuffer({resolveWithObject:true});
   const pixel=(x,y)=>[...data.subarray((y*info.width+x)*3,(y*info.width+x)*3+3)];
   assert.deepEqual(pixel(330,675),[255,0,0]);
-  assert.deepEqual(pixel(329,675),[255,248,238]);
+  assert.deepEqual(pixel(329,675),[255,255,255]);
   assert.deepEqual(pixel(120,500),[255,255,255]);
 });
 
