@@ -21,7 +21,12 @@ export async function GET() {
     publishedAt: coloringPages.publishedAt,
   }).from(coloringPages)
     .leftJoin(categories, eq(coloringPages.categoryId, categories.id))
-    .where(and(eq(coloringPages.isPublished, true), isNotNull(coloringPages.imageUrl)))
+    .where(and(
+      eq(coloringPages.isPublished, true),
+      isNotNull(coloringPages.imageUrl),
+      isNotNull(coloringPages.slug),
+      isNotNull(categories.slug),
+    ))
     .orderBy(desc(coloringPages.publishedAt), desc(coloringPages.id))
     .limit(50);
 
@@ -29,7 +34,7 @@ export async function GET() {
   // of the 50 newest raster-backed pages, ordered oldest to newest in the feed.
   const items = rows.reverse().map((row) => ({
     ...row,
-    slug: row.slug || String(row.id),
+    slug: row.slug!,
     sheets: [],
   }));
 
