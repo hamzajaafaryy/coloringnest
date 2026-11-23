@@ -2,7 +2,7 @@
 
 New coloring-image uploads from Content Studio and the coloring-page create/edit forms use the server's `coloring` profile. Upload PNG, JPEG, or WebP; the browser prepares sources larger than 4 MiB before sending them. The selection limit is 20 MiB, and the server decoder accepts at most 40 million pixels.
 
-**New coloring artwork must be at least 1200 × 1600 pixels in portrait orientation (or 1600 × 1200 in landscape orientation).** The shorter edge must be at least 1200 pixels and the image must contain at least 1.92 megapixels. The server rejects smaller sources instead of enlarging them and presenting a blurry printable. This check is applied after accounting for EXIF rotation.
+**New coloring artwork must have a shorter edge of at least 1200 pixels and at least 1.92 megapixels total** (for example, 1200 × 1600 in portrait orientation or 1600 × 1200 in landscape orientation). The server rejects smaller sources instead of enlarging them and presenting a blurry printable. This check is applied after accounting for EXIF rotation.
 
 The server applies EXIF rotation, fits the complete artwork inside 2550 × 3300 pixels, flattens transparency to white, and creates:
 
