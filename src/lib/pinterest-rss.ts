@@ -1,4 +1,4 @@
-import { makePinSeo, xmlEscape, type PinArtwork } from "./pinterest-studio";
+import { makePinSeo, xmlEscape, type PinArtwork } from "./pinterest-studio.ts";
 
 export type PinterestFeedItem = PinArtwork & { publishedAt: Date | null };
 
