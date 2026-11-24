@@ -18,26 +18,33 @@ const globalForDb = globalThis as typeof globalThis & {
   __craftColoringPostgresPool?: Pool;
 };
 
+/**
+ * Reuse one small pool per warm serverless instance.
+ *
+ * IMPORTANT: On Vercel, DATABASE_URL must use Supabase's shared
+ * Transaction Pooler (port 6543), not Session Pooler (5432) or
+ * the direct database endpoint. max: 1 limits each warm instance;
+ * transaction pooling is what safely multiplexes many instances.
+ *
+ * Drizzle's node-postgres driver sends parameterized queries without
+ * naming prepared statements, which is compatible with Supavisor
+ * transaction mode.
+ */
 export const pool =
   globalForDb.__craftColoringPostgresPool ??
   new Pool({
     connectionString: databaseUrl,
-
-    // Keep only one connection to avoid Supabase connection limits.
     max: 1,
     min: 0,
-
-    // Give Next.js build workers enough time
-    // to wait for the available database connection.
-    connectionTimeoutMillis: 60_000,
-
-    // Keep the connection alive longer between queries.
-    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 10_000,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
   });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.__craftColoringPostgresPool = pool;
-}
+// Cache in every environment. In production this reuses the same pool
+// if multiple route modules are loaded in the same warm process.
+globalForDb.__craftColoringPostgresPool = pool;
 
 export const db = drizzle(pool, {
   schema,
