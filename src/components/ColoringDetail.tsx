@@ -13,6 +13,7 @@ import PrintButton from "@/components/PrintButton";
 import SocialShare from "@/components/SocialShare";
 import FAQ from "@/components/FAQ";
 import RelatedColoringPages from "@/components/RelatedColoringPages";
+import MonetagBanner from "@/components/MonetagBanner";
 import { getColoringPageByCategoryAndSlug, getColoringPageFaqs, getRelatedColoringPages } from "@/db/queries";
 import { loadColoringSvg } from "@/lib/coloring/loadSvg";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
@@ -99,6 +100,8 @@ export default async function ColoringDetail({ page, printable = false }: { page
             </section>
           )}
         </div>
+
+        {!printable && <MonetagBanner />}
 
         {isCollection ? <ColoringCollection sheets={sheets} slug={page.slug!} /> : <>
         <div id="print" aria-label="Print, download or color this picture" className="no-print grid scroll-mt-28 grid-cols-2 items-start gap-2.5 sm:gap-3 lg:grid-cols-4">
