@@ -163,18 +163,31 @@ export default function ContentStudio() {
         {parseError && <p role="alert" className="text-sm text-red-700">{parseError}</p>}
         {issues.length > 0 && <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-900"><strong>Fix these fields before saving:</strong><ul className="mt-2 list-disc space-y-1 pl-5">{issues.map((issue, index) => <li key={index}>{issue}</li>)}</ul></div>}
       </section>
-      {seo && <section className="space-y-4 rounded-2xl border bg-white p-5">
-        <h2 className="text-xl font-bold">4. Edit page sections</h2>
-        <p className="text-sm text-slate-600">Edit each paragraph here without rebuilding the JSON. Leave a section empty when it does not add useful, artwork-specific information.</p>
-        {[
-          {key:"description",label:"🎨 Meet Your New Coloring Adventure!",hint:"80–120 words"},
-          {key:"artworkDetails",label:"🔍 What's in This Picture?",hint:"35–90 words"},
-          {key:"colorIdeas",label:"🌈 Let's Pick Some Colors!",hint:"35–90 words"},
-          {key:"creativeActivity",label:"✨ Little Artist, Big Ideas!",hint:"35–90 words"},
-          {key:"coloringBenefits",label:"🧠 What Kids Can Practice",hint:"25–70 words or leave empty"},
-          {key:"printingGuide",label:"🖨️ Ready to Print?",hint:"25–70 words"},
-        ].map(section=><label key={section.key} className="block text-sm font-bold">{section.label}<span className="ml-2 font-normal text-slate-500">{section.hint}</span><textarea rows={3} value={seo[section.key as keyof typeof seo] as string} onChange={event=>updateContentSection(section.key,event.target.value)} className="mt-2 w-full rounded-xl border p-3 font-normal leading-6" /></label>)}
-      </section>
+      {seo ? (
+        <section className="space-y-4 rounded-2xl border bg-white p-5">
+          <h2 className="text-xl font-bold">4. Edit page sections</h2>
+          <p className="text-sm text-slate-600">Edit each paragraph here without rebuilding the JSON. Leave a section empty when it does not add useful, artwork-specific information.</p>
+          {[
+            { key: "description", label: "🎨 Meet Your New Coloring Adventure!", hint: "80–120 words" },
+            { key: "artworkDetails", label: "🔍 What's in This Picture?", hint: "35–90 words" },
+            { key: "colorIdeas", label: "🌈 Let's Pick Some Colors!", hint: "35–90 words" },
+            { key: "creativeActivity", label: "✨ Little Artist, Big Ideas!", hint: "35–90 words" },
+            { key: "coloringBenefits", label: "🧠 What Kids Can Practice", hint: "25–70 words or leave empty" },
+            { key: "printingGuide", label: "🖨️ Ready to Print?", hint: "25–70 words" },
+          ].map((section) => (
+            <label key={section.key} className="block text-sm font-bold">
+              {section.label}
+              <span className="ml-2 font-normal text-slate-500">{section.hint}</span>
+              <textarea
+                rows={3}
+                value={seo[section.key as keyof typeof seo] as string}
+                onChange={(event) => updateContentSection(section.key, event.target.value)}
+                className="mt-2 w-full rounded-xl border p-3 font-normal leading-6"
+              />
+            </label>
+          ))}
+        </section>
+      ) : null}
       {seo && <section className="space-y-4 rounded-2xl border bg-white p-5">
         <h2 className="text-xl font-bold">5. Validation and preview</h2>
         <p className="text-sm text-slate-500">These ranges are site editorial rules, not a Google score or a ranking guarantee. Cards use the meta description; a separate cardDescription is not needed.</p>
