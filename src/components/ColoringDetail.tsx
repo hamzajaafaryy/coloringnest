@@ -144,11 +144,11 @@ export default async function ColoringDetail({ page, printable = false }: { page
           <p className="mt-3 max-w-3xl text-sm leading-8 text-[#73677d] sm:text-base">{page.description}</p>
         </section>}
         {[
-          { title: "🔍 Look Closer! What is in This Picture?", content: page.artworkDetails },
-          { title: "🌈 Let Us Pick Some Colors!", content: page.colorIdeas },
+          { title: "🔍 Look Closer! What's in This Picture?", content: page.artworkDetails },
+          { title: "🌈 Let's Pick Some Colors!", content: page.colorIdeas },
           { title: "✨ Little Artist, Big Ideas!", content: page.creativeActivity },
           { title: "🧠 More Than Fun! What Kids Can Practice", content: page.coloringBenefits },
-          { title: "🖨️ Ready to Print? Let Us Get Coloring!", content: page.printingGuide },
+          { title: "🖨️ Ready to Print? Let's Get Coloring!", content: page.printingGuide },
         ].filter(section => section.content?.trim()).map(section => (
           <section key={section.title} className="rounded-3xl border border-[#eee5ef] bg-white p-5 sm:p-8 lg:px-12">
             <h2 className="text-xl font-black sm:text-2xl">{section.title}</h2>
