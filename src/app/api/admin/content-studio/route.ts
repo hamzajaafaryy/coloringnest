@@ -57,6 +57,9 @@ async function importSeo(body: Record<string, unknown>) {
     }
     const created = await tx.insert(coloringPages).values({
       title: seo.title, slug: seo.slug, description: seo.description,
+      artworkDetails: seo.artworkDetails || null, colorIdeas: seo.colorIdeas || null,
+      creativeActivity: seo.creativeActivity || null, coloringBenefits: seo.coloringBenefits || null,
+      printingGuide: seo.printingGuide || null,
       imageUrl: body.imageUrl as string, svgUrl, svgContent, categoryId,
       seoTitle: seo.seoTitle, seoDescription: seo.seoDescription, altText: seo.altText,
       tags: [...new Set([...seo.tags, seo.primaryKeyword, ...seo.keywords])].slice(0, 12),
