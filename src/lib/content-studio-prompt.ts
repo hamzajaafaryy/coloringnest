@@ -17,11 +17,11 @@ The site provides printing, image download, PDF download, and Color Online for s
 
 PAGE STRUCTURE. The site displays these headings; do not include headings inside field values:
 1. 🎨 Meet Your New Coloring Adventure! — description, 80–120 words.
-2. 🔍 Look Closer! What is in This Picture? — artworkDetails, 35–90 words about visible subject, pose, shapes, and details.
-3. 🌈 Let Us Pick Some Colors! — colorIdeas, 35–90 words with 3–5 optional color suggestions.
+2. 🔍 Look Closer! What's in This Picture? — artworkDetails, 35–90 words about visible subject, pose, shapes, and details.
+3. 🌈 Let's Pick Some Colors! — colorIdeas, 35–90 words with 3–5 optional color suggestions.
 4. ✨ Little Artist, Big Ideas! — creativeActivity, 35–90 words with one practical activity connected to the picture.
 5. 🧠 More Than Fun! What Kids Can Practice — coloringBenefits, 25–70 words. Mention only realistic, relevant practice such as noticing shapes, choosing colors, or pencil control. Avoid medical, therapeutic, intelligence, guaranteed developmental, or universal claims. Keep it specific; return empty string if no useful page-specific benefit.
-6. 🖨️ Ready to Print? Let Us Get Coloring! — printingGuide, 25–70 words with accurate, simple steps.
+6. 🖨️ Ready to Print? Let's Get Coloring! — printingGuide, 25–70 words with accurate, simple steps.
 If a section cannot be made genuinely useful from the artwork, return an empty string. The site hides empty sections. Never add filler to meet word counts.
 
 EXACT JSON FIELDS:
