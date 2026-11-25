@@ -75,6 +75,17 @@ export default function ContentStudio() {
     try { setJson(await selected.text()); setMessage(""); }
     catch { setMessage("Could not read this JSON file. Paste its contents instead."); }
   }
+  function updateContentSection(key: string, value: string) {
+    try {
+      const parsed = JSON.parse(json);
+      parsed[key] = value;
+      setJson(JSON.stringify(parsed, null, 2));
+      setMessage("");
+    } catch {
+      setMessage("Fix the JSON before editing the content fields.");
+    }
+  }
+
   async function copyPrompt() {
     try { await navigator.clipboard.writeText(buildStudioPrompt(Boolean(svgFile), sheets)); setMessage("Master Prompt copied with the current image/SVG features."); }
     catch { setMessage("Clipboard unavailable. Open the prompt below and copy it manually."); }
@@ -152,11 +163,36 @@ export default function ContentStudio() {
         {parseError && <p role="alert" className="text-sm text-red-700">{parseError}</p>}
         {issues.length > 0 && <div role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-900"><strong>Fix these fields before saving:</strong><ul className="mt-2 list-disc space-y-1 pl-5">{issues.map((issue, index) => <li key={index}>{issue}</li>)}</ul></div>}
       </section>
+      {seo ? (
+        <section className="space-y-4 rounded-2xl border bg-white p-5">
+          <h2 className="text-xl font-bold">4. Edit page sections</h2>
+          <p className="text-sm text-slate-600">Edit each paragraph here without rebuilding the JSON. Leave a section empty when it does not add useful, artwork-specific information.</p>
+          {[
+            { key: "description", label: "🎨 Meet Your New Coloring Adventure!", hint: "80–120 words" },
+            { key: "artworkDetails", label: "🔍 What's in This Picture?", hint: "35–90 words" },
+            { key: "colorIdeas", label: "🌈 Let's Pick Some Colors!", hint: "35–90 words" },
+            { key: "creativeActivity", label: "✨ Little Artist, Big Ideas!", hint: "35–90 words" },
+            { key: "coloringBenefits", label: "🧠 What Kids Can Practice", hint: "25–70 words or leave empty" },
+            { key: "printingGuide", label: "🖨️ Ready to Print?", hint: "25–70 words" },
+          ].map((section) => (
+            <label key={section.key} className="block text-sm font-bold">
+              {section.label}
+              <span className="ml-2 font-normal text-slate-500">{section.hint}</span>
+              <textarea
+                rows={3}
+                value={seo[section.key as keyof typeof seo] as string}
+                onChange={(event) => updateContentSection(section.key, event.target.value)}
+                className="mt-2 w-full rounded-xl border p-3 font-normal leading-6"
+              />
+            </label>
+          ))}
+        </section>
+      ) : null}
       {seo && <section className="space-y-4 rounded-2xl border bg-white p-5">
-        <h2 className="text-xl font-bold">4. Validation and preview</h2>
+        <h2 className="text-xl font-bold">5. Validation and preview</h2>
         <p className="text-sm text-slate-500">These ranges are site editorial rules, not a Google score or a ranking guarantee. Cards use the meta description; a separate cardDescription is not needed.</p>
-        <div className="grid gap-2 sm:grid-cols-2">{SEO_RULES.map(rule => { const count = fieldCount(seo[rule.key], rule.unit); const ok = count >= rule.min && count <= rule.max; return <div key={rule.key} className={`rounded-xl border p-3 text-sm ${ok ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}><strong>{ok ? "✓" : "✕"} {rule.label}</strong><p>{count} / {rule.min}–{rule.max} {rule.unit}</p></div>; })}</div>
-        <div className="rounded-xl border p-4"><p className="text-xs font-bold uppercase text-slate-500">Search preview</p><p className="mt-2 text-lg text-blue-800">{seo.seoTitle}</p><p className="break-all text-xs text-green-800">/coloring-pages/{canonicalCategorySlug(seo.category)}/{seo.slug}/</p><p className="mt-1 text-sm text-slate-700">{seo.seoDescription}</p><hr className="my-4" /><h3 className="text-xl font-bold">{seo.title}</h3><p className="mt-1 text-sm text-slate-500">{seo.category} · {seo.ageRange} · {seo.difficulty}</p><p className="mt-4 whitespace-pre-line text-sm leading-7">{seo.description}</p><p className="mt-3 text-sm"><b>Alt:</b> {seo.altText}</p><div className="mt-4 space-y-3">{seo.faqs.map((faq, index) => <div key={index}><strong className="text-sm">{faq.question}</strong><p className="text-sm leading-6">{faq.answer}</p></div>)}</div></div>
+        <div className="grid gap-2 sm:grid-cols-2">{SEO_RULES.map(rule => { const count = fieldCount(seo[rule.key], rule.unit); const ok = (("optional" in rule) && rule.optional && count === 0) || (count >= rule.min && count <= rule.max); return <div key={rule.key} className={`rounded-xl border p-3 text-sm ${ok ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}><strong>{ok ? "✓" : "✕"} {rule.label}</strong><p>{("optional" in rule && rule.optional && count === 0) ? "Optional — left empty" : `${count} / ${rule.min}–${rule.max} ${rule.unit}`}</p></div>; })}</div>
+        <div className="rounded-xl border p-4"><p className="text-xs font-bold uppercase text-slate-500">Search preview</p><p className="mt-2 text-lg text-blue-800">{seo.seoTitle}</p><p className="break-all text-xs text-green-800">/coloring-pages/{canonicalCategorySlug(seo.category)}/{seo.slug}/</p><p className="mt-1 text-sm text-slate-700">{seo.seoDescription}</p><hr className="my-4" /><h3 className="text-xl font-bold">{seo.title}</h3><p className="mt-1 text-sm text-slate-500">{seo.category} · {seo.ageRange} · {seo.difficulty}</p><h4 className="mt-4 font-bold">🎨 Meet Your New Coloring Adventure!</h4><p className="mt-1 whitespace-pre-line text-sm leading-7">{seo.description}</p>{[{label:"🔍 Look Closer! What is in This Picture?",value:seo.artworkDetails},{label:"🌈 Let Us Pick Some Colors!",value:seo.colorIdeas},{label:"✨ Little Artist, Big Ideas!",value:seo.creativeActivity},{label:"🧠 More Than Fun! What Kids Can Practice",value:seo.coloringBenefits},{label:"🖨️ Ready to Print? Let Us Get Coloring!",value:seo.printingGuide}].filter(section=>section.value?.trim()).map(section=><div key={section.label} className="mt-3"><strong className="text-sm">{section.label}</strong><p className="text-sm leading-6">{section.value}</p></div>)}<p className="mt-3 text-sm"><b>Alt:</b> {seo.altText}</p><div className="mt-4 space-y-3">{seo.faqs.map((faq, index) => <div key={index}><strong className="text-sm">{faq.question}</strong><p className="text-sm leading-6">{faq.answer}</p></div>)}</div></div>
       </section>}
       <div className="flex flex-wrap gap-3"><button type="button" disabled={!valid || busy} onClick={() => void submit(false)} className="rounded-xl bg-slate-800 px-6 py-3 font-bold text-white disabled:opacity-40">Save Draft ({sheets.length + 1} drawings)</button><button type="button" disabled={!valid || busy} onClick={() => void submit(true)} className="rounded-xl bg-emerald-700 px-6 py-3 font-bold text-white disabled:opacity-40">Publish {sheets.length > 0 ? "Collection" : "Page"}</button></div>
     </fieldset>

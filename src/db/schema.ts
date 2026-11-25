@@ -63,6 +63,11 @@ export const coloringPages = pgTable("coloring_pages", {
   title: text("title").notNull(),
   slug: text("slug"),
   description: text("description"),
+  artworkDetails: text("artwork_details"),
+  colorIdeas: text("color_ideas"),
+  creativeActivity: text("creative_activity"),
+  coloringBenefits: text("coloring_benefits"),
+  printingGuide: text("printing_guide"),
 
   categoryId: bigint("category_id", { mode: "number" }),
 

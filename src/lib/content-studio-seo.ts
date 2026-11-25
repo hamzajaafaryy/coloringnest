@@ -2,7 +2,7 @@ export const STUDIO_CATEGORIES = ["Animal", "Christmas", "Adults", "Dinosaur", "
 
 export interface StudioSeo {
   title: string; slug: string; seoTitle: string; seoDescription: string;
-  description: string; primaryKeyword: string; keywords: string[];
+  description: string; artworkDetails: string; colorIdeas: string; creativeActivity: string; coloringBenefits: string; printingGuide: string; primaryKeyword: string; keywords: string[];
   altText: string; category: string; tags: string[]; ageRange: string;
   difficulty: string; faqs: { question: string; answer: string }[];
 }
@@ -12,7 +12,12 @@ export const SEO_RULES = [
   { key: "slug", label: "URL slug", min: 15, max: 85, unit: "chars" },
   { key: "seoTitle", label: "SEO title", min: 45, max: 60, unit: "chars" },
   { key: "seoDescription", label: "Meta description / card summary", min: 140, max: 160, unit: "chars" },
-  { key: "description", label: "Article", min: 250, max: 350, unit: "words" },
+  { key: "description", label: "Introduction", min: 80, max: 120, unit: "words" },
+  { key: "artworkDetails", label: "Artwork details", min: 35, max: 90, unit: "words", optional: true },
+  { key: "colorIdeas", label: "Color ideas", min: 35, max: 90, unit: "words", optional: true },
+  { key: "creativeActivity", label: "Creative activity", min: 35, max: 90, unit: "words", optional: true },
+  { key: "coloringBenefits", label: "Coloring benefits", min: 25, max: 70, unit: "words", optional: true },
+  { key: "printingGuide", label: "Printing guide", min: 25, max: 70, unit: "words", optional: true },
   { key: "primaryKeyword", label: "Primary search phrase", min: 3, max: 7, unit: "words" },
   { key: "keywords", label: "Related search phrases", min: 4, max: 6, unit: "items" },
   { key: "altText", label: "Descriptive image alt text", min: 20, max: 180, unit: "chars" },
@@ -49,13 +54,15 @@ export function validateStudioSeo(value: unknown): { seo: StudioSeo | null; issu
   const seo: StudioSeo = {
     title: string("title"), slug: string("slug"), seoTitle: string("seoTitle"),
     seoDescription: string("seoDescription"), description: string("description"),
+    artworkDetails: string("artworkDetails"), colorIdeas: string("colorIdeas"), creativeActivity: string("creativeActivity"),
+    coloringBenefits: string("coloringBenefits"), printingGuide: string("printingGuide"),
     primaryKeyword: string("primaryKeyword"), keywords: strings("keywords"), altText: string("altText"),
     category: string("category"), tags: strings("tags"), ageRange: string("ageRange"),
     difficulty: string("difficulty"), faqs,
   };
   for (const rule of SEO_RULES) {
     const count = fieldCount(seo[rule.key], rule.unit);
-    if (count < rule.min || count > rule.max) issues.push(`${rule.label}: ${count}; expected ${rule.min}–${rule.max} ${rule.unit}.`);
+    if ((!("optional" in rule) || !rule.optional || count > 0) && (count < rule.min || count > rule.max)) issues.push(`${rule.label}: ${count}; expected ${rule.min}–${rule.max} ${rule.unit}.`);
   }
   if (!/Coloring Pages?$/.test(seo.title)) issues.push("Page title must end in Coloring Page or Coloring Pages.");
   if (!seo.seoTitle.endsWith("| CraftColoring")) issues.push("SEO title must end in | CraftColoring.");
