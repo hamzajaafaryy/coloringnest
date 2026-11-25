@@ -139,10 +139,22 @@ export default async function ColoringDetail({ page, printable = false }: { page
         </>}
 
         <SocialShare title={page.title} url={canonicalUrl} imageUrl={image || undefined} />
-        {page.description && <section className="space-y-4 rounded-3xl border border-[#eee5ef] bg-white p-5 sm:p-8 lg:px-12">
-          <h2 className="text-2xl font-black">About {isCollection ? "this coloring collection" : "this coloring picture"}</h2>
-          {page.description.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index} className="max-w-3xl text-sm leading-8 text-[#73677d] sm:text-base">{paragraph}</p>)}
+        {page.description && <section className="rounded-3xl border border-[#eee5ef] bg-white p-5 sm:p-8 lg:px-12">
+          <h2 className="text-xl font-black sm:text-2xl">🎨 Meet Your New Coloring Adventure!</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-8 text-[#73677d] sm:text-base">{page.description}</p>
         </section>}
+        {[
+          { title: "🔍 Look Closer! What is in This Picture?", content: page.artworkDetails },
+          { title: "🌈 Let Us Pick Some Colors!", content: page.colorIdeas },
+          { title: "✨ Little Artist, Big Ideas!", content: page.creativeActivity },
+          { title: "🧠 More Than Fun! What Kids Can Practice", content: page.coloringBenefits },
+          { title: "🖨️ Ready to Print? Let Us Get Coloring!", content: page.printingGuide },
+        ].filter(section => section.content?.trim()).map(section => (
+          <section key={section.title} className="rounded-3xl border border-[#eee5ef] bg-white p-5 sm:p-8 lg:px-12">
+            <h2 className="text-xl font-black sm:text-2xl">{section.title}</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-8 text-[#73677d] sm:text-base">{section.content}</p>
+          </section>
+        ))}
         <FAQ items={faqs.length ? faqs : fallbackFaqs} title="Before you get your crayons" />
         <RelatedColoringPages pages={related} title="More pictures to color" />
       </article>
