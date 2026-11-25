@@ -2,7 +2,7 @@ export const STUDIO_CATEGORIES = ["Animal", "Christmas", "Adults", "Dinosaur", "
 
 export interface StudioSeo {
   title: string; slug: string; seoTitle: string; seoDescription: string;
-  description: string; primaryKeyword: string; keywords: string[];
+  description: string; artworkDetails: string; colorIdeas: string; creativeActivity: string; coloringBenefits: string; printingGuide: string; primaryKeyword: string; keywords: string[];
   altText: string; category: string; tags: string[]; ageRange: string;
   difficulty: string; faqs: { question: string; answer: string }[];
 }
@@ -12,7 +12,12 @@ export const SEO_RULES = [
   { key: "slug", label: "URL slug", min: 15, max: 85, unit: "chars" },
   { key: "seoTitle", label: "SEO title", min: 45, max: 60, unit: "chars" },
   { key: "seoDescription", label: "Meta description / card summary", min: 140, max: 160, unit: "chars" },
-  { key: "description", label: "Article", min: 250, max: 350, unit: "words" },
+  { key: "description", label: "Introduction", min: 80, max: 120, unit: "words" },
+  { key: "artworkDetails", label: "Artwork details", min: 35, max: 90, unit: "words" },
+  { key: "colorIdeas", label: "Color ideas", min: 35, max: 90, unit: "words" },
+  { key: "creativeActivity", label: "Creative activity", min: 35, max: 90, unit: "words" },
+  { key: "coloringBenefits", label: "Coloring benefits", min: 25, max: 70, unit: "words" },
+  { key: "printingGuide", label: "Printing guide", min: 25, max: 70, unit: "words" },
   { key: "primaryKeyword", label: "Primary search phrase", min: 3, max: 7, unit: "words" },
   { key: "keywords", label: "Related search phrases", min: 4, max: 6, unit: "items" },
   { key: "altText", label: "Descriptive image alt text", min: 20, max: 180, unit: "chars" },
@@ -49,6 +54,8 @@ export function validateStudioSeo(value: unknown): { seo: StudioSeo | null; issu
   const seo: StudioSeo = {
     title: string("title"), slug: string("slug"), seoTitle: string("seoTitle"),
     seoDescription: string("seoDescription"), description: string("description"),
+    artworkDetails: string("artworkDetails"), colorIdeas: string("colorIdeas"), creativeActivity: string("creativeActivity"),
+    coloringBenefits: string("coloringBenefits"), printingGuide: string("printingGuide"),
     primaryKeyword: string("primaryKeyword"), keywords: strings("keywords"), altText: string("altText"),
     category: string("category"), tags: strings("tags"), ageRange: string("ageRange"),
     difficulty: string("difficulty"), faqs,
