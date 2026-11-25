@@ -48,7 +48,15 @@ export default async function EditColoringPage({ params }: { params: Promise<{ i
 
         <CollectionSheetsField initial={sheets} />
 
-        <TextArea label="Description" name="description" defaultValue={page.description} rows={5} />
+        <section className="space-y-5 rounded-2xl border border-slate-200 p-5">
+          <h2 className="text-lg font-bold">Page content sections</h2>
+          <TextArea label="🎨 Meet Your New Coloring Adventure! (Introduction)" name="description" defaultValue={page.description} rows={4} />
+          <TextArea label="🔍 What's in This Picture? (Artwork details)" name="artworkDetails" defaultValue={page.artworkDetails} rows={3} />
+          <TextArea label="🌈 Let's Pick Some Colors! (Color ideas)" name="colorIdeas" defaultValue={page.colorIdeas} rows={3} />
+          <TextArea label="✨ Little Artist, Big Ideas! (Creative activity)" name="creativeActivity" defaultValue={page.creativeActivity} rows={3} />
+          <TextArea label="🧠 What Kids Can Practice (Optional)" name="coloringBenefits" defaultValue={page.coloringBenefits} rows={3} />
+          <TextArea label="🖨️ Ready to Print? (Printing guide)" name="printingGuide" defaultValue={page.printingGuide} rows={3} />
+        </section>
         <TextArea label="SVG content" name="svgContent" defaultValue={page.svgContent} rows={8} />
 
         <section className="grid gap-5 md:grid-cols-3">
