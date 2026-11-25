@@ -18,6 +18,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <head>
         <meta name="p:domain_verify" content="bbbe48b03c9158fcd59c147d768cbfed" />
+        <meta name="monetag" content="e80a718f4d4fc832dedb11188c75c083" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteSchema) }}
