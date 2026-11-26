@@ -20,10 +20,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const artwork = pinArtworkForSheet(item, "cover");
     if (!artwork.imageUrl) return new Response("Image not found", { status: 404 });
 
-    const seo = makePinSeo(item, SITE_CONFIG.domain, "editorial");
+    const seo = makePinSeo(item, SITE_CONFIG.domain, "papercut);
     const image = await fetchPinterestArtworkImage(artwork.imageUrl);
     const rendered = await renderPinterestPin({
-      template: "editorial",
+      template: "papercut,
       headline: seo.headline,
       category: item.categoryName,
       image,
