@@ -2,14 +2,6 @@ import sharp from "sharp";
 import { isPinTemplate, type PinTemplate } from "./pinterest-studio.ts";
 import { letterPaths, titleLetterPaths } from "./pinterest-lettering.ts";
 
-const STYLES = {
-  editorial: { bg: "#0E7C86", ink: "#0B2F33", accent: "#0B6B73", secondary: "#FFD95A", soft: "#12929B", paper: "#FFFFFF", label: "#FFD95A" },
-  lilac: { bg: "#EEDFFF", ink: "#52277E", accent: "#8248B7", secondary: "#FFD968", soft: "#FBF3FF", paper: "#FFFFFF", label: "#FFDF6A" },
-  sunshine: { bg: "#FFF0B9", ink: "#49326C", accent: "#EB8C50", secondary: "#9356B9", soft: "#FFF9E8", paper: "#FFFFFF", label: "#FFFFFF" },
-  midnight: { bg: "#2D2345", ink: "#FFF8F0", accent: "#EAC670", secondary: "#AD8AE1", soft: "#47385F", paper: "#FFFFFF", label: "#47385F" },
-  papercut: { bg: "#DDF3EB", ink: "#1E5963", accent: "#327980", secondary: "#F2BA52", soft: "#FFF5E7", paper: "#FFFFFF", label: "#FFFFFF" },
-} as const;
-
 type RenderOptions = {
   template: PinTemplate;
   headline: string;
