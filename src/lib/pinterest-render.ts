@@ -2,14 +2,6 @@ import sharp from "sharp";
 import { isPinTemplate, type PinTemplate } from "./pinterest-studio.ts";
 import { letterPaths, titleLetterPaths } from "./pinterest-lettering.ts";
 
-const STYLES = {
-  editorial: { bg: "#FFF8EE", ink: "#56306F", accent: "#9B64BE", secondary: "#EFC955", soft: "#F4E2F6", paper: "#FFFFFF", label: "#FBEEFF" },
-  lilac: { bg: "#EEDFFF", ink: "#52277E", accent: "#8248B7", secondary: "#FFD968", soft: "#FBF3FF", paper: "#FFFFFF", label: "#FFDF6A" },
-  sunshine: { bg: "#FFF0B9", ink: "#49326C", accent: "#EB8C50", secondary: "#9356B9", soft: "#FFF9E8", paper: "#FFFFFF", label: "#FFFFFF" },
-  midnight: { bg: "#2D2345", ink: "#FFF8F0", accent: "#EAC670", secondary: "#AD8AE1", soft: "#47385F", paper: "#FFFFFF", label: "#47385F" },
-  papercut: { bg: "#DDF3EB", ink: "#1E5963", accent: "#327980", secondary: "#F2BA52", soft: "#FFF5E7", paper: "#FFFFFF", label: "#FFFFFF" },
-} as const;
-
 type RenderOptions = {
   template: PinTemplate;
   headline: string;
@@ -54,31 +46,63 @@ export async function renderPinterestPin({
   if (!metadata.width || !metadata.height || !["png", "jpeg", "webp", "avif"].includes(metadata.format || "")) {
     throw new Error("A PNG, JPEG, WebP or AVIF artwork image is required");
   }
-  const c = STYLES[template];
-  const title = headline.replace(/\s+/g, " ").trim().slice(0, 90) || "Free Printable Coloring Page";
-  const headerLines = titleLetterPaths(title, c.ink);
-  const cat = (category || "Coloring Pages").trim().slice(0, 50);
-  const artX = 116, artY = 491, artW = 768, artH = 808;
-  const paperTop = template === "papercut"
-    ? `<rect x="84" y="463" width="850" height="861" rx="26" fill="#68B5AF" transform="rotate(2 500 880)" opacity=".5"/>`
-    : "";
+
+  // One consistent CraftColoring identity, adapted from the supplied Baby Hippo reference.
+  const bg = "#0E7C86";
+  const deep = "#0B2F33";
+  const teal = "#12929B";
+  const yellow = "#FFD95A";
+  const coral = "#FF6B4A";
+  const white = "#FFFFFF";
+  const title = headline.replace(/\\s+/g, " ").trim().slice(0, 76) || "Free Printable Coloring Page";
+  const rawCategory = (category || "Coloring").trim().replace(/\\s+coloring pages?$/i, "");
+  const categoryLabel = (rawCategory || "Coloring").slice(0, 34) + " Coloring Pages";
+  const titlePaths = titleLetterPaths(title, white);
+  const titleShadow = titleLetterPaths(title, deep);
+  const artW = 540, artH = 610;
+  const artX = 230, artY = 560;
+  const cat = categoryLabel.replace(/\\s+/g, " ").slice(0, 42);
+
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
-    <rect width="1000" height="1500" fill="${c.bg}"/>
-    ${decorate(template, c.accent, c.secondary)}
-    <rect x="293" y="46" width="414" height="56" rx="28" fill="${c.label}"/>
-    ${letterPaths("FREE PRINTABLE",{x:500,y:83,fontSize:23,maxWidth:380,color:template === "midnight" ? "#FFF7E6" : c.accent,align:"center"})}
-    ${headerLines}
-    ${paperTop}
-    <rect x="78" y="457" width="844" height="878" rx="31" fill="#352C42" opacity=".10"/>
-    <rect x="72" y="451" width="856" height="874" rx="29" fill="${c.paper}" stroke="#EDE3EB" stroke-width="5"/>
-    <rect x="104" y="480" width="792" height="832" rx="13" fill="#FFFFFF"/>
-    <rect x="68" y="1363" width="864" height="1" fill="${c.accent}" opacity=".26"/>
-    ${letterPaths("CraftColoring",{x:72,y:1423,fontSize:30,maxWidth:490,color:c.ink})}
-    ${letterPaths("FREE TO PRINT · FUN TO COLOR",{x:72,y:1460,fontSize:19,maxWidth:470,color:c.ink})}
-    ${letterPaths(cat.slice(0, 34),{x:929,y:1414,fontSize:19,maxWidth:330,color:c.ink,align:"right"})}
-    ${letterPaths("craftcoloring.com",{x:929,y:1456,fontSize:20,maxWidth:330,color:c.ink,align:"right"})}
+    <rect width="1000" height="1500" fill="${bg}"/>
+    <ellipse cx="500" cy="20" rx="520" ry="350" fill="${teal}"/>
+    <circle cx="-5" cy="625" r="70" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="8"/>
+    <circle cx="74" cy="740" r="32" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="6"/>
+    <circle cx="1010" cy="1020" r="60" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="8"/>
+    <circle cx="920" cy="1160" r="25" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="6"/>
+    <path d="M92 88l13 34 34 13-34 13-13 34-13-34-34-13 34-13z" fill="${yellow}"/>
+    <path d="M904 328l10 25 25 10-25 10-10 25-10-25-25-10 25-10z" fill="${coral}"/>
+    <path d="M80 1200l11 27 27 11-27 11-11 27-11-27-27-11 27-11z" fill="${yellow}"/>
+
+    <rect x="286" y="54" width="428" height="58" rx="29" fill="${yellow}" transform="rotate(-2 500 83)"/>
+    ${letterPaths("PRINTABLE COLORING PAGE",{x:500,y:92,fontSize:23,maxWidth:390,color:deep,align:"center"})}
+    <g transform="translate(0 7)">${titleShadow}</g>
+    ${titlePaths}
+    ${letterPaths(cat,{x:500,y:442,fontSize:43,maxWidth:840,color:yellow,align:"center"})}
+
+    <rect x="208" y="540" width="600" height="665" rx="44" fill="${yellow}" />
+    <rect x="190" y="520" width="600" height="665" rx="44" fill="${white}" stroke="${deep}" stroke-width="7"/>
+    <rect x="216" y="546" width="548" height="613" rx="24" fill="#FFFFFF"/>
+    <circle cx="814" cy="496" r="87" fill="${coral}" stroke="${deep}" stroke-width="7"/>
+    <g transform="translate(814 484)">
+      ${letterPaths("FREE",{x:0,y:0,fontSize:53,maxWidth:145,color:deep,align:"center"})}
+      ${letterPaths("TO PRINT",{x:0,y:38,fontSize:23,maxWidth:140,color:deep,align:"center"})}
+    </g>
+
+    <rect x="160" y="1220" width="300" height="58" rx="29" fill="${deep}"/>
+    ${letterPaths("PRINT AT HOME",{x:310,y:1257,fontSize:22,maxWidth:260,color:white,align:"center"})}
+    <rect x="478" y="1220" width="362" height="58" rx="29" fill="${deep}"/>
+    ${letterPaths("LETTER & A4",{x:659,y:1257,fontSize:22,maxWidth:320,color:white,align:"center"})}
+
+    <rect x="56" y="1332" width="888" height="116" rx="58" fill="${white}" stroke="${deep}" stroke-width="6"/>
+    <rect x="56" y="1440" width="888" height="8" rx="4" fill="${deep}"/>
+    ${letterPaths("CraftColoring",{x:94,y:1388,fontSize:38,maxWidth:390,color:deep})}
+    ${letterPaths(categoryLabel.slice(0,30),{x:94,y:1423,fontSize:20,maxWidth:390,color:"#0B6B73"})}
+    <rect x="622" y="1356" width="292" height="66" rx="33" fill="${coral}"/>
+    ${letterPaths("craftcoloring.com",{x:768,y:1399,fontSize:25,maxWidth:265,color:"#2A0F00",align:"center"})}
   </svg>`;
-  // Keep original pixels: shrink large artwork to fit, but never upscale small artwork.
+
+  // Keep the original coloring artwork intact; only scale it to fit the reference frame.
   const { data: illustration, info: illustrationInfo } = await sharp(source, {limitInputPixels: 40_000_000})
     .rotate().flatten({ background: "#FFFFFF" })
     .resize(artW, artH, { fit: "contain", background: "#FFFFFF", withoutEnlargement: true })
