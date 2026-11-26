@@ -1,14 +1,7 @@
 import sharp from "sharp";
-import { isPinTemplate, type PinTemplate } from "./pinterest-studio.ts";
-import { letterPaths, titleLetterPaths } from "./pinterest-lettering.ts";
-
-const STYLES = {
-  editorial: { bg: "#FFF8EE", ink: "#56306F", accent: "#9B64BE", secondary: "#EFC955", soft: "#F4E2F6", paper: "#FFFFFF", label: "#FBEEFF" },
-  lilac: { bg: "#EEDFFF", ink: "#52277E", accent: "#8248B7", secondary: "#FFD968", soft: "#FBF3FF", paper: "#FFFFFF", label: "#FFDF6A" },
-  sunshine: { bg: "#FFF0B9", ink: "#49326C", accent: "#EB8C50", secondary: "#9356B9", soft: "#FFF9E8", paper: "#FFFFFF", label: "#FFFFFF" },
-  midnight: { bg: "#2D2345", ink: "#FFF8F0", accent: "#EAC670", secondary: "#AD8AE1", soft: "#47385F", paper: "#FFFFFF", label: "#47385F" },
-  papercut: { bg: "#DDF3EB", ink: "#1E5963", accent: "#327980", secondary: "#F2BA52", soft: "#FFF5E7", paper: "#FFFFFF", label: "#FFFFFF" },
-} as const;
+import type { PinTemplate } from "./pinterest-studio.ts";
+import { letterPaths } from "./pinterest-lettering.ts";
+import { wrapPinHeadline } from "./pinterest-studio.ts";
 
 type RenderOptions = {
   template: PinTemplate;
@@ -17,76 +10,87 @@ type RenderOptions = {
   image: Buffer | Uint8Array;
 };
 
-function decorate(template: PinTemplate, accent: string, second: string): string {
-  if (template === "editorial") {
-    return `<circle cx="932" cy="105" r="130" fill="${accent}" opacity=".11"/>
-      <path d="M44 395 Q120 352 195 393" fill="none" stroke="${second}" stroke-width="13" stroke-linecap="round"/>
-      <circle cx="55" cy="1200" r="30" fill="${second}" opacity=".30"/>`;
-  }
-  if (template === "lilac") {
-    return `<circle cx="960" cy="140" r="160" fill="${second}" opacity=".65"/>
-      <path d="M30 368q53-71 106 0t104 0" fill="none" stroke="${accent}" stroke-width="12" opacity=".28"/>
-      <path d="M877 370l13 27 28 10-28 9-13 28-10-28-27-9 27-10z" fill="${second}"/>`;
-  }
-  if (template === "sunshine") {
-    return `<circle cx="920" cy="100" r="165" fill="${accent}" opacity=".13"/>
-      <path d="M55 425l13-29 13 29 29 13-29 13-13 29-13-29-29-13z" fill="${second}" opacity=".55"/>
-      <circle cx="900" cy="1350" r="60" fill="${accent}" opacity=".18"/>`;
-  }
-  if (template === "midnight") {
-    return `<circle cx="920" cy="56" r="140" fill="${accent}" opacity=".13"/>
-      <circle cx="73" cy="367" r="23" fill="${second}" opacity=".40"/>
-      <path d="M880 384l12 30 30 12-30 12-12 30-12-30-30-12 30-12z" fill="${accent}" opacity=".74"/>`;
-  }
-  return `<circle cx="920" cy="118" r="148" fill="${second}" opacity=".25"/>
-    <path d="M34 364q56-26 108 14t100-4" fill="none" stroke="${accent}" stroke-width="13" opacity=".23"/>
-    <path d="M915 380q-22-52-55 0 33 29 55 0zm0 0q22-52 55 0-33 29-55 0z" fill="${accent}" opacity=".45"/>`;
-}
-
-/** Produce a real 1000×1500 PNG. The original drawing is composited, never redrawn. */
+/**
+ * One fixed CraftColoring Pinterest identity for every Pin.
+ * The original artwork pixels are composited unchanged; only the presentation
+ * frame and surrounding brand artwork are generated here.
+ */
 export async function renderPinterestPin({
-  template, headline, category, image,
+  headline, category, image,
 }: RenderOptions): Promise<Buffer> {
-  if (!isPinTemplate(template)) throw new Error("Invalid Pinterest template");
   const source = Buffer.from(image);
   if (!source.length || source.length > 18 * 1024 * 1024) throw new Error("Artwork image is too large");
   const metadata = await sharp(source, { limitInputPixels: 40_000_000, failOn: "error" }).metadata();
   if (!metadata.width || !metadata.height || !["png", "jpeg", "webp", "avif"].includes(metadata.format || "")) {
     throw new Error("A PNG, JPEG, WebP or AVIF artwork image is required");
   }
-  const c = STYLES[template];
-  const title = headline.replace(/\s+/g, " ").trim().slice(0, 90) || "Free Printable Coloring Page";
-  const headerLines = titleLetterPaths(title, c.ink);
-  const cat = (category || "Coloring Pages").trim().slice(0, 50);
-  const artX = 116, artY = 491, artW = 768, artH = 808;
-  const paperTop = template === "papercut"
-    ? `<rect x="84" y="463" width="850" height="861" rx="26" fill="#68B5AF" transform="rotate(2 500 880)" opacity=".5"/>`
-    : "";
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
-    <rect width="1000" height="1500" fill="${c.bg}"/>
-    ${decorate(template, c.accent, c.secondary)}
-    <rect x="293" y="46" width="414" height="56" rx="28" fill="${c.label}"/>
-    ${letterPaths("FREE PRINTABLE",{x:500,y:83,fontSize:23,maxWidth:380,color:template === "midnight" ? "#FFF7E6" : c.accent,align:"center"})}
-    ${headerLines}
-    ${paperTop}
-    <rect x="78" y="457" width="844" height="878" rx="31" fill="#352C42" opacity=".10"/>
-    <rect x="72" y="451" width="856" height="874" rx="29" fill="${c.paper}" stroke="#EDE3EB" stroke-width="5"/>
-    <rect x="104" y="480" width="792" height="832" rx="13" fill="#FFFFFF"/>
-    <rect x="68" y="1363" width="864" height="1" fill="${c.accent}" opacity=".26"/>
-    ${letterPaths("CraftColoring",{x:72,y:1423,fontSize:30,maxWidth:490,color:c.ink})}
-    ${letterPaths("FREE TO PRINT · FUN TO COLOR",{x:72,y:1460,fontSize:19,maxWidth:470,color:c.ink})}
-    ${letterPaths(cat.slice(0, 34),{x:929,y:1414,fontSize:19,maxWidth:330,color:c.ink,align:"right"})}
-    ${letterPaths("craftcoloring.com",{x:929,y:1456,fontSize:20,maxWidth:330,color:c.ink,align:"right"})}
-  </svg>`;
-  // Keep original pixels: shrink large artwork to fit, but never upscale small artwork.
-  const { data: illustration, info: illustrationInfo } = await sharp(source, {limitInputPixels: 40_000_000})
+
+  const teal = "#138F98";
+  const tealDark = "#0B2F33";
+  const tealLight = "#20A0A6";
+  const yellow = "#FFD95A";
+  const orange = "#FF6B4A";
+  const title = headline.replace(/\\s+/g, " ").trim().slice(0, 90) || "Free Printable Coloring Page";
+  const lines = wrapPinHeadline(title.replace(/\\s*\\|\\s*Free Printable$/i, ""), 20, 3);
+  const titleSize = lines.length >= 3 ? 76 : 94;
+  const titleStart = lines.length >= 3 ? 184 : lines.length === 2 ? 218 : 265;
+  const titleMarkup = lines.map((line, index) => {
+    const y = titleStart + index * (titleSize + 7);
+    return letterPaths(line, { x: 500, y: y + 8, fontSize: titleSize, maxWidth: 850, color: tealDark, align: "center" }) +
+      letterPaths(line, { x: 500, y, fontSize: titleSize, maxWidth: 850, color: "#FFFFFF", align: "center" });
+  }).join("");
+  const cat = (category || "Coloring Pages").replace(/\\s+/g, " ").trim().slice(0, 34);
+  const subtitleY = lines.length >= 3 ? 420 : lines.length === 2 ? 405 : 390;
+  const subtitle = letterPaths(cat, { x: 500, y: subtitleY, fontSize: 47, maxWidth: 820, color: yellow, align: "center" });
+
+  const cardWidth = 650, cardHeight = 820;
+  const artWidth = 590, artHeight = 760;
+  const { data: illustration, info } = await sharp(source, { limitInputPixels: 40_000_000 })
     .rotate().flatten({ background: "#FFFFFF" })
-    .resize(artW, artH, { fit: "contain", background: "#FFFFFF", withoutEnlargement: true })
+    .resize(artWidth, artHeight, { fit: "contain", background: "#FFFFFF", withoutEnlargement: true })
     .png().toBuffer({ resolveWithObject: true });
-  const left = artX + Math.round((artW - illustrationInfo.width) / 2);
-  const top = artY + Math.round((artH - illustrationInfo.height) / 2);
-  return sharp(Buffer.from(svg))
-    .composite([{ input: illustration, left, top }])
+  const cardSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${cardWidth}" height="${cardHeight}" viewBox="0 0 ${cardWidth} ${cardHeight}">
+    <rect x="8" y="8" width="634" height="804" rx="42" fill="#FFFFFF" stroke="${tealDark}" stroke-width="7"/>
+    <rect x="26" y="25" width="598" height="770" rx="25" fill="#FFFFFF"/>
+  </svg>`);
+  const cardLeft = 30 + Math.round((artWidth - info.width) / 2);
+  const cardTop = 30 + Math.round((artHeight - info.height) / 2);
+  const card = await sharp(cardSvg).composite([{ input: illustration, left: cardLeft, top: cardTop }])
+    .png().toBuffer();
+  const tiltedCard = await sharp(card).rotate(-2, { background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
+
+  const footerCategory = cat.length ? cat + " Coloring Pages" : "Free Coloring Pages";
+  const backgroundSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
+    <rect width="1000" height="1500" fill="${teal}"/>
+    <path d="M0 0H1000V360Q770 510 500 465Q180 420 0 270Z" fill="${tealLight}" opacity=".48"/>
+    <path d="M92 70l13 29 30 13-30 12-13 30-12-30-30-12 30-13z" fill="${yellow}"/>
+    <path d="M920 330l10 23 24 10-24 10-10 24-10-24-24-10 24-10z" fill="${orange}"/>
+    <path d="M80 1190l13 29 30 13-30 12-13 30-12-30-30-12 30-13z" fill="${yellow}"/>
+    <circle cx="18" cy="640" r="72" fill="none" stroke="#72C4C8" stroke-width="9" opacity=".85"/>
+    <circle cx="92" cy="735" r="35" fill="none" stroke="#72C4C8" stroke-width="8" opacity=".8"/>
+    <circle cx="970" cy="1060" r="65" fill="none" stroke="#72C4C8" stroke-width="9" opacity=".8"/>
+    <circle cx="925" cy="1150" r="29" fill="none" stroke="#72C4C8" stroke-width="8" opacity=".8"/>
+
+    <rect x="224" y="58" width="552" height="62" rx="31" fill="${yellow}" transform="rotate(-2 500 89)"/>
+    ${letterPaths("FREE PRINTABLE COLORING PAGE",{x:500,y:99,fontSize:24,maxWidth:510,color:tealDark,align:"center"})}
+    ${titleMarkup}
+    ${subtitle}
+
+    <rect x="55" y="1320" width="890" height="112" rx="56" fill="${tealDark}" opacity=".95"/>
+    <rect x="60" y="1310" width="880" height="112" rx="56" fill="#FFFFFF" stroke="${tealDark}" stroke-width="6"/>
+    ${letterPaths("CraftColoring",{x:101,y:1373,fontSize:38,maxWidth:430,color:tealDark})}
+    ${letterPaths(footerCategory,{x:102,y:1404,fontSize:20,maxWidth:430,color:"#0B6B73"})}
+    <rect x="610" y="1330" width="293" height="72" rx="36" fill="${orange}"/>
+    ${letterPaths("craftcoloring.com",{x:756,y:1377,fontSize:27,maxWidth:270,color:"#2A0F00",align:"center"})}
+
+    <circle cx="758" cy="492" r="91" fill="${tealDark}"/>
+    <circle cx="758" cy="484" r="87" fill="${orange}" stroke="${tealDark}" stroke-width="7"/>
+    ${letterPaths("FREE",{x:758,y:488,fontSize:53,maxWidth:145,color:tealDark,align:"center"})}
+    ${letterPaths("TO PRINT",{x:758,y:526,fontSize:25,maxWidth:145,color:tealDark,align:"center"})}
+  </svg>`);
+
+  return sharp(backgroundSvg)
+    .composite([{ input: tiltedCard, left: 175, top: 465 }])
     .png({ compressionLevel: 9, effort: 7 }).toBuffer();
 }
 
@@ -99,7 +103,7 @@ export async function fetchPinterestArtworkImage(imageUrl: string): Promise<Buff
   if (base.protocol !== "https:" || image.protocol !== "https:" ||
       image.origin !== base.origin || image.username || image.password ||
       image.search || image.hash || !image.pathname.startsWith(prefix) ||
-      !/\.(png|jpe?g|webp|avif)$/i.test(image.pathname)) {
+      !/\\.(png|jpe?g|webp|avif)$/i.test(image.pathname)) {
     throw new Error("Artwork must be a public CraftColoring image");
   }
   const response = await fetch(image.href, {
