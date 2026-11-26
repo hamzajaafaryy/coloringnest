@@ -33,7 +33,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       headers: {
         "Content-Type": "image/png",
         "Content-Length": String(rendered.length),
-        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+        "Cache-Control": "no-store, max-age=0, must-revalidate",
         "X-Content-Type-Options": "nosniff",
       },
     });
