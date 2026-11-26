@@ -9,32 +9,6 @@ type RenderOptions = {
   image: Buffer | Uint8Array;
 };
 
-function decorate(template: PinTemplate, accent: string, second: string): string {
-  if (template === "editorial") {
-    return `<circle cx="932" cy="105" r="130" fill="${accent}" opacity=".11"/>
-      <path d="M44 395 Q120 352 195 393" fill="none" stroke="${second}" stroke-width="13" stroke-linecap="round"/>
-      <circle cx="55" cy="1200" r="30" fill="${second}" opacity=".30"/>`;
-  }
-  if (template === "lilac") {
-    return `<circle cx="960" cy="140" r="160" fill="${second}" opacity=".65"/>
-      <path d="M30 368q53-71 106 0t104 0" fill="none" stroke="${accent}" stroke-width="12" opacity=".28"/>
-      <path d="M877 370l13 27 28 10-28 9-13 28-10-28-27-9 27-10z" fill="${second}"/>`;
-  }
-  if (template === "sunshine") {
-    return `<circle cx="920" cy="100" r="165" fill="${accent}" opacity=".13"/>
-      <path d="M55 425l13-29 13 29 29 13-29 13-13 29-13-29-29-13z" fill="${second}" opacity=".55"/>
-      <circle cx="900" cy="1350" r="60" fill="${accent}" opacity=".18"/>`;
-  }
-  if (template === "midnight") {
-    return `<circle cx="920" cy="56" r="140" fill="${accent}" opacity=".13"/>
-      <circle cx="73" cy="367" r="23" fill="${second}" opacity=".40"/>
-      <path d="M880 384l12 30 30 12-30 12-12 30-12-30-30-12 30-12z" fill="${accent}" opacity=".74"/>`;
-  }
-  return `<circle cx="920" cy="118" r="148" fill="${second}" opacity=".25"/>
-    <path d="M34 364q56-26 108 14t100-4" fill="none" stroke="${accent}" stroke-width="13" opacity=".23"/>
-    <path d="M915 380q-22-52-55 0 33 29 55 0zm0 0q22-52 55 0-33 29-55 0z" fill="${accent}" opacity=".45"/>`;
-}
-
 /** Produce a real 1000×1500 PNG. The original drawing is composited, never redrawn. */
 export async function renderPinterestPin({
   template, headline, category, image,
