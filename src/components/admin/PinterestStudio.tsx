@@ -16,11 +16,7 @@ import PinterestPublisher from "@/components/admin/PinterestPublisher";
 
 type Catalog = {items:PinArtwork[];page:number;pageCount:number;total:number};
 const LABELS: Record<PinTemplate,{title:string;tag:string;swatch:string}> = {
-  editorial:{title:"Editorial",tag:"Timeless · Cream",swatch:"from-amber-50 via-white to-violet-200"},
-  lilac:{title:"Lilac Pop",tag:"Bright · Playful",swatch:"from-violet-300 via-fuchsia-100 to-yellow-200"},
-  sunshine:{title:"Sunshine",tag:"Happy · Warm",swatch:"from-yellow-200 via-amber-100 to-orange-200"},
-  midnight:{title:"Midnight",tag:"Bold · Contrast",swatch:"from-slate-900 via-violet-900 to-indigo-600"},
-  papercut:{title:"Paper Cut",tag:"Fresh · Artistic",swatch:"from-emerald-100 via-teal-100 to-orange-100"},
+  editorial:{title:"CraftColoring Signature",tag:"Turquoise · Yellow · Coral",swatch:"from-[#0E7C86] via-[#12929B] to-[#FFD95A]"},
 };
 const ORIGIN = "https://www.craftcoloring.com";
 const MAX_BULK = 8;
