@@ -30,7 +30,6 @@ export async function GET(_request: Request, { params }: RouteContext) {
     });
   }
 
-  const sourceCategoryIds = category?.sourceIds;
   const conditions = [
     eq(coloringPages.isPublished, true),
     isNotNull(coloringPages.imageUrl),
@@ -38,8 +37,8 @@ export async function GET(_request: Request, { params }: RouteContext) {
     isNotNull(categories.slug),
   ];
 
-  if (sourceCategoryIds) {
-    conditions.push(inArray(coloringPages.categoryId, sourceCategoryIds));
+  if (category) {
+    conditions.push(inArray(coloringPages.categoryId, category.sourceIds));
   }
 
   const rows = await db
@@ -51,6 +50,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
       description: coloringPages.description,
       seoDescription: coloringPages.seoDescription,
       altText: coloringPages.altText,
+      categoryId: coloringPages.categoryId,
       categoryName: categories.name,
       categorySlug: categories.slug,
       publishedAt: coloringPages.publishedAt,
@@ -71,18 +71,15 @@ export async function GET(_request: Request, { params }: RouteContext) {
   // Pinterest processes feed items oldest-first. Keep the newest 50 and
   // emit them oldest-first so newly published pages are discovered correctly.
   const items = rows.reverse().map((row) => {
-    const canonical = canonicalCategoryById.get(row.categorySlug ? (
-      catalog.find((entry) => entry.sourceIds.includes(
-        // Resolve the database category through its joined slug below.
-        entry.sourceIds[0] ?? -1
-      ))?.sourceIds[0] ?? -1
-    ) : -1);
+    const canonical = row.categoryId === null
+      ? undefined
+      : canonicalCategoryById.get(row.categoryId);
 
     return {
       ...row,
       slug: row.slug!,
-      categoryName: category?.name || row.categoryName,
-      categorySlug: category?.slug || row.categorySlug,
+      categoryName: category?.name || canonical?.name || row.categoryName,
+      categorySlug: category?.slug || canonical?.slug || row.categorySlug,
       sheets: [],
     };
   });
