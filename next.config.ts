@@ -35,7 +35,14 @@ const nextConfig: NextConfig = {
     "/api/admin/pinterest/actions": ["./node_modules/@img/sharp-*/**/*"],
     "/api/cron/pinterest": ["./node_modules/@img/sharp-*/**/*"],
   },
-  async rewrites() {\n    return {\n      beforeFiles: [{ source: "/feed/:category.xml", destination: "/feed/:category" }],\n      afterFiles: [],\n      fallback: [],\n    };\n  },\n  async redirects() {
+  async rewrites() {
+    return {
+      beforeFiles: [{ source: "/feed/:category.xml", destination: "/feed/:category" }],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
+  async redirects() {
     return [
       ...siteRedirectRules(resolveSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL), process.env.SITE_REDIRECT_FROM_HOSTS),
       ...categoryRedirectRules(),
