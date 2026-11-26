@@ -59,7 +59,7 @@ export async function renderPinterestPin({
     .png().toBuffer();
   const tiltedCard = await sharp(card).rotate(-2, { background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
 
-  const footerCategory = cat.length ? cat + " Coloring Pages" : "Free Coloring Pages";
+  const footerCategory = cat.length ? (/coloring pages?$/i.test(cat) ? cat : cat + " Coloring Pages") : "Free Coloring Pages";
   const backgroundSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
     <rect width="1000" height="1500" fill="${teal}"/>
     <path d="M0 0H1000V360Q770 510 500 465Q180 420 0 270Z" fill="${tealLight}" opacity=".48"/>
@@ -83,14 +83,16 @@ export async function renderPinterestPin({
     <rect x="610" y="1330" width="293" height="72" rx="36" fill="${orange}"/>
     ${letterPaths("craftcoloring.com",{x:756,y:1377,fontSize:27,maxWidth:270,color:"#2A0F00",align:"center"})}
 
+  </svg>`);
+
+  const badgeSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
     <circle cx="758" cy="492" r="91" fill="${tealDark}"/>
     <circle cx="758" cy="484" r="87" fill="${orange}" stroke="${tealDark}" stroke-width="7"/>
     ${letterPaths("FREE",{x:758,y:488,fontSize:53,maxWidth:145,color:tealDark,align:"center"})}
     ${letterPaths("TO PRINT",{x:758,y:526,fontSize:25,maxWidth:145,color:tealDark,align:"center"})}
   </svg>`);
-
   return sharp(backgroundSvg)
-    .composite([{ input: tiltedCard, left: 175, top: 465 }])
+    .composite([{ input: tiltedCard, left: 175, top: 465 }, { input: badgeSvg }])
     .png({ compressionLevel: 9, effort: 7 }).toBuffer();
 }
 
