@@ -30,8 +30,8 @@ export async function renderPinterestPin({
   const tealLight = "#20A0A6";
   const yellow = "#FFD95A";
   const orange = "#FF6B4A";
-  const title = headline.replace(/\\s+/g, " ").trim().slice(0, 90) || "Free Printable Coloring Page";
-  const lines = wrapPinHeadline(title.replace(/\\s*\\|\\s*Free Printable$/i, ""), 20, 3);
+  const title = headline.replace(/\s+/g, " ").trim().slice(0, 90) || "Free Printable Coloring Page";
+  const lines = wrapPinHeadline(title.replace(/\s*\\|\s*Free Printable$/i, ""), 20, 3);
   const titleSize = lines.length >= 3 ? 76 : 94;
   const titleStart = lines.length >= 3 ? 184 : lines.length === 2 ? 218 : 265;
   const titleMarkup = lines.map((line, index) => {
@@ -39,7 +39,7 @@ export async function renderPinterestPin({
     return letterPaths(line, { x: 500, y: y + 8, fontSize: titleSize, maxWidth: 850, color: tealDark, align: "center" }) +
       letterPaths(line, { x: 500, y, fontSize: titleSize, maxWidth: 850, color: "#FFFFFF", align: "center" });
   }).join("");
-  const cat = (category || "Coloring Pages").replace(/\\s+/g, " ").trim().slice(0, 34);
+  const cat = (category || "Coloring Pages").replace(/\s+/g, " ").trim().slice(0, 34);
   const subtitleY = lines.length >= 3 ? 420 : lines.length === 2 ? 405 : 390;
   const subtitle = letterPaths(cat, { x: 500, y: subtitleY, fontSize: 47, maxWidth: 820, color: yellow, align: "center" });
 
@@ -105,7 +105,7 @@ export async function fetchPinterestArtworkImage(imageUrl: string): Promise<Buff
   if (base.protocol !== "https:" || image.protocol !== "https:" ||
       image.origin !== base.origin || image.username || image.password ||
       image.search || image.hash || !image.pathname.startsWith(prefix) ||
-      !/\\.(png|jpe?g|webp|avif)$/i.test(image.pathname)) {
+      !/\.(png|jpe?g|webp|avif)$/i.test(image.pathname)) {
     throw new Error("Artwork must be a public CraftColoring image");
   }
   const response = await fetch(image.href, {
