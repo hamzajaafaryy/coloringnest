@@ -269,12 +269,12 @@ export default function PinterestStudio(){
             <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-violet-500">Step 02 / Design</p><h2 className="mt-1 text-xl font-black">Pin canvas</h2></div>
             <span className="rounded-full bg-[#F3EDF9] px-3 py-2 text-xs font-bold text-violet-700">1000 × 1500 · PNG</span>
           </div>
-          <div className="mb-4 grid grid-cols-5 gap-2">
-            {PIN_TEMPLATES.map(key=><button type="button" key={key} aria-pressed={template===key} onClick={()=>setTemplate(key)}
-              className={`rounded-2xl border p-1.5 text-center transition ${template===key?"border-violet-600 bg-violet-50 ring-2 ring-violet-100":"border-slate-100 hover:border-violet-200"}`}>
-              <span className={`block h-12 rounded-xl bg-gradient-to-br ${LABELS[key].swatch}`}/>
-              <span className="mt-2 block truncate text-[10px] font-black sm:text-xs">{LABELS[key].title}</span>
-            </button>)}
+          <div className="mb-4 rounded-2xl border border-[#0E7C86] bg-[#E9F7F6] p-3 ring-2 ring-[#0E7C86]/10">
+            <div className="flex items-center gap-3">
+              <span className="block h-12 w-20 shrink-0 rounded-xl bg-gradient-to-br from-[#0E7C86] via-[#12929B] to-[#FFD95A]"/>
+              <span className="min-w-0"><span className="block text-sm font-black text-[#0B2F33]">CraftColoring Signature</span><span className="mt-1 block text-xs text-[#0E7C86]">Turquoise · Yellow · Coral</span></span>
+              <span className="ml-auto rounded-full bg-[#0E7C86] px-3 py-1 text-[10px] font-black uppercase tracking-wide text-white">Active</span>
+            </div>
           </div>
           {active && active.sheets.length>0 && <div className="mb-4">
             <label htmlFor="pinterest-sheet" className="mb-2 block text-xs font-bold text-slate-600">Artwork inside the collection</label>
@@ -283,8 +283,8 @@ export default function PinterestStudio(){
               {active.sheets.map(s=><option key={s.id} value={s.id}>{s.title}</option>)}
             </select>
           </div>}
-          <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden rounded-[1.75rem] bg-[radial-gradient(circle_at_40%_30%,#f9eaff,transparent_55%),#F1ECF6] p-5 sm:p-7">
-            <div className="pointer-events-none absolute -left-8 top-7 h-20 w-20 rounded-full border-8 border-violet-100"/>
+          <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden rounded-[1.75rem] bg-[radial-gradient(circle_at_40%_30%,#D7F2EF,transparent_55%),#E9F7F6] p-5 sm:p-7">
+            <div className="pointer-events-none absolute -left-8 top-7 h-20 w-20 rounded-full border-8 border-[#B8E4DF]"/>
             <div className="relative w-full max-w-[350px] overflow-hidden rounded-[1.25rem] bg-white shadow-[0_25px_65px_rgba(43,20,73,0.2)]" style={{aspectRatio:"2 / 3"}}>
               {preview && <img src={preview} alt="Live exported Pinterest Pin design preview" className="h-full w-full object-contain"/>}
               {!preview && <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-[#FFFCF5] to-[#E9D7FA] p-8 text-center"><WandSparkles size={44} className="text-violet-500"/><span className="mt-3 text-lg font-black">Select an artwork</span><span className="mt-2 text-sm text-violet-700">See the full-size pin preview here.</span></div>}
