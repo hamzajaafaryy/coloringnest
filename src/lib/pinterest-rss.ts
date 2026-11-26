@@ -5,12 +5,12 @@ export type PinterestFeedItem = PinArtwork & { publishedAt: Date | null };
 export function buildPinterestRssFeed(items: PinterestFeedItem[], siteOrigin: string, builtAt = new Date()): string {
   const entries = items.map((item) => {
     const seo = makePinSeo(item, siteOrigin, "editorial");
-    const imageUrl = new URL(`/api/pinterest/pin/${item.id}`, siteOrigin).toString();
+    const imageUrl = new URL(`/api/pinterest/pin/${item.id}?v=2`, siteOrigin).toString();
     const pubDate = (item.publishedAt || builtAt).toUTCString();
     return `<item>
       <title>${xmlEscape(seo.title)}</title>
       <link>${xmlEscape(seo.destination)}</link>
-      <guid isPermaLink="false">${xmlEscape(`craftcoloring-coloring-page-${item.id}`)}</guid>
+      <guid isPermaLink="false">${xmlEscape(`craftcoloring-coloring-page-${item.id}-v2`)}</guid>
       <pubDate>${xmlEscape(pubDate)}</pubDate>
       <description>${xmlEscape(seo.description)}</description>
       <enclosure url="${xmlEscape(imageUrl)}" type="image/png" length="0" />
