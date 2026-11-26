@@ -55,7 +55,8 @@ export async function renderPinterestPin({
   const coral = "#FF6B4A";
   const white = "#FFFFFF";
   const title = headline.replace(/\\s+/g, " ").trim().slice(0, 76) || "Free Printable Coloring Page";
-  const categoryLabel = (category || "Coloring Pages").trim().slice(0, 34) + " Coloring Pages";
+  const rawCategory = (category || "Coloring").trim().replace(/\\s+coloring pages?$/i, "");
+  const categoryLabel = (rawCategory || "Coloring").slice(0, 34) + " Coloring Pages";
   const titlePaths = titleLetterPaths(title, white);
   const titleShadow = titleLetterPaths(title, deep);
   const artW = 540, artH = 610;
