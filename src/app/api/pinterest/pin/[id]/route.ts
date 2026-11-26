@@ -20,10 +20,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const artwork = pinArtworkForSheet(item, "cover");
     if (!artwork.imageUrl) return new Response("Image not found", { status: 404 });
 
-    const seo = makePinSeo(item, SITE_CONFIG.domain, "papercut);
+    const seo = makePinSeo(item, SITE_CONFIG.domain, "papercut");
     const image = await fetchPinterestArtworkImage(artwork.imageUrl);
     const rendered = await renderPinterestPin({
-      template: "papercut,
+      template: "papercut",
       headline: seo.headline,
       category: item.categoryName,
       image,
@@ -33,7 +33,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       headers: {
         "Content-Type": "image/png",
         "Content-Length": String(rendered.length),
-        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+        "Cache-Control": "no-store, max-age=0, must-revalidate",
         "X-Content-Type-Options": "nosniff",
       },
     });
