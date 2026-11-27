@@ -1,4 +1,4 @@
-const BLOCKED_TAGS = /<\/?(?:script|iframe|object|embed|foreignObject|audio|video|image)\b[^>]*>/gi;
+const BLOCKED_TAGS = /<\/?(?:script|iframe|object|embed|foreignObject|audio|video|image|animate|animateTransform|animateMotion|set|discard|handler|link)\b[^>]*>/gi;
 const EVENT_ATTR = /\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
 const STYLE_ATTR = /\s+style\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
 const XML_BASE_ATTR = /\s+xml:base\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
