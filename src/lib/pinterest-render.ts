@@ -65,14 +65,16 @@ export async function renderPinterestPin({
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
     <rect width="1000" height="1500" fill="${c.bg}"/>
     ${decorate(template, c.accent, c.secondary)}
+    <rect x="64" y="119" width="872" height="306" rx="38" fill="${c.soft}" stroke="#FFFFFF" stroke-width="8"/>
     <rect x="293" y="46" width="414" height="56" rx="28" fill="${c.label}"/>
     ${letterPaths("FREE PRINTABLE",{x:500,y:83,fontSize:23,maxWidth:380,color:template === "midnight" ? "#FFF7E6" : c.accent,align:"center"})}
     ${headerLines}
     ${paperTop}
     <rect x="78" y="457" width="844" height="878" rx="31" fill="#352C42" opacity=".10"/>
-    <rect x="72" y="451" width="856" height="874" rx="29" fill="${c.paper}" stroke="#EDE3EB" stroke-width="5"/>
+    <rect x="72" y="451" width="856" height="874" rx="29" fill="${c.paper}" stroke="${c.accent}" stroke-opacity=".22" stroke-width="5"/>
     <rect x="104" y="480" width="792" height="832" rx="13" fill="#FFFFFF"/>
     <rect x="68" y="1363" width="864" height="1" fill="${c.accent}" opacity=".26"/>
+    <rect x="560" y="1380" width="372" height="82" rx="30" fill="${c.soft}"/>
     ${letterPaths("CraftColoring",{x:72,y:1423,fontSize:30,maxWidth:490,color:c.ink})}
     ${letterPaths("FREE TO PRINT · FUN TO COLOR",{x:72,y:1460,fontSize:19,maxWidth:470,color:c.ink})}
     ${letterPaths(cat.slice(0, 34),{x:929,y:1414,fontSize:19,maxWidth:330,color:c.ink,align:"right"})}
