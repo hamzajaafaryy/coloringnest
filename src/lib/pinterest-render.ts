@@ -87,7 +87,7 @@ export async function renderPinterestPin({
     </defs>
     <rect width="1000" height="1500" fill="${bg}"/>
     <ellipse cx="500" cy="150" rx="520" ry="350" fill="${teal}"/>
-    <circle cx="- -0" cy="630" r="70" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="8"/>
+    <circle cx="-5" cy="630" r="70" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="8"/>
     <circle cx="68" cy="732" r="32" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="6"/>
     <circle cx="1010" cy="1040" r="60" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="8"/>
     <circle cx="925" cy="1160" r="25" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="6"/>
