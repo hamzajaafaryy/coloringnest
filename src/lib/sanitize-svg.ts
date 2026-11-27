@@ -19,7 +19,7 @@ function keepInternalHref(_match: string, xlink: string | undefined, raw: string
   return ` ${xlink ? "xlink:" : ""}href="${value}"`;
 }
 
-function removeExternalUrlAttributes(_match: string, _name: string, raw: string) {
+function removeExternalUrlAttributes(_match: string, raw: string) {
   const value = attributeValue(raw);
   const urls = [...value.matchAll(URL_FUNCTION)];
   return urls.some((entry) => !String(entry[2] || "").trim().startsWith("#"))
@@ -43,7 +43,7 @@ export function sanitizeSvg(svg: string) {
   // Reject external resource loads in SVG presentation attributes such as
   // fill, stroke, filter, mask and clip-path; local url(#id) references remain.
   safe = safe.replace(
-    /\s+([a-z][a-z0-9:_.-]*)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,
+    /\s+[a-z][a-z0-9:_.-]*\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,
     removeExternalUrlAttributes
   );
 
