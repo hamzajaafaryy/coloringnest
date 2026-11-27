@@ -43,6 +43,8 @@ jobs:
       - name: Verify category aliases and studio JSON validation
         run: node --test tests/*.test.mjs
       - run: npm run typecheck
+      - name: Lint application source
+        run: npm run lint
       - name: Install browser for collection acceptance tests
         run: npx playwright install --with-deps chromium
       - name: Verify collections, PDF downloads, coloring, admin and SEO

@@ -22,7 +22,7 @@ const image=origin+'/collection-test/cat.png';
 assert.equal(Number((await db.query('select count(*) from coloring_pages')).rows[0].count),0,'This test requires an empty disposable database');
 console.log('Seeding fixtures');
 await db.query('INSERT INTO categories(name,slug) VALUES ($1,$2)', ['Animals','animals']);
-await db.query('INSERT INTO coloring_pages(title,slug,category_id,image_url,alt_text,is_published,published_at,description) VALUES ($1,$2,1,$3,$4,true,now(),$5)', ['Cute animal coloring collection','test-collection',image,'A kitten with large coloring spaces.','Three animal pictures to print or color online.']);
+await db.query('INSERT INTO coloring_pages(title,slug,category_id,image_url,alt_text,is_published,published_at,description,seo_description) VALUES ($1,$2,1,$3,$4,true,now(),$5,$6)', ['Cute animal coloring collection','test-collection',image,'A kitten with large coloring spaces.','Three animal pictures to print or color online.','Print these cute animal coloring pages for a simple creative activity at home or school.']);
 const ids=['11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222'];
 for(let i=0;i<2;i++) await db.query('INSERT INTO coloring_sheets(id,coloring_page_id,title,alt_text,image_url,sort_order) VALUES ($1,1,$2,$3,$4,$5)',[ids[i],['Happy penguin','Baby octopus'][i],['A happy penguin.','A baby octopus.'][i], origin+'/collection-test/'+['penguin.png','octopus.png'][i],i]);
 await db.query('INSERT INTO coloring_pages(title,slug,category_id,image_url,alt_text,is_published,published_at) VALUES ($1,$2,1,$3,$4,true,now())', ['Single cat','single-cat',image,'One cat.']);
@@ -86,7 +86,7 @@ try{
  assert.ok(categorySchema.mainEntity.itemListElement.every(item=>!item.item.url.endsWith('/')));
  console.log('PASS: crawlable article links, headings, lists, safe JSON-LD/HTML, article preview image, drafts, sitemap, artwork and category Schema');
  await page.goto(origin+'/admin/coloring-pages/1');assert.ok(page.url().includes('/admin/login'));
- const payload=Buffer.from(JSON.stringify({username:'fixture',exp:Date.now()+600000})).toString('base64url');const signature=createHmac('sha256','fixture-secret').update(payload).digest('hex');await context.addCookies([{name:'craftcoloring_admin',value:`${payload}.${signature}`,domain:'localhost',path:'/'}]);
+ const credentialVersion=createHmac('sha256','fixture-secret').update('fixture: fixture').digest('hex');const payload=Buffer.from(JSON.stringify({username:'fixture',credentialVersion,exp:Date.now()+600000})).toString('base64url');const signature=createHmac('sha256','fixture-secret').update(payload).digest('hex');await context.addCookies([{name:'craftcoloring_admin',value:`${payload}.${signature}`,domain:'localhost',path:'/'}]);
  await page.goto(origin+'/admin/coloring-pages/1');await page.getByRole('heading',{name:'Collection sheets',exact:true}).waitFor();assert.equal(await page.locator('fieldset').count(),2);
  const trusted=origin+'/storage/v1/object/public/coloring-pages/images/test.png';await page.route('**/api/admin/upload',route=>route.fulfill({json:{url:trusted,size:100,width:850,height:1100}}));
  for(const field of await page.locator('fieldset').all())await field.getByLabel('Printable image',{exact:true}).setInputFiles({name:'test.png',mimeType:'image/png',buffer:await readFile(root+'/public/collection-test/cat.png')});

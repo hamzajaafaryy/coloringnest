@@ -4,6 +4,8 @@ import {
   text,
   boolean,
   timestamp,
+  index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 /* ==========================================
@@ -31,7 +33,9 @@ export const categories = pgTable("categories", {
   heroColor: text("hero_color"),
 
   subcategories: text("subcategories").array(),
-});
+}, (table) => [
+  uniqueIndex("categories_slug_unique").on(table.slug),
+]);
 
 /* ==========================================
    CATEGORY FAQs
@@ -43,13 +47,16 @@ export const categoryFaqs = pgTable("category_faqs", {
     .generatedAlwaysAsIdentity(),
 
   categoryId: bigint("category_id", { mode: "number" })
-    .notNull(),
+    .notNull()
+    .references(() => categories.id, { onDelete: "cascade" }),
 
   question: text("question"),
   answer: text("answer"),
 
   sortOrder: bigint("sort_order", { mode: "number" }),
-});
+}, (table) => [
+  index("category_faqs_category_id_idx").on(table.categoryId),
+]);
 
 /* ==========================================
    COLORING PAGES
@@ -64,7 +71,8 @@ export const coloringPages = pgTable("coloring_pages", {
   slug: text("slug"),
   description: text("description"),
 
-  categoryId: bigint("category_id", { mode: "number" }),
+  categoryId: bigint("category_id", { mode: "number" })
+    .references(() => categories.id),
 
   imageUrl: text("image_url"),
   svgUrl: text("svg_url"),
@@ -90,7 +98,10 @@ export const coloringPages = pgTable("coloring_pages", {
   publishedAt: timestamp("published_at", {
     withTimezone: true,
   }),
-});
+}, (table) => [
+  uniqueIndex("coloring_pages_slug_unique").on(table.slug),
+  index("coloring_pages_category_id_idx").on(table.categoryId),
+]);
 
 /* ==========================================
    TAGS
@@ -136,7 +147,9 @@ export const blogPosts = pgTable("blog_posts", {
   publishedAt: timestamp("published_at", {
     withTimezone: true,
   }),
-});
+}, (table) => [
+  uniqueIndex("blog_posts_slug_unique").on(table.slug),
+]);
 
 /* ==========================================
    COLORING PAGE FAQs
@@ -149,13 +162,15 @@ export const faqs = pgTable("faqs", {
 
   coloringPageId: bigint("coloring_page_id", {
     mode: "number",
-  }).notNull(),
+  }).notNull().references(() => coloringPages.id, { onDelete: "cascade" }),
 
   question: text("question"),
   answer: text("answer"),
 
   sortOrder: bigint("sort_order", { mode: "number" }),
-});
+}, (table) => [
+  index("faqs_coloring_page_id_idx").on(table.coloringPageId),
+]);
 
 /* ==========================================
    ALIASES
@@ -175,4 +190,6 @@ export const coloringSheets = pgTable("coloring_sheets", {
   svgUrl: text("svg_url"),
   sortOrder: bigint("sort_order", { mode: "number" }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [
+  index("coloring_sheets_page_order_idx").on(table.coloringPageId, table.sortOrder),
+]);

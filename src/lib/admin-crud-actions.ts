@@ -10,7 +10,6 @@ import { db } from "@/db";
 import { getCategoryBySlugFromDb } from "@/db/queries";
 import { blogPosts, categories, categoryFaqs, coloringPages, faqs } from "@/db/schema";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { deleteCraftColoringStorageUrl } from "@/lib/storage";
 import { sanitizeSvg } from "@/lib/sanitize-svg";
 
 async function requireAdmin() {
@@ -56,12 +55,41 @@ async function assertUniqueBlogSlug(slug: string, exceptId?: number) {
   if (existing.length && existing[0].id !== exceptId) throw new Error("Another blog post already uses this slug.");
 }
 
-function validatePublishablePage(formData: FormData, published: boolean) {
+function selectedCategoryId(formData: FormData) {
+  const raw = text(formData, "categoryId");
+  if (!raw) return null;
+  const id = Number(raw);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    throw new Error("Choose a valid category.");
+  }
+  return id;
+}
+
+async function assertCategoryExists(categoryId: number | null) {
+  if (categoryId === null) return;
+  const found = await db.select({ id: categories.id }).from(categories).where(eq(categories.id, categoryId)).limit(1);
+  if (!found.length) throw new Error("The selected category no longer exists. Refresh the form and choose another category.");
+}
+
+function validatePublishablePage(categoryId: number | null, formData: FormData, published: boolean) {
   if (!published) return;
-  if (!Number(formData.get("categoryId"))) throw new Error("Choose a category before publishing.");
+  if (categoryId === null) throw new Error("Choose a category before publishing.");
+  if (!text(formData, "description")) throw new Error("Add a useful description before publishing.");
+  if (!text(formData, "altText")) throw new Error("Add descriptive alt text before publishing.");
+  if (!text(formData, "seoDescription")) throw new Error("Add an SEO description before publishing.");
   if (!text(formData, "imageUrl") && !text(formData, "svgUrl") && !text(formData, "svgContent")) {
     throw new Error("Upload an image or SVG before publishing.");
   }
+}
+
+function validatePublishableBlogPost(formData: FormData, published: boolean) {
+  if (!published) return;
+  const excerpt = text(formData, "excerpt");
+  const content = text(formData, "content");
+  const seoDescription = text(formData, "seoDescription");
+  if (!excerpt || excerpt.length < 40) throw new Error("Add a useful article excerpt (at least 40 characters) before publishing.");
+  if (!content || content.length < 500) throw new Error("Add the full article content (at least 500 characters) before publishing.");
+  if (!seoDescription || seoDescription.length < 80) throw new Error("Add an SEO description (at least 80 characters) before publishing.");
 }
 
 function collectionInput(formData: FormData) {
@@ -77,11 +105,13 @@ export async function createColoringPage(formData: FormData) {
   const title = text(formData, "title"); if (!title) return;
   const sheets = collectionInput(formData);
   const published = checkbox(formData, "isPublished");
+  const categoryId = selectedCategoryId(formData);
   const slug = normalizedSlug(formData, title);
-  validatePublishablePage(formData, published);
+  validatePublishablePage(categoryId, formData, published);
+  await assertCategoryExists(categoryId);
   await assertUniqueColoringSlug(slug);
   await db.transaction(async tx => {
-  const [created] = await tx.insert(coloringPages).values({ title, slug, description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null }).returning({ id: coloringPages.id });
+  const [created] = await tx.insert(coloringPages).values({ title, slug, description: text(formData, "description"), categoryId, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null }).returning({ id: coloringPages.id });
     if (sheets.length) await tx.insert(coloringSheets).values(sheets.map((sheet, sortOrder) => ({ ...sheet, imageUrl: sheet.imageUrl!, coloringPageId: created.id, sortOrder })));
   });
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
@@ -92,15 +122,18 @@ export async function updateColoringPage(id: number, formData: FormData) {
   const title = text(formData, "title"); if (!title) return;
   const sheets = collectionInput(formData);
   const published = checkbox(formData, "isPublished");
+  const categoryId = selectedCategoryId(formData);
   const slug = normalizedSlug(formData, title);
-  validatePublishablePage(formData, published);
+  validatePublishablePage(categoryId, formData, published);
+  await assertCategoryExists(categoryId);
   await assertUniqueColoringSlug(slug, id);
-  const existing = await db.select({ publishedAt: coloringPages.publishedAt, imageUrl: coloringPages.imageUrl, svgUrl: coloringPages.svgUrl }).from(coloringPages).where(eq(coloringPages.id, id)).limit(1);
-  const publishedAt = published ? existing[0]?.publishedAt ?? new Date() : existing[0]?.publishedAt ?? null;
+  const existing = await db.select({ publishedAt: coloringPages.publishedAt }).from(coloringPages).where(eq(coloringPages.id, id)).limit(1);
+  if (!existing.length) throw new Error("Coloring page not found.");
+  const publishedAt = published ? existing[0].publishedAt ?? new Date() : existing[0].publishedAt ?? null;
   const nextImageUrl = text(formData, "imageUrl");
   const nextSvgUrl = text(formData, "svgUrl");
   await db.transaction(async tx => {
-  await tx.update(coloringPages).set({ updatedAt: new Date(), title, slug, description: text(formData, "description"), categoryId: Number(formData.get("categoryId")) || null, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
+  await tx.update(coloringPages).set({ updatedAt: new Date(), title, slug, description: text(formData, "description"), categoryId, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
     await tx.delete(coloringSheets).where(eq(coloringSheets.coloringPageId, id));
     if (sheets.length) await tx.insert(coloringSheets).values(sheets.map((sheet, sortOrder) => ({ ...sheet, imageUrl: sheet.imageUrl!, coloringPageId: id, sortOrder })));
   });
@@ -137,29 +170,27 @@ export async function updateCategory(id: number, formData: FormData) {
   await requireAdmin(); const name = text(formData, "name"); if (!name) return;
   const slug = normalizedSlug(formData, name);
   await assertUniqueCategorySlug(slug, id);
-  const existing = await db.select({ imageUrl: categories.imageUrl }).from(categories).where(eq(categories.id, id)).limit(1);
   const nextImageUrl = text(formData, "imageUrl");
   await db.update(categories).set({ name, slug, description: text(formData, "description"), imageUrl: nextImageUrl, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), iconName: text(formData, "iconName"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), heroColor: text(formData, "heroColor"), subcategories: list(formData, "subcategories") }).where(eq(categories.id, id));
-  if (existing[0]?.imageUrl && existing[0].imageUrl !== nextImageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/categories/");
 }
 
 export async function deleteCategory(id: number) {
   await requireAdmin();
-  const existing = await db.select({ imageUrl: categories.imageUrl }).from(categories).where(eq(categories.id, id)).limit(1);
   const linked = await db.select({ id: coloringPages.id }).from(coloringPages).where(eq(coloringPages.categoryId, id)).limit(1);
   if (linked.length) throw new Error("Cannot delete a category that still has coloring pages.");
   await db.transaction(async (tx) => {
     await tx.delete(categoryFaqs).where(eq(categoryFaqs.categoryId, id));
     await tx.delete(categories).where(eq(categories.id, id));
   });
-  if (existing[0]?.imageUrl) await deleteCraftColoringStorageUrl(existing[0].imageUrl);
+  // Storage files are retained because the same image may be referenced elsewhere.
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/categories/");
 }
 
 export async function createBlogPost(formData: FormData) {
   await requireAdmin(); const title = text(formData, "title"); if (!title) return; const published = checkbox(formData, "isPublished");
   const slug = normalizedSlug(formData, title);
+  validatePublishableBlogPost(formData, published);
   await assertUniqueBlogSlug(slug);
   await db.insert(blogPosts).values({ title, slug, excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: text(formData, "featuredImage"), seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt: published ? new Date() : null });
   revalidatePath("/blog/");
@@ -171,11 +202,14 @@ export async function createBlogPost(formData: FormData) {
 export async function updateBlogPost(id: number, formData: FormData) {
   await requireAdmin(); const title = text(formData, "title"); if (!title) return; const published = checkbox(formData, "isPublished");
   const slug = normalizedSlug(formData, title);
+  validatePublishableBlogPost(formData, published);
   await assertUniqueBlogSlug(slug, id);
-  const existing = await db.select({ publishedAt: blogPosts.publishedAt, featuredImage: blogPosts.featuredImage }).from(blogPosts).where(eq(blogPosts.id, id)).limit(1); const publishedAt = published ? existing[0]?.publishedAt ?? new Date() : existing[0]?.publishedAt ?? null;
+  const existing = await db.select({ publishedAt: blogPosts.publishedAt }).from(blogPosts).where(eq(blogPosts.id, id)).limit(1);
+  if (!existing.length) throw new Error("Blog post not found.");
+  const publishedAt = published ? existing[0].publishedAt ?? new Date() : existing[0].publishedAt ?? null;
   const nextFeaturedImage = text(formData, "featuredImage");
   await db.update(blogPosts).set({ title, slug, excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: nextFeaturedImage, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt }).where(eq(blogPosts.id, id));
-  if (existing[0]?.featuredImage && existing[0].featuredImage !== nextFeaturedImage) await deleteCraftColoringStorageUrl(existing[0].featuredImage);
+  // Keep old artwork in storage; it may be shared by another page or post.
   revalidatePath("/blog/");
   revalidatePath("/blog/[slug]", "page");
   revalidatePath("/sitemap.xml");
@@ -184,7 +218,7 @@ export async function updateBlogPost(id: number, formData: FormData) {
 
 export async function deleteBlogPost(id: number) {
   await requireAdmin();
-  const existing = await db.select({ featuredImage: blogPosts.featuredImage }).from(blogPosts).where(eq(blogPosts.id, id)).limit(1);
   await db.delete(blogPosts).where(eq(blogPosts.id, id));
-  if (existing[0]?.featuredImage) await deleteCraftColoringStorageUrl(existing[0].featuredImage); revalidatePath("/blog/"); revalidatePath("/sitemap.xml"); redirect("/admin/blog/");
+  // Storage files are retained because they may be shared by other content.
+  revalidatePath("/blog/"); revalidatePath("/sitemap.xml"); redirect("/admin/blog/");
 }
