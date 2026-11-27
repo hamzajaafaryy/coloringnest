@@ -54,10 +54,10 @@ export default function FavoriteButton({
       aria-pressed={saved}
       aria-label={saved ? `Remove ${title} from favorites` : `Save ${title} to favorites`}
       title={saved ? "Remove from favorites" : "Save to favorites"}
-      className={`absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border shadow-md transition-all hover:scale-110 focus-visible:ring-4 focus-visible:ring-pink-200 sm:right-6 sm:top-6 ${
+      className={`absolute right-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full border-2 border-[#2b2140] shadow-[3px_3px_0_#2b2140] transition-all hover:scale-110 focus-visible:ring-4 focus-visible:ring-[#c4a8f8] sm:right-6 sm:top-6 ${
         saved
-          ? "border-pink-200 bg-pink-500 text-white"
-          : "border-white bg-white/95 text-slate-500 hover:text-pink-600"
+          ? "bg-[#ff5d73] text-[#2b2140]"
+          : "bg-white text-[#2b2140] hover:bg-[#fff3d6]"
       }`}
     >
       <Heart className={`h-5 w-5 ${saved ? "fill-current" : ""}`} aria-hidden="true" />

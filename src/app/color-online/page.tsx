@@ -35,24 +35,24 @@ export default async function ColorOnlineDirectoryPage({ searchParams }: { searc
       <Breadcrumbs items={breadcrumbItems} />
 
       <header className="max-w-3xl space-y-4">
-        <span className="inline-flex px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100">
+        <span className="inline-flex min-h-10 items-center rounded-full border-2 border-[#2b2140] bg-[#c4a8f8] px-3 py-1 text-xs font-bold text-[#2b2140] shadow-[3px_3px_0_#2b2140]">
           Interactive Browser Coloring
         </span>
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-3xl font-black tracking-tight text-[#2b2140] sm:text-5xl">
           Color Coloring Pages Online
         </h1>
-        <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
+        <p className="text-base leading-7 text-[#514461] sm:text-lg sm:leading-8">
           Choose an interactive picture to color on screen. Some pictures are only available to print, so those will appear in our printable collection instead.
         </p>
       </header>
 
-      <section className="relative overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-rose-400 p-6 text-white shadow-xl sm:p-8">
+      <section className="relative overflow-hidden rounded-[2rem] border-2 border-[#2b2140] bg-[#4c3176] p-6 text-white shadow-[7px_7px_0_#2b2140] sm:p-8">
         <div className="absolute -right-6 -top-6 text-8xl opacity-40" aria-hidden="true">🌈</div>
         <div className="relative flex flex-wrap items-center justify-between gap-5">
           <div>
-            <p className="text-xs font-black uppercase tracking-widest text-yellow-200">Need a warm-up?</p>
+            <p className="text-xs font-black uppercase tracking-widest text-[#ffd23f]">Need a warm-up?</p>
             <h2 className="mt-2 text-2xl font-black sm:text-3xl">Meet our five creative art adventures!</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-violet-50">Paint original cartoon animals, explore color challenges, find matching friends and draw your own art.</p>
+            <p className="mt-2 max-w-xl text-sm leading-7 text-white">Paint original cartoon animals, explore color challenges, find matching friends and draw your own art.</p>
           </div>
           <Link href="/play/" className="cc-btn bg-yellow-300 text-violet-950 shadow-lg hover:bg-yellow-200">🎮 Play kids games →</Link>
         </div>
@@ -69,7 +69,7 @@ export default async function ColorOnlineDirectoryPage({ searchParams }: { searc
         <PaginationLinks path="/color-online" page={listing.page} pageCount={listing.pageCount} />
       </section>
 
-      <section className="max-w-3xl prose prose-indigo text-slate-700">
+      <section className="cc-content-page max-w-3xl">
         <h2>How online coloring works</h2>
         <p>
           Open any design, choose a color, and tap or click a closed area of

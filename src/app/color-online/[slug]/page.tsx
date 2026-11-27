@@ -109,13 +109,13 @@ export default async function ColorOnlinePage({
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+          <span className="inline-flex min-h-10 items-center rounded-full border-2 border-[#2b2140] bg-[#c4a8f8] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#2b2140] shadow-[3px_3px_0_#2b2140]">
             Browser Interactive Editor
           </span>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-2">
+          <h1 className="mt-2 text-2xl font-black tracking-tight text-[#2b2140] sm:text-3xl">
             Color Online: {selected.title}
           </h1>
         </div>
@@ -123,21 +123,21 @@ export default async function ColorOnlinePage({
         <div className="flex items-center gap-3">
           <Link
             href={`/coloring-pages/${page.categorySlug}/${page.slug}/`}
-            className="text-xs font-semibold text-slate-600 hover:text-indigo-600 underline"
+            className="inline-flex min-h-11 items-center text-xs font-semibold text-[#59398a] underline underline-offset-4 hover:text-[#2b2140]"
           >
             View Print & Download Page →
           </Link>
         </div>
       </div>
 
-      {sheets.length > 1 && <nav aria-label="Collection drawings" className="rounded-2xl border border-violet-200 bg-violet-50 p-4">
+      {sheets.length > 1 && <nav aria-label="Collection drawings" className="rounded-2xl border-2 border-[#2b2140] bg-[#fff3d6] p-4 shadow-[5px_5px_0_rgba(43,33,64,0.14)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {selectedIndex > 0 ? <Link className="cc-btn min-h-11 bg-white" href={sheetEditorUrl(page.slug, sheets[selectedIndex - 1].id)}>← Previous</Link> : <span />}
-          <p className="text-sm font-bold text-violet-950">Drawing {selectedIndex + 1} of {sheets.length}</p>
+          <p className="text-sm font-bold text-[#2b2140]">Drawing {selectedIndex + 1} of {sheets.length}</p>
           {selectedIndex < sheets.length - 1 ? <Link className="cc-btn min-h-11 bg-white" href={sheetEditorUrl(page.slug, sheets[selectedIndex + 1].id)}>Next →</Link> : <span />}
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">{sheets.map((sheet, index) => <Link key={sheet.id} aria-current={index === selectedIndex ? "page" : undefined} title={sheet.title} href={sheetEditorUrl(page.slug!, sheet.id)} className={`flex h-11 min-w-11 items-center justify-center rounded-xl border font-bold ${index === selectedIndex ? "bg-violet-700 text-white" : "bg-white text-violet-900"}`}>{index + 1}</Link>)}</div>
-        <p className="mt-3 text-xs text-violet-900">Your colors are saved on this device when browser storage is available.</p>
+        <div className="mt-3 flex flex-wrap gap-2">{sheets.map((sheet, index) => <Link key={sheet.id} aria-current={index === selectedIndex ? "page" : undefined} title={sheet.title} href={sheetEditorUrl(page.slug!, sheet.id)} className={`flex h-11 min-w-11 items-center justify-center rounded-xl border-2 border-[#2b2140] font-bold shadow-[2px_2px_0_#2b2140] ${index === selectedIndex ? "bg-[#8b5cf6] text-white" : "bg-white text-[#2b2140]"}`}>{index + 1}</Link>)}</div>
+        <p className="mt-3 text-xs text-[#514461]">Your colors are saved on this device when browser storage is available.</p>
       </nav>}
       {svgContent || selected.imageUrl ? (
         <ColoringEditor
@@ -148,9 +148,9 @@ export default async function ColorOnlinePage({
           svgContent={svgContent}
         />
       ) : (
-        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center">
-          <h2 className="text-xl font-extrabold text-amber-950">Online coloring is not available for this design yet</h2>
-          <p className="mt-2 text-sm text-amber-900">This artwork could not be opened. You can still view the printable page.</p>
+        <div className="rounded-3xl border-2 border-[#2b2140] bg-[#fff3d6] p-8 text-center shadow-[5px_5px_0_rgba(43,33,64,0.14)]">
+          <h2 className="text-xl font-extrabold text-[#2b2140]">Online coloring is not available for this design yet</h2>
+          <p className="mt-2 text-sm text-[#514461]">This artwork could not be opened. You can still view the printable page.</p>
           <Link className="cc-btn cc-btn-dark mt-5" href={`/coloring-pages/${page.categorySlug}/${page.slug}/`}>
             View printable artwork
           </Link>

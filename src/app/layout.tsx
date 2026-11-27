@@ -27,7 +27,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(orgSchema) }}
         />
       </head>
-      <body className="bg-white text-slate-900 antialiased selection:bg-indigo-500 selection:text-white flex flex-col min-h-screen">
+      <body className="flex min-h-screen flex-col bg-[#fffaf0] text-[#2b2140] antialiased selection:bg-[#ffd23f] selection:text-[#2b2140]">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

@@ -18,22 +18,22 @@ const info = [
 
 export default function Footer() {
   return (
-    <footer className="mt-0 overflow-hidden bg-[#33244d] text-white">
-      <div className="h-2 bg-gradient-to-r from-[#ff9fb2] via-[#ffd881] via-[#bde9d4] to-[#b39bfd]" aria-hidden="true" />
+    <footer className="mt-0 overflow-hidden border-t-2 border-[#2b2140] bg-[#4c3176] text-white">
+      <div className="h-3 bg-[linear-gradient(90deg,#ff5d73_0_16.66%,#ff9f1c_16.66%_33.33%,#ffd23f_33.33%_50%,#3ecf8e_50%_66.66%,#3aa8ff_66.66%_83.33%,#8b5cf6_83.33%)]" aria-hidden="true" />
       <div className="mx-auto max-w-7xl px-4 pb-8 pt-12 sm:px-6 sm:pt-16">
         <div className="grid gap-11 pb-12 md:grid-cols-[1.5fr_1fr_1fr] lg:gap-20">
           <div>
             <Link href="/" className="inline-flex items-center gap-3 rounded-xl">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#9357d3] text-white shadow-lg"><Palette className="h-6 w-6" /></span>
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl border-2 border-[#2b2140] bg-[#ffd23f] text-[#2b2140] shadow-[4px_4px_0_#2b2140]"><Palette className="h-6 w-6" /></span>
               <span className="text-2xl font-black tracking-tight">
-                Craft<span className="text-[#ffc784]">Coloring</span>
+                Craft<span className="text-[#ffd23f]">Coloring</span>
               </span>
             </Link>
             <p className="mt-5 max-w-sm text-sm leading-7 text-[#d7cce6]">
               A cheerful place to find pictures, pick up your crayons, and make a little art together. Browse free coloring pages for kids, families, and classrooms.
             </p>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold text-[#fff0cf]">
-              <Heart className="h-4 w-4 fill-[#ffaac6] text-[#ffaac6]" /> Made for colorful moments
+              <Heart className="h-4 w-4 fill-[#ff7ab8] text-[#ff7ab8]" /> Made for colorful moments
             </div>
           </div>
 

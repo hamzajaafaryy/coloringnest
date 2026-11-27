@@ -31,15 +31,15 @@ export default function FavoritesCollection({ pages }: { pages: DbColoringPageCa
   );
 
   if (!ready) {
-    return <div className="rounded-3xl border border-slate-100 bg-white p-12 text-center text-slate-500" role="status">Loading your saved pages…</div>;
+    return <div className="rounded-3xl border-2 border-[#2b2140] bg-white p-12 text-center text-[#625973] shadow-[5px_5px_0_rgba(43,33,64,0.14)]" role="status">Loading your saved pages…</div>;
   }
 
   if (!favorites.length) {
     return (
-      <div className="rounded-[2rem] border border-pink-100 bg-gradient-to-br from-pink-50 via-white to-violet-50 px-6 py-14 text-center shadow-sm">
-        <Heart className="mx-auto h-12 w-12 text-pink-400" aria-hidden="true" />
-        <h2 className="mt-5 text-2xl font-black text-slate-900">Your favorite pages will appear here</h2>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600">Tap the heart on a coloring page to save it on this device, with no account needed.</p>
+      <div className="rounded-[2rem] border-2 border-[#2b2140] bg-[#fff3d6] px-6 py-14 text-center shadow-[6px_6px_0_rgba(43,33,64,0.16)]">
+        <Heart className="mx-auto h-12 w-12 text-[#ff5d73]" aria-hidden="true" />
+        <h2 className="mt-5 text-2xl font-black text-[#2b2140]">Your favorite pages will appear here</h2>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#514461]">Tap the heart on a coloring page to save it on this device, with no account needed.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/coloring-pages/" className="cc-btn cc-btn-primary">Explore coloring pages</Link>
           <Link href="/surprise-me/" className="cc-btn cc-btn-outline"><Shuffle className="h-4 w-4" /> Surprise me</Link>
@@ -50,9 +50,9 @@ export default function FavoritesCollection({ pages }: { pages: DbColoringPageCa
 
   return (
     <section aria-label="Saved coloring pages" className="space-y-5">
-      <p className="text-sm font-semibold text-slate-600">{favorites.length} saved coloring {favorites.length === 1 ? "page" : "pages"} on this device</p>
+      <p className="text-sm font-semibold text-[#514461]">{favorites.length} saved coloring {favorites.length === 1 ? "page" : "pages"} on this device</p>
       <ColoringGrid pages={favorites} />
-      <p className="text-xs text-slate-500">Favorites are stored only in this browser. They will not sync between devices.</p>
+      <p className="text-xs text-[#625973]">Favorites are stored only in this browser. They will not sync between devices.</p>
     </section>
   );
 }

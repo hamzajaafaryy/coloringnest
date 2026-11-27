@@ -38,7 +38,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
       <span className={`pointer-events-none absolute -right-4 -top-4 h-14 w-14 rounded-full blur-[1px] transition-transform duration-500 group-hover:scale-150 ${isPrintable ? "bg-orange-300/70" : "bg-yellow-300/70"}`} />
       <span className="pointer-events-none absolute bottom-20 -left-3 h-7 w-7 rotate-12 rounded-lg bg-pink-300/60 transition-transform duration-500 group-hover:rotate-45" />
 
-      <Link href={pageUrl} className={`relative block aspect-square overflow-hidden p-3 sm:p-4 ${isPrintable ? "bg-[#f7f4ee]" : "bg-gradient-to-br from-violet-50 via-white to-sky-50"}`} aria-label={cardLabel}>
+      <Link href={pageUrl} className={`relative block aspect-square overflow-hidden p-3 sm:p-4 ${isPrintable ? "bg-[#fff3d6]" : "bg-[#e8f4ff]"}`} aria-label={cardLabel}>
         <div className={`absolute inset-2 rounded-[1.35rem] border-2 shadow-inner sm:inset-3 ${isPrintable ? "border-white bg-white" : "border-white/90 bg-white/60"}`} />
         <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-1.5 sm:left-6 sm:top-6">
           <span className={`rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-wider shadow-sm sm:text-[10px] ${isPrintable ? "bg-white text-orange-700 ring-1 ring-orange-100" : "bg-white/95 text-violet-700 ring-1 ring-violet-100"}`}>

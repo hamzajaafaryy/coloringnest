@@ -34,21 +34,21 @@ export default async function ColoringPagesDirectory({ searchParams }: { searchP
   const pages = allPages.filter((page) => Boolean(page.slug && page.categorySlug));
 
   return (
-    <main className="min-w-0 overflow-hidden bg-[#fffdfa]">
-      <section className="relative overflow-hidden border-b border-[#eee4d8] bg-gradient-to-br from-[#f9ebff] via-[#fffbf3] to-[#e5f6ff]">
+    <main className="min-w-0 overflow-hidden bg-[#fffaf0]">
+      <section className="relative overflow-hidden border-b-2 border-[#2b2140] bg-[#fff3d6]">
         <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border-[45px] border-white/60" />
         <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-widest text-[#8146b9] shadow-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border-2 border-[#2b2140] bg-white px-4 py-2 text-xs font-black uppercase tracking-widest text-[#2b2140] shadow-[3px_3px_0_#2b2140]">
             <Sparkles className="h-4 w-4" /> Let&apos;s find something fun
           </div>
-          <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-tight text-[#302247] sm:text-6xl">
+          <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-tight text-[#2b2140] sm:text-6xl">
             So many pictures.<br />
-            <span className="text-[#9253cc]">So many colors.</span>
+            <span className="text-[#59398a]">So many colors.</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-[#6d607a] sm:text-lg">
+          <p className="mt-5 max-w-2xl text-base leading-8 text-[#514461] sm:text-lg">
             Browse free coloring pages for kids. Find a favorite animal, try a magical theme, or choose a picture just because it makes you smile.
           </p>
-          <div className="mt-7 max-w-lg rounded-[1.4rem] bg-white p-2 shadow-[0_10px_28px_rgba(85,53,112,0.1)]">
+          <div className="mt-7 max-w-lg rounded-[1.4rem] border-2 border-[#2b2140] bg-white p-2 shadow-[5px_5px_0_rgba(43,33,64,0.16)]">
             <SearchBar size="lg" placeholder="What would you like to color?" />
           </div>
         </div>
@@ -71,7 +71,7 @@ export default async function ColoringPagesDirectory({ searchParams }: { searchP
         )}
       </section>
 
-      <section className="border-t border-[#eeebf5] bg-[#f7f7ff] py-14 sm:py-16">
+      <section className="border-t-2 border-dashed border-[#3aa8ff] bg-[#e8f4ff] py-14 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
             <div>

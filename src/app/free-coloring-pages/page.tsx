@@ -51,16 +51,16 @@ export default async function FreeColoringPagesPage() {
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      <section className="bg-gradient-to-tr from-pink-500 via-purple-600 to-indigo-600 text-white p-8 sm:p-12 rounded-3xl shadow-lg space-y-4">
-        <span className="text-xs font-bold uppercase tracking-wider text-pink-100 bg-white/10 px-3 py-1 rounded-full border border-white/20">
+      <section className="space-y-4 rounded-3xl border-2 border-[#2b2140] bg-[#4c3176] p-8 text-white shadow-[7px_7px_0_#2b2140] sm:p-12">
+        <span className="rounded-full border-2 border-[#2b2140] bg-[#ffd23f] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#2b2140] shadow-[3px_3px_0_#2b2140]">
           No Subscription Required
         </span>
 
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+        <h1 className="text-3xl font-black tracking-tight sm:text-5xl">
           100% Free Online Coloring Pages
         </h1>
 
-        <p className="text-pink-100 text-base sm:text-lg max-w-2xl leading-relaxed">
+        <p className="max-w-2xl text-base leading-7 text-white sm:text-lg sm:leading-8">
           At CraftColoring, we believe creativity should be accessible to all
           kids, parents, and teachers. Explore themed collections and
           color directly in your browser.
@@ -68,7 +68,7 @@ export default async function FreeColoringPagesPage() {
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-2xl font-bold text-slate-900">
+        <h2 className="text-2xl font-black text-[#2b2140]">
           Featured Free Sheets
         </h2>
 
@@ -81,7 +81,7 @@ export default async function FreeColoringPagesPage() {
       />
 
       <section className="space-y-6">
-        <h2 className="text-2xl font-bold text-slate-900">
+        <h2 className="text-2xl font-black text-[#2b2140]">
           Explore All Free Categories
         </h2>
 

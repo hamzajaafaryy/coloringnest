@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, X, Sparkles, ArrowRight } from "lucide-react";
@@ -46,6 +46,7 @@ export default function SearchBar({
 
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const suggestionsId = useId();
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -92,10 +93,12 @@ export default function SearchBar({
 
         const data: SearchResults = await response.json();
 
-        setResults({
-          categories: data.categories ?? [],
-          pages: data.pages ?? [],
-        });
+        if (!controller.signal.aborted) {
+          setResults({
+            categories: data.categories ?? [],
+            pages: data.pages ?? [],
+          });
+        }
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") {
           return;
@@ -108,7 +111,9 @@ export default function SearchBar({
           pages: [],
         });
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     }, 250);
 
@@ -167,14 +172,14 @@ export default function SearchBar({
         className="relative w-full min-w-0"
       >
         <Search
-          className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${iconSizes[size]}`}
+          className={`absolute top-1/2 -translate-y-1/2 text-[#625973] pointer-events-none ${iconSizes[size]}`}
         />
 
         <input
           type="search"
           aria-label="Search coloring pages"
-          aria-autocomplete="list"
           aria-expanded={isOpen && Boolean(query.trim())}
+          aria-controls={suggestionsId}
           autoComplete="off"
           value={query}
           onChange={(e) => {
@@ -189,14 +194,14 @@ export default function SearchBar({
             }
           }}
           placeholder={placeholder}
-          className={`w-full max-w-full rounded-full border border-violet-100 bg-white text-slate-900 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-300 transition-all ${sizeClasses[size]}`}
+          className={`w-full max-w-full rounded-full border-2 border-[#2b2140] bg-white text-[#2b2140] placeholder-[#756a7b] shadow-[3px_3px_0_rgba(43,33,64,0.2)] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] focus:border-[#2b2140] transition-all ${sizeClasses[size]}`}
         />
 
         {query && (
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-full"
+            className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-[#625973] hover:bg-[#fff3d6] hover:text-[#2b2140]"
             aria-label="Clear search query"
           >
             <X className="w-4 h-4" />
@@ -206,13 +211,13 @@ export default function SearchBar({
 
       {/* Auto-suggestions dropdown */}
       {isOpen && query.trim().length > 0 && (
-        <div className="absolute left-0 right-0 top-full mt-2 max-h-[min(60vh,420px)] overflow-y-auto overscroll-contain bg-white rounded-2xl shadow-xl border border-slate-100 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div id={suggestionsId} className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[min(60vh,420px)] overflow-y-auto overscroll-contain rounded-2xl border-2 border-[#2b2140] bg-white shadow-[6px_6px_0_rgba(43,33,64,0.2)] animate-in fade-in slide-in-from-top-2 duration-150">
           {isLoading ? (
-            <div className="p-4 text-center text-sm text-slate-500">
+            <div className="p-4 text-center text-sm text-[#625973]" role="status">
               Searching...
             </div>
           ) : !hasResults ? (
-            <div className="p-4 text-center text-sm text-slate-500">
+            <div className="p-4 text-center text-sm text-[#625973]">
               No direct matches for &ldquo;{query}&rdquo;. Press Enter to
               search all coloring pages.
             </div>
@@ -221,7 +226,7 @@ export default function SearchBar({
               {/* Category Suggestions */}
               {matchedCategories.length > 0 && (
                 <div className="px-3 py-2">
-                  <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase px-2 mb-1 block">
+                  <span className="mb-1 block px-2 text-xs font-semibold uppercase tracking-wider text-[#625973]">
                     Categories
                   </span>
 
@@ -230,13 +235,13 @@ export default function SearchBar({
                       key={cat.id}
                       href={`/coloring-pages/${cat.slug}/`}
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition-colors"
+                      className="flex min-h-11 items-center justify-between rounded-lg px-3 py-2 text-sm text-[#2b2140] transition-colors hover:bg-[#fff3d6]"
                     >
                       <span className="font-medium">
                         {cat.name}
                       </span>
 
-                      <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-sans">
+                      <span className="rounded-full bg-[#e8f4ff] px-2 py-0.5 text-xs font-sans text-[#2b2140]">
                         Category
                       </span>
                     </Link>
@@ -247,7 +252,7 @@ export default function SearchBar({
               {/* Coloring Page Suggestions */}
               {matchedPages.length > 0 && (
                 <div className="px-3 py-2">
-                  <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase px-2 mb-1 block">
+                  <span className="mb-1 block px-2 text-xs font-semibold uppercase tracking-wider text-[#625973]">
                     Coloring Pages
                   </span>
 
@@ -260,28 +265,28 @@ export default function SearchBar({
                           : "/coloring-pages/"
                       }
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition-colors group"
+                      className="group flex min-h-11 items-center justify-between rounded-lg px-3 py-2 text-sm text-[#2b2140] transition-colors hover:bg-[#fff3d6]"
                     >
                       <div className="flex items-center gap-2 truncate">
-                        <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
+                        <Sparkles className="h-4 w-4 shrink-0 text-[#8b5cf6]" />
 
                         <span className="font-medium truncate">
                           {page.title}
                         </span>
                       </div>
 
-                      <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors shrink-0" />
+                      <ArrowRight className="h-4 w-4 shrink-0 text-[#625973] transition-colors group-hover:text-[#2b2140]" />
                     </Link>
                   ))}
                 </div>
               )}
 
               {/* Full Search Action */}
-              <div className="p-2 bg-slate-50 text-center">
+              <div className="bg-[#fff3d6] p-2 text-center">
                 <button
                   type="button"
                   onClick={handleSearchSubmit}
-                  className="w-full text-xs font-semibold text-indigo-600 hover:text-indigo-800 py-1 flex items-center justify-center gap-1"
+                  className="flex min-h-11 w-full items-center justify-center gap-1 py-1 text-xs font-semibold text-[#2b2140] hover:underline"
                 >
                   View all results for &ldquo;{query}&rdquo;
                   <ArrowRight className="w-3 h-3" />
