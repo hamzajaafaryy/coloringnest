@@ -1,6 +1,7 @@
 const BLOCKED_TAGS = /<\/?(?:script|iframe|object|embed|foreignObject|audio|video|image)\b[^>]*>/gi;
 const EVENT_ATTR = /\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
 const STYLE_ATTR = /\s+style\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
+const XML_BASE_ATTR = /\s+xml:base\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
 const STYLE_BLOCK = /<style\b[^>]*>[\s\S]*?<\/style\s*>/gi;
 const HREF_ATTR = /\s+(xlink:)?href\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi;
 const URL_FUNCTION = /url\s*\(\s*(['"]?)(.*?)\1\s*\)/gi;
@@ -38,6 +39,7 @@ export function sanitizeSvg(svg: string) {
     .replace(BLOCKED_TAGS, "")
     .replace(EVENT_ATTR, "")
     .replace(STYLE_ATTR, "")
+    .replace(XML_BASE_ATTR, "")
     .replace(HREF_ATTR, keepInternalHref);
 
   // Reject external resource loads in SVG presentation attributes such as
