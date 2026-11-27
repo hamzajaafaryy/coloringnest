@@ -67,28 +67,33 @@ export default function DoodleStudio({ onAward, onFeedback }: { onAward: (amount
   }, []);
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE) || "[]");
-      if (Array.isArray(saved)) {
-        const clean: Stroke[] = saved.filter((value: unknown): value is Stroke => {
-          if (typeof value !== "object" || !value) return false;
-          const v = value as Partial<Stroke>;
-          return (v.kind === "line" || v.kind === "stamp") &&
-            Array.isArray(v.points) && v.points.length <= 3000 &&
-            v.points.every((p) => typeof p.x === "number" && typeof p.y === "number" && Number.isFinite(p.x) && Number.isFinite(p.y)) &&
-            typeof v.color === "string" && typeof v.size === "number" && Number.isFinite(v.size);
-        }).slice(-160);
-        setStrokes(clean);
-      }
-    } catch {}
-    setReady(true);
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (cancelled) return;
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE) || "[]");
+        if (Array.isArray(saved)) {
+          const clean: Stroke[] = saved.filter((value: unknown): value is Stroke => {
+            if (typeof value !== "object" || !value) return false;
+            const v = value as Partial<Stroke>;
+            return (v.kind === "line" || v.kind === "stamp") &&
+              Array.isArray(v.points) && v.points.length <= 3000 &&
+              v.points.every((p) => typeof p.x === "number" && typeof p.y === "number" && Number.isFinite(p.x) && Number.isFinite(p.y)) &&
+              typeof v.color === "string" && typeof v.size === "number" && Number.isFinite(v.size);
+          }).slice(-160);
+          setStrokes(clean);
+        }
+      } catch {}
+      setReady(true);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => { repaint(strokes); }, [strokes, repaint]);
   useEffect(() => {
     if (!ready) return;
     try { localStorage.setItem(STORAGE, JSON.stringify(strokes)); } catch {
-      setNotice("Browser storage is full. You can still download your art!");
+      queueMicrotask(() => setNotice("Browser storage is full. You can still download your art!"));
     }
   }, [strokes, ready]);
 
