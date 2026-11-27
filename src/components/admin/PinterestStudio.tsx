@@ -87,7 +87,6 @@ export default function PinterestStudio(){
 
   useEffect(()=>{
     const controller=new AbortController();
-    setCatalogBusy(true);setError("");
     fetch("/api/admin/pinterest?"+new URLSearchParams({q:search,page:String(page)}),{
       cache:"no-store",signal:controller.signal,
     }).then(async response=>{
@@ -108,14 +107,20 @@ export default function PinterestStudio(){
   const activeImage=active?pinArtworkForSheet(active,sheetId):null;
   useEffect(()=>{
     if(!active)return;
-    const defaultSeo=makePinSeo(active,ORIGIN,template,sheetId);
-    setSeo(defaultSeo);
-    if(!pinArtworkForSheet(active,sheetId).imageUrl){
-      setPreview("");setError("This page does not have a PNG/JPEG/WebP cover yet.");
-      return;
-    }
     const controller=new AbortController();
-    setError("");setPreviewBusy(true);setPreviewHeadline("");
+    const defaultSeo=makePinSeo(active,ORIGIN,template,sheetId);
+    const hasArtwork=Boolean(pinArtworkForSheet(active,sheetId).imageUrl);
+    queueMicrotask(()=>{
+      if(controller.signal.aborted)return;
+      setSeo(defaultSeo);
+      if(!hasArtwork){
+        setPreview("");setPreviewBusy(false);
+        setError("This page does not have a PNG/JPEG/WebP cover yet.");
+        return;
+      }
+      setError("");setPreviewBusy(true);setPreviewHeadline("");
+    });
+    if(!hasArtwork)return ()=>controller.abort();
     requestRender(active,template,sheetId,defaultSeo.headline,controller.signal)
       .then(blob=>{if(!controller.signal.aborted){setPreview(URL.createObjectURL(blob));setPreviewHeadline(defaultSeo.headline);setPreviewBusy(false);}})
       .catch(e=>{if(!controller.signal.aborted){setPreviewBusy(false);setError(String(e.message||e));}});
@@ -226,7 +231,7 @@ export default function PinterestStudio(){
             <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-violet-500">Step 01 / Artwork</p><h2 className="mt-1 text-xl font-black">Your library</h2></div>
             <span className="rounded-full bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700">{catalog.total}</span>
           </div>
-          <form onSubmit={e=>{e.preventDefault();setPage(1);setSearch(searchInput.trim());}} className="mb-4 flex gap-2">
+          <form onSubmit={e=>{e.preventDefault();setCatalogBusy(true);setError("");setPage(1);setSearch(searchInput.trim());}} className="mb-4 flex gap-2">
             <label className="relative min-w-0 flex-1">
               <Search size={17} className="pointer-events-none absolute left-3 top-3.5 text-slate-400"/>
               <input aria-label="Search published coloring pages" value={searchInput} onChange={e=>setSearchInput(e.target.value)}
@@ -262,9 +267,9 @@ export default function PinterestStudio(){
             })}
           </div>
           <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-semibold text-slate-500">
-            <button type="button" disabled={catalog.page<=1||catalogBusy} onClick={()=>setPage(p=>p-1)} className="flex items-center gap-1 disabled:opacity-30"><ChevronLeft size={17}/> Previous</button>
+            <button type="button" disabled={catalog.page<=1||catalogBusy} onClick={()=>{setCatalogBusy(true);setError("");setPage(p=>p-1);}} className="flex items-center gap-1 disabled:opacity-30"><ChevronLeft size={17}/> Previous</button>
             <span>Page {catalog.page} / {catalog.pageCount}</span>
-            <button type="button" disabled={catalog.page>=catalog.pageCount||catalogBusy} onClick={()=>setPage(p=>p+1)} className="flex items-center gap-1 disabled:opacity-30">Next <ChevronRight size={17}/></button>
+            <button type="button" disabled={catalog.page>=catalog.pageCount||catalogBusy} onClick={()=>{setCatalogBusy(true);setError("");setPage(p=>p+1);}} className="flex items-center gap-1 disabled:opacity-30">Next <ChevronRight size={17}/></button>
           </div>
         </section>
 
