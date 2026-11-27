@@ -78,14 +78,19 @@ export default function CartoonColoring({
   const complete = painted === scene.pieces.length;
 
   useEffect(() => {
-    try {
-      setProgress(safeProgress(JSON.parse(localStorage.getItem(STORE) || "{}")));
-      const savedWins = JSON.parse(localStorage.getItem(WINS_STORE) || "[]");
-      if (Array.isArray(savedWins)) {
-        setCompleteIds(savedWins.filter((id): id is CartoonId => CARTOONS.some(scene => scene.id === id)));
-      }
-    } catch { /* Private mode still allows playing without persistence. */ }
-    setReady(true);
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (cancelled) return;
+      try {
+        setProgress(safeProgress(JSON.parse(localStorage.getItem(STORE) || "{}")));
+        const savedWins = JSON.parse(localStorage.getItem(WINS_STORE) || "[]");
+        if (Array.isArray(savedWins)) {
+          setCompleteIds(savedWins.filter((id): id is CartoonId => CARTOONS.some(scene => scene.id === id)));
+        }
+      } catch { /* Private mode still allows playing without persistence. */ }
+      setReady(true);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
