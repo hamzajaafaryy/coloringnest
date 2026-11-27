@@ -74,9 +74,22 @@ async function assertCategoryExists(categoryId: number | null) {
 function validatePublishablePage(categoryId: number | null, formData: FormData, published: boolean) {
   if (!published) return;
   if (categoryId === null) throw new Error("Choose a category before publishing.");
+  if (!text(formData, "description")) throw new Error("Add a useful description before publishing.");
+  if (!text(formData, "altText")) throw new Error("Add descriptive alt text before publishing.");
+  if (!text(formData, "seoDescription")) throw new Error("Add an SEO description before publishing.");
   if (!text(formData, "imageUrl") && !text(formData, "svgUrl") && !text(formData, "svgContent")) {
     throw new Error("Upload an image or SVG before publishing.");
   }
+}
+
+function validatePublishableBlogPost(formData: FormData, published: boolean) {
+  if (!published) return;
+  const excerpt = text(formData, "excerpt");
+  const content = text(formData, "content");
+  const seoDescription = text(formData, "seoDescription");
+  if (!excerpt || excerpt.length < 40) throw new Error("Add a useful article excerpt (at least 40 characters) before publishing.");
+  if (!content || content.length < 500) throw new Error("Add the full article content (at least 500 characters) before publishing.");
+  if (!seoDescription || seoDescription.length < 80) throw new Error("Add an SEO description (at least 80 characters) before publishing.");
 }
 
 function collectionInput(formData: FormData) {
@@ -177,6 +190,7 @@ export async function deleteCategory(id: number) {
 export async function createBlogPost(formData: FormData) {
   await requireAdmin(); const title = text(formData, "title"); if (!title) return; const published = checkbox(formData, "isPublished");
   const slug = normalizedSlug(formData, title);
+  validatePublishableBlogPost(formData, published);
   await assertUniqueBlogSlug(slug);
   await db.insert(blogPosts).values({ title, slug, excerpt: text(formData, "excerpt"), content: text(formData, "content"), author: text(formData, "author"), category: text(formData, "category"), readTime: text(formData, "readTime"), featuredImage: text(formData, "featuredImage"), seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), tags: list(formData, "tags"), isPublished: published, publishedAt: published ? new Date() : null });
   revalidatePath("/blog/");
@@ -188,6 +202,7 @@ export async function createBlogPost(formData: FormData) {
 export async function updateBlogPost(id: number, formData: FormData) {
   await requireAdmin(); const title = text(formData, "title"); if (!title) return; const published = checkbox(formData, "isPublished");
   const slug = normalizedSlug(formData, title);
+  validatePublishableBlogPost(formData, published);
   await assertUniqueBlogSlug(slug, id);
   const existing = await db.select({ publishedAt: blogPosts.publishedAt }).from(blogPosts).where(eq(blogPosts.id, id)).limit(1);
   if (!existing.length) throw new Error("Blog post not found.");
