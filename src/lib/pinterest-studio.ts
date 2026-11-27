@@ -2,7 +2,7 @@
 import { canonicalCategorySlug } from "./category-catalog.ts";
 
 export const PIN_SIZE = { width: 1000, height: 1500 } as const;
-export const PIN_TEMPLATES = ["editorial", "lilac", "sunshine", "midnight", "papercut"] as const;
+export const PIN_TEMPLATES = ["editorial"] as const;
 export type PinTemplate = (typeof PIN_TEMPLATES)[number];
 
 export type PinArtwork = {
