@@ -1,4 +1,4 @@
-import { STUDIO_CATEGORIES } from "./content-studio-seo";
+import { STUDIO_CATEGORIES } from "./content-studio-seo.ts";
 
 export function buildStudioPrompt(hasSvg: boolean, sheets: { title: string; altText: string }[] = []) {
   return `You are the English editor for CraftColoring, a free printable coloring-page website for children, parents, and teachers. Study the attached artwork and return ONE valid JSON object only. No Markdown fences, commentary, HTML, or extra fields.
