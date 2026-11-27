@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getColoringImageAssets } from "./coloring-image-assets";
 import { craftColoringImageAttribution } from "./image-attribution";
-import { canonicalSiteUrl, resolveSiteOrigin } from "./site-urls";
+import { canonicalPageUrl, canonicalSiteUrl, resolveSiteOrigin } from "./site-urls";
 export { serializeJsonLd } from "./structured-data";
 
 const SITE_ROOT = resolveSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL);
@@ -19,6 +19,10 @@ export const SITE_CONFIG = {
 
 export function buildCanonicalUrl(path: string): string {
   return canonicalSiteUrl(path, SITE_CONFIG.domain);
+}
+
+export function buildPaginatedCanonicalUrl(path: string, page: number): string {
+  return canonicalPageUrl(path, SITE_CONFIG.domain, page);
 }
 
 interface MetadataParams {

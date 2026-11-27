@@ -6,7 +6,7 @@ import SearchBar from "@/components/SearchBar";
 import {
   getAllPublishedCategories,
 } from "@/db/queries";
-import { constructMetadata, buildCanonicalUrl } from "@/lib/seo";
+import { constructMetadata, buildPaginatedCanonicalUrl } from "@/lib/seo";
 import { getPublishedCardPage } from "@/db/page-cards";
 import { parsePage } from "@/lib/paging";
 import PaginationLinks from "@/components/PaginationLinks";
@@ -14,13 +14,14 @@ import PaginationLinks from "@/components/PaginationLinks";
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const page = parsePage((await searchParams).page);
+  const listing = await getPublishedCardPage({ page });
   const metadata = constructMetadata({
-  title: "Free Coloring Pages for Kids",
-  description:
-    "Explore free coloring pages for kids by theme. Find animals, dinosaurs, unicorns, and more, then print a picture for a little creative time.",
-  path: "/coloring-pages/",
-});
-  return page > 1 ? { ...metadata, alternates: { canonical: `${buildCanonicalUrl("/coloring-pages")}?page=${page}` } } : metadata;
+    title: "Free Coloring Pages for Kids",
+    description:
+      "Explore free coloring pages for kids by theme. Find animals, dinosaurs, unicorns, and more, then print a picture for a little creative time.",
+    path: "/coloring-pages/",
+  });
+  return { ...metadata, alternates: { canonical: buildPaginatedCanonicalUrl("/coloring-pages", listing.page) } };
 }
 
 export default async function ColoringPagesDirectory({ searchParams }: { searchParams: Promise<{ page?: string }> }) {

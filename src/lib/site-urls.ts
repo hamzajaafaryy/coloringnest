@@ -19,6 +19,11 @@ export function canonicalSiteUrl(path: string, origin: string): string {
   return `${origin}${pathname}`;
 }
 
+export function canonicalPageUrl(path: string, origin: string, page: number): string {
+  const canonical = canonicalSiteUrl(path, origin);
+  return page > 1 ? `${canonical}?page=${page}` : canonical;
+}
+
 // Opt in only after the new domain is attached and HTTPS works. Host matching
 // prevents redirects on preview deployments and excludes the destination host.
 export function siteRedirectRules(origin: string, configuredHosts = "") {

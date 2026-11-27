@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { canonicalSiteUrl, resolveSiteOrigin, siteRedirectRules } from '../src/lib/site-urls.ts';
+import { canonicalPageUrl, canonicalSiteUrl, resolveSiteOrigin, siteRedirectRules } from '../src/lib/site-urls.ts';
 import { serializeJsonLd } from '../src/lib/structured-data.ts';
 
 test('site origin stays on the existing host until the owner configures a purchased domain', () => {
@@ -16,6 +16,12 @@ test('canonical URLs agree across metadata, Schema and sitemaps without query, h
   assert.equal(canonicalSiteUrl('/blog/example/?preview=true#read', origin), origin + '/blog/example');
   assert.equal(canonicalSiteUrl(origin + '/coloring-pages/animals/', origin), origin + '/coloring-pages/animals');
   assert.throws(() => canonicalSiteUrl('//elsewhere.example/page', origin));
+});
+
+test('paginated metadata canonicals distinguish listing pages and normalize page one', () => {
+  const origin = 'https://coloringnest.vercel.app';
+  assert.equal(canonicalPageUrl('/color-online/', origin, 1), origin + '/color-online');
+  assert.equal(canonicalPageUrl('/color-online/', origin, 2), origin + '/color-online?page=2');
 });
 
 test('domain redirects are opt in, host scoped, permanent and cannot loop to the same host', () => {
