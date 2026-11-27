@@ -9,6 +9,7 @@ import { deleteColoringPage, updateColoringPage } from "@/lib/admin-crud-actions
 import { AdminShell, Check, Field, Submit, TextArea } from "@/components/admin/AdminForm";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import DeleteConfirmButton from "@/components/admin/DeleteConfirmButton";
+import SeoMetadataFields from "@/components/admin/SeoMetadataFields";
 
 export const dynamic = "force-dynamic";
 
@@ -57,10 +58,7 @@ export default async function EditColoringPage({ params }: { params: Promise<{ i
           <Field label="Difficulty" name="difficulty" defaultValue={page.difficulty} />
         </section>
 
-        <section className="grid gap-5 md:grid-cols-2">
-          <Field label="SEO title" name="seoTitle" defaultValue={page.seoTitle} />
-          <Field label="SEO description" name="seoDescription" defaultValue={page.seoDescription} />
-        </section>
+        <SeoMetadataFields seoTitle={page.seoTitle} seoDescription={page.seoDescription} />
 
         <div className="flex flex-wrap gap-6">
           <Check label="Published" name="isPublished" defaultChecked={page.isPublished ?? false} />

@@ -7,6 +7,7 @@ import { deleteBlogPost, updateBlogPost } from "@/lib/admin-crud-actions";
 import { AdminShell, Check, Field, Submit, TextArea } from "@/components/admin/AdminForm";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import DeleteConfirmButton from "@/components/admin/DeleteConfirmButton";
+import SeoMetadataFields from "@/components/admin/SeoMetadataFields";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export default async function EditBlogPost({ params }: { params: Promise<{ id: s
     <TextArea label="Content" name="content" defaultValue={post.content} rows={18} />
     <p className="text-sm text-slate-500">Use ## for headings, - or 1. for lists, **bold** for emphasis, and [link text](/coloring-pages/animals) for links. HTML is displayed as text.</p>
     <Field label="Tags" name="tags" defaultValue={post.tags?.join(", ")} />
-    <section className="grid gap-5 md:grid-cols-2"><Field label="SEO title" name="seoTitle" defaultValue={post.seoTitle} /><Field label="SEO description" name="seoDescription" defaultValue={post.seoDescription} /></section>
+    <SeoMetadataFields seoTitle={post.seoTitle} seoDescription={post.seoDescription} />
     <Check label="Published" name="isPublished" defaultChecked={post.isPublished ?? false} />
     <div className="flex gap-3"><Submit label="Save changes" /><Link href="/admin/blog/" className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700">Cancel</Link></div>
   </form><form action={remove} className="mt-6"><DeleteConfirmButton label="Delete article" name={post.title} /></form></AdminShell>;

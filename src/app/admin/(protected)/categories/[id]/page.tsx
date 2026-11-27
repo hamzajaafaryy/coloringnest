@@ -7,6 +7,7 @@ import { deleteCategory, updateCategory } from "@/lib/admin-crud-actions";
 import { AdminShell, Check, Field, Submit, TextArea } from "@/components/admin/AdminForm";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import DeleteConfirmButton from "@/components/admin/DeleteConfirmButton";
+import SeoMetadataFields from "@/components/admin/SeoMetadataFields";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,7 @@ export default async function EditCategory({ params }: { params: Promise<{ id: s
       <Field label="Subcategories" name="subcategories" defaultValue={category.subcategories?.join(", ")} />
     </section>
     <TextArea label="Description" name="description" defaultValue={category.description} />
-    <section className="grid gap-5 md:grid-cols-2"><Field label="SEO title" name="seoTitle" defaultValue={category.seoTitle} /><Field label="SEO description" name="seoDescription" defaultValue={category.seoDescription} /></section>
+    <SeoMetadataFields seoTitle={category.seoTitle} seoDescription={category.seoDescription} />
     <div className="flex flex-wrap gap-6"><Check label="Featured" name="featured" defaultChecked={category.featured ?? false} /><Check label="Popular" name="popular" defaultChecked={category.popular ?? false} /></div>
     <div className="flex gap-3"><Submit label="Save changes" /><Link href="/admin/categories/" className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700">Cancel</Link></div>
   </form><form action={remove} className="mt-6"><DeleteConfirmButton label="Delete category" name={category.name} /></form></AdminShell>;
