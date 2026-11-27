@@ -101,6 +101,7 @@ export async function renderPinterestPin({
     <text x="500" y="${lines.length === 1 ? 330 : 410}" text-anchor="middle" font-family="Fredoka, DejaVu Sans, sans-serif" font-size="48" font-weight="600" fill="${yellow}">${xml(subtitle)}</text>
 
     <g transform="rotate(-2 500 ${cardY + cardHeight / 2})">
+      <rect x="${cardX + 16}" y="${cardY + 18}" width="${cardWidth}" height="${cardHeight}" rx="44" fill="${yellow}"/>
       <rect x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" rx="44" fill="${white}" stroke="${ink}" stroke-width="7"/>
       <image x="${imageX}" y="${imageY}" width="${artMeta.width || artWidth}" height="${artMeta.height || artHeight}" xlink:href="data:image/png;base64,${imageBase64}" clip-path="url(#artClip)"/>
     </g>
