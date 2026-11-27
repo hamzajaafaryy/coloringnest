@@ -113,10 +113,10 @@ export default async function BlogPostDetailPage({
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      <header className="space-y-4 border-b border-slate-200 pb-8">
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+      <header className="space-y-4 border-b-2 border-dashed border-[#2b2140]/25 pb-8">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-[#625973]">
           {post.category && (
-            <span className="font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+            <span className="rounded-full border-2 border-[#2b2140] bg-[#ffd23f] px-3 py-1 font-bold uppercase tracking-wider text-[#2b2140]">
               {post.category}
             </span>
           )}
@@ -143,12 +143,12 @@ export default async function BlogPostDetailPage({
           )}
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+        <h1 className="text-3xl font-black leading-tight tracking-tight text-[#2b2140] sm:text-5xl">
           {post.title}
         </h1>
 
-        <div className="flex items-center gap-2 text-sm text-slate-600">
-          <User className="w-4 h-4 text-indigo-600" />
+        <div className="flex items-center gap-2 text-sm text-[#514461]">
+          <User className="h-4 w-4 text-[#59398a]" />
 
           <span className="font-semibold">
             {post.author || "CraftColoring"}
@@ -157,7 +157,7 @@ export default async function BlogPostDetailPage({
       </header>
 
       {post.featuredImage && (
-        <figure className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50">
+        <figure className="overflow-hidden rounded-3xl border-2 border-[#2b2140] bg-white p-2 shadow-[6px_6px_0_rgba(43,33,64,0.16)]">
           <img
             src={post.featuredImage}
             alt={post.title}
@@ -180,10 +180,10 @@ export default async function BlogPostDetailPage({
         title="Try These Free Coloring Pages"
       />
 
-      <div className="pt-6 border-t border-slate-200 flex justify-between items-center">
+      <div className="flex items-center justify-between border-t-2 border-dashed border-[#2b2140]/25 pt-6">
         <Link
           href="/blog/"
-          className="inline-flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800"
+          className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#59398a] underline-offset-4 hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to All Articles

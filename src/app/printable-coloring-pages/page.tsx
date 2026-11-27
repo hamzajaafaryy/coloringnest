@@ -33,39 +33,39 @@ export default async function PrintableDirectory({ searchParams }: { searchParam
   const pages = allPages.filter((page) => Boolean(page.slug && page.categorySlug));
 
   return (
-    <main className="min-w-0 overflow-hidden bg-[#fffdfa]">
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#fff0d8] via-[#fff9f4] to-[#ffe5ec]">
+    <main className="min-w-0 overflow-hidden bg-[#fffaf0]">
+      <section className="relative overflow-hidden border-b-2 border-[#2b2140] bg-[#fff3d6]">
         <div aria-hidden="true" className="pointer-events-none absolute -right-28 -top-24 h-96 w-96 rounded-full border-[65px] border-white/50" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.25fr_0.75fr]">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#f5d5a4] bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-widest text-[#ab651e]">
+            <div className="inline-flex items-center gap-2 rounded-full border-2 border-[#2b2140] bg-white px-4 py-2 text-xs font-black uppercase tracking-widest text-[#2b2140] shadow-[3px_3px_0_#2b2140]">
               <Printer className="h-4 w-4" /> Print a little happiness
             </div>
-            <h1 className="mt-6 max-w-3xl text-4xl font-black leading-tight tracking-tight text-[#40304e] sm:text-6xl">
+            <h1 className="mt-6 max-w-3xl text-4xl font-black leading-tight tracking-tight text-[#2b2140] sm:text-6xl">
               Printable coloring pages for little hands.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-[#705c70] sm:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-8 text-[#514461] sm:text-lg">
               All you need is paper and a few crayons. Choose a free coloring page, print it at home or school, and let the colors flow.
             </p>
             <div className="mt-7 flex flex-wrap gap-4">
-              <Link href="#printable-pages" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#b96b4a] px-6 py-3 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#9f4e38]">
+              <Link href="#printable-pages" className="cc-sticker cc-sticker-red">
                 Find your next page <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/coloring-pages/" className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[#e6c6ba] bg-white px-6 py-3 text-sm font-bold text-[#8c523f] transition hover:bg-[#fff6ed]">
+              <Link href="/coloring-pages/" className="cc-sticker cc-sticker-white">
                 Browse by theme
               </Link>
             </div>
-            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-[#84687b]">
-              <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-emerald-600" /> Free to use</span>
-              <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-emerald-600" /> No sign-up needed</span>
+            <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-[#514461]">
+              <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-[#167347]" /> Free to use</span>
+              <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4 text-[#167347]" /> No sign-up needed</span>
             </div>
           </div>
-          <div className="mx-auto w-full max-w-xs rounded-[2.4rem] border-[12px] border-white bg-[#fffaf0] p-8 text-center shadow-[0_28px_65px_rgba(149,90,66,0.16)] lg:rotate-[5deg]">
-            <Printer className="mx-auto h-20 w-20 text-[#b96b4a]" strokeWidth={1.35} />
-            <div className="mx-auto mt-5 h-2 w-28 rounded-full bg-[#ffd59c]" />
-            <div className="mx-auto mt-3 h-2 w-36 rounded-full bg-[#f5e3cb]" />
-            <Heart className="mx-auto mt-5 h-12 w-12 fill-[#f8b5bf] text-[#ee8d9d]" strokeWidth={1.5} />
-            <p className="mt-4 text-lg font-black text-[#7b4f63]">Made for art time!</p>
+          <div className="mx-auto w-full max-w-xs rounded-[2.4rem] border-[6px] border-[#2b2140] bg-white p-8 text-center shadow-[7px_7px_0_#2b2140] lg:rotate-[3deg]">
+            <Printer className="mx-auto h-20 w-20 text-[#2b2140]" strokeWidth={1.35} />
+            <div className="mx-auto mt-5 h-2 w-28 rounded-full bg-[#ffd23f]" />
+            <div className="mx-auto mt-3 h-2 w-36 rounded-full bg-[#e8f4ff]" />
+            <Heart className="mx-auto mt-5 h-12 w-12 fill-[#ff7ab8] text-[#2b2140]" strokeWidth={1.5} />
+            <p className="mt-4 text-lg font-black text-[#2b2140]">Made for art time!</p>
           </div>
         </div>
       </section>
@@ -86,7 +86,7 @@ export default async function PrintableDirectory({ searchParams }: { searchParam
       </section>
 
       {categories.some((category) => category.pageCount > 0) && (
-        <section className="bg-[#f8f6ff] py-14 sm:py-16">
+        <section className="border-y-2 border-dashed border-[#3ecf8e] bg-[#c9f2dc] py-14 sm:py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <h2 className="text-3xl font-black text-[#362b4a] sm:text-4xl">Find a printable by theme</h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#756a7f]">From animals to magical worlds, there is a theme for every mood.</p>

@@ -42,25 +42,25 @@ export default async function CategoryCollection({ slug, printable = false, page
           items: pages.filter(page => page.slug).map(page => ({ title: page.title, path: `/coloring-pages/${category.slug}/${page.slug}`, image: page.imageUrl })),
         })) }} />}
         <Breadcrumbs items={breadcrumbs} />
-        <section className="grid items-center gap-6 rounded-[2rem] border border-[#eadff1] bg-gradient-to-br from-[#f5eaff] via-[#fffbf3] to-[#e5f6ef] p-6 sm:p-9 md:grid-cols-[1fr_160px]">
+        <section className="grid items-center gap-6 rounded-[2rem] border-2 border-[#2b2140] bg-[#fff3d6] p-6 shadow-[6px_6px_0_rgba(43,33,64,0.16)] sm:p-9 md:grid-cols-[1fr_160px]">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-extrabold text-[#8050a8]">
+            <span className="inline-flex min-h-10 items-center gap-2 rounded-full border-2 border-[#2b2140] bg-white px-3 py-2 text-xs font-extrabold text-[#2b2140] shadow-[3px_3px_0_#2b2140]">
               {printable ? <Printer className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />} Pick a picture to print
             </span>
             <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{printable ? "Printable " : ""}{category.name}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#6e6179]">{category.description || "Choose a picture, grab your crayons, and enjoy a little creative time."}</p>
-            <p className="mt-3 text-xs font-bold text-[#8050a8]">{listing.total} {listing.total === 1 ? "picture" : "pictures"} available</p>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#514461]">{category.description || "Choose a picture, grab your crayons, and enjoy a little creative time."}</p>
+            <p className="mt-3 text-xs font-bold text-[#514461]">{listing.total} {listing.total === 1 ? "picture" : "pictures"} available</p>
           </div>
-          {category.imageUrl && <img src={category.imageUrl} alt={category.name} className="mx-auto hidden h-36 w-36 rounded-3xl bg-white p-3 object-contain shadow-sm md:block" />}
+          {category.imageUrl && <img src={category.imageUrl} alt="" className="mx-auto hidden h-36 w-36 rounded-3xl border-2 border-[#2b2140] bg-white p-3 object-contain shadow-[4px_4px_0_#2b2140] md:block" />}
         </section>
         <section className="space-y-5">
           <h2 className="text-2xl font-black">Choose your coloring picture</h2>
           {pages.length > 0 ? <ColoringGrid pages={pages} variant={printable ? "printable" : "coloring"} /> : (
-            <div className="rounded-3xl border border-dashed border-[#dccaec] bg-white p-8 text-center">
+            <div className="rounded-3xl border-2 border-dashed border-[#2b2140] bg-[#fffaf0] p-8 text-center">
               <Palette className="mx-auto h-10 w-10 text-[#9255cb]" />
               <h3 className="mt-4 text-xl font-bold">This theme is getting ready</h3>
               <p className="mt-2 text-sm text-[#786b81]">New pictures will appear here when they are published. Explore a theme below for something to color today.</p>
-              <Link href={`${base}/`} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#8147c8] px-5 py-3 text-sm font-bold text-white">Browse available pictures <ArrowRight className="h-4 w-4" /></Link>
+              <Link href={`${base}/`} className="cc-sticker cc-sticker-red mt-5">Browse available pictures <ArrowRight className="h-4 w-4" /></Link>
             </div>
           )}
         </section>

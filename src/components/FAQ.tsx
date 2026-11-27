@@ -28,16 +28,16 @@ export default function FAQ({
   if (!items || items.length === 0) return null;
 
   return (
-    <section className="my-12 py-10 px-6 sm:px-10 bg-slate-50 rounded-3xl border border-slate-200/80">
+    <section className="my-12 rounded-3xl border-2 border-[#2b2140] bg-[#fff3d6] px-6 py-10 shadow-[6px_6px_0_rgba(43,33,64,0.16)] sm:px-10">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#2b2140] bg-[#ffd23f] text-[#2b2140]">
             <HelpCircle className="w-5 h-5" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
+          <h2 className="text-2xl font-black text-[#2b2140]">{title}</h2>
         </div>
         {description && (
-          <p className="text-slate-600 text-sm mb-8 leading-relaxed">
+          <p className="mb-8 text-sm leading-7 text-[#514461]">
             {description}
           </p>
         )}
@@ -48,23 +48,23 @@ export default function FAQ({
             return (
               <div
                 key={index}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs transition-all"
+                className="overflow-hidden rounded-2xl border-2 border-[#2b2140] bg-white shadow-[4px_4px_0_rgba(43,33,64,0.16)] transition-all"
               >
                 <button
                   onClick={() => toggle(index)}
-                  className="flex min-h-14 w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-bold text-slate-900 transition-colors hover:text-violet-600 sm:px-6 sm:text-base"
+                  className="flex min-h-14 w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-bold text-[#2b2140] transition-colors hover:bg-[#fffaf0] sm:px-6 sm:text-base"
                   aria-expanded={isOpen}
                 >
                   <span>{item.question}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${
-                      isOpen ? "rotate-180 text-indigo-600" : ""
+                    className={`h-5 w-5 shrink-0 text-[#2b2140] transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="px-4 pb-5 pt-3 text-sm leading-relaxed text-slate-600 border-t border-slate-50 sm:px-6">
+                  <div className="border-t-2 border-[#2b2140]/15 px-4 pb-5 pt-3 text-sm leading-7 text-[#514461] sm:px-6">
                     {item.answer}
                   </div>
                 )}

@@ -41,7 +41,10 @@ export default function NameColoringStudio() {
     if (!valid) { nameInput.current?.focus(); return; }
     setMode("preview");
     preview.current?.focus({ preventScroll: true });
-    preview.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    preview.current?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start",
+    });
   }
 
   async function download(format: "png" | "svg") {
@@ -66,19 +69,19 @@ export default function NameColoringStudio() {
 
   return (
     <div id="name-studio" className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-7">
-      <form onSubmit={showPreview} className="min-w-0 space-y-6 rounded-[1.8rem] border border-[#e9dfee] bg-white p-5 shadow-[0_12px_40px_rgba(64,37,84,.04)] sm:p-6">
+      <form onSubmit={showPreview} className="min-w-0 space-y-6 rounded-[1.8rem] border-2 border-[#2b2140] bg-white p-5 shadow-[6px_6px_0_rgba(43,33,64,0.16)] sm:p-6">
         <div>
-          <div className="mb-4 flex items-center gap-2.5"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#efe4fb] text-xs font-black text-[#7642a8]">1</span><label htmlFor="coloring-name" className="font-extrabold text-[#3d2a52]">Start with a name</label></div>
+          <div className="mb-4 flex items-center gap-2.5"><span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#2b2140] bg-[#ffd23f] text-xs font-black text-[#2b2140]">1</span><label htmlFor="coloring-name" className="font-extrabold text-[#2b2140]">Start with a name</label></div>
           <input ref={nameInput} id="coloring-name" name="name" type="text" maxLength={36} autoComplete="off" autoCapitalize="words" spellCheck={false} value={name}
             onChange={event => { setName(event.target.value); designChanged(); }} placeholder="e.g. SARA" aria-invalid={!valid} aria-describedby={`coloring-name-help${valid ? "" : " coloring-name-error"}`}
             className={`min-h-14 w-full rounded-2xl border-2 bg-[#fdfaff] px-4 text-xl font-black tracking-wide text-[#43295c] outline-none transition placeholder:text-[#b4a3c3] focus:border-[#8b4ec9] ${valid ? "border-[#e6d7f1]" : "border-[#c54b68]"}`} />
           <div id="coloring-name-help" className="mt-2 flex items-start justify-between gap-2 text-xs leading-5 text-[#7c6b88]"><span>Capital bubble letters, ready to color.</span><span className="shrink-0 tabular-nums">{Array.from(name.normalize("NFC")).length}/{MAX_NAME_LENGTH}</span></div>
           {!valid && <p id="coloring-name-error" role="alert" className="mt-2 text-xs font-semibold leading-5 text-[#a52d4d]">{validation.error}</p>}
-          <div className="mt-3 flex flex-wrap items-center gap-2"><span className="text-xs text-[#7c6b88]">Try:</span>{["SARA", "HAMZA", "ÉLODIE"].map(example => <button key={example} type="button" onClick={() => { setName(example); designChanged(); }} className="min-h-9 rounded-full border border-[#e9dfef] px-3 text-[11px] font-bold text-[#73528e] transition hover:bg-[#f5edfb]">{example}</button>)}</div>
+          <div className="mt-3 flex flex-wrap items-center gap-2"><span className="text-xs text-[#7c6b88]">Try:</span>{["SARA", "HAMZA", "ÉLODIE"].map(example => <button key={example} type="button" onClick={() => { setName(example); designChanged(); }}           className="min-h-11 rounded-full border-2 border-[#2b2140] bg-white px-3 text-[11px] font-bold text-[#2b2140] shadow-[2px_2px_0_rgba(43,33,64,0.2)] transition hover:bg-[#fff3d6]">{example}</button>)}</div>
         </div>
 
         <fieldset>
-          <legend className="mb-4 flex items-center gap-2.5 font-extrabold text-[#3d2a52]"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#ffecd6] text-xs font-black text-[#8a5a25]">2</span>Pick a little world</legend>
+          <legend className="mb-4 flex items-center gap-2.5 font-extrabold text-[#2b2140]"><span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#2b2140] bg-[#c9f2dc] text-xs font-black text-[#2b2140]">2</span>Pick a little world</legend>
           <div className="grid grid-cols-2 gap-2.5">
             {NAME_THEMES.map(item => {
               const Icon = themeIcons[item.id];
@@ -92,7 +95,7 @@ export default function NameColoringStudio() {
           </div>
         </fieldset>
 
-        <fieldset className="space-y-4 border-t border-[#eee6f2] pt-5">
+        <fieldset className="space-y-4 border-t-2 border-dashed border-[#2b2140]/20 pt-5">
           <legend className="sr-only">Print preferences</legend>
           <label htmlFor="name-paper" className="block text-xs font-extrabold text-[#63506f]">Paper size</label>
           <select id="name-paper" value={paper} onChange={event => { setPaper(event.target.value as NamePaper); designChanged(); }} className="min-h-11 w-full rounded-xl border border-[#e6d9ed] bg-[#fdfaff] px-3 text-sm font-semibold text-[#5d4670]">
@@ -100,11 +103,11 @@ export default function NameColoringStudio() {
           </select>
           <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-[#fcf7ee] p-3 text-sm leading-5 text-[#6c5260]"><input type="checkbox" checked={tracing} onChange={event => { setTracing(event.target.checked); designChanged(); }} className="mt-0.5 h-4 w-4 shrink-0 accent-[#8050b3]" /><span><strong className="block text-xs font-extrabold">Add a name tracing row</strong><span className="mt-1 block text-xs">A little extra letter practice.</span></span></label>
         </fieldset>
-        <button type="submit" disabled={!valid} className="cc-btn min-h-12 w-full bg-[#7842b6] text-white shadow-[0_8px_20px_rgba(120,66,182,.16)] hover:bg-[#65349e] disabled:cursor-not-allowed disabled:opacity-50"><Sparkles aria-hidden="true" className="h-4 w-4" /> Preview My Page <ArrowDown aria-hidden="true" className="h-4 w-4" /></button>
+        <button type="submit" disabled={!valid} className="cc-btn cc-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"><Sparkles aria-hidden="true" className="h-4 w-4" /> Preview My Page <ArrowDown aria-hidden="true" className="h-4 w-4" /></button>
         <p className="text-center text-xs leading-5 text-[#86758e]">The preview updates as you type.<br />Free to create. No account needed.</p>
       </form>
 
-      <section ref={preview} tabIndex={-1} aria-labelledby="name-preview-heading" className="min-w-0 scroll-mt-28 rounded-[1.8rem] border border-[#e7dced] bg-[#f5effa] p-3 outline-none sm:p-5">
+      <section ref={preview} tabIndex={-1} aria-labelledby="name-preview-heading" className="min-w-0 scroll-mt-28 rounded-[1.8rem] border-2 border-[#2b2140] bg-[#e8f4ff] p-3 outline-none shadow-[6px_6px_0_rgba(43,33,64,0.16)] sm:p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-1 sm:mb-5">
           <div><h2 id="name-preview-heading" className="text-base font-black text-[#49305d]">Your coloring sheet</h2><p className="mt-1 text-xs text-[#7c688b]">{selectedTheme.label} <span aria-hidden="true">·</span> {paper === "a4" ? "A4" : "US Letter"}</p></div>
           <div role="group" aria-label="Preview or color your name" className="inline-flex rounded-full border border-[#e4d6ee] bg-white p-1 text-xs font-extrabold">

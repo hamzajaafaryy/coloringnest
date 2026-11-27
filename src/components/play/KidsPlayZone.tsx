@@ -15,11 +15,11 @@ type Game = "cartoon" | "colors" | "memory" | "doodle" | "numbers";
 const STARS_KEY = "craftcoloring_kids_stars_v1";
 const AUDIO_KEY = "craftcoloring_sound_v1";
 const TABS: { id: Game; title: string; subtitle: string; color: string }[] = [
-  { id: "cartoon", title: "Cartoon Coloring", subtitle: "Paint magical friends", color: "from-rose-100 to-amber-100" },
-  { id: "colors", title: "Rainbow Quest", subtitle: "Solve color puzzles", color: "from-amber-100 to-emerald-100" },
-  { id: "memory", title: "Memory Garden", subtitle: "Find cartoon pairs", color: "from-violet-100 to-sky-100" },
-  { id: "doodle", title: "Doodle Studio", subtitle: "Create your own art", color: "from-yellow-100 to-teal-100" },
-  { id: "numbers", title: "Pixel Art Club", subtitle: "Color by numbers", color: "from-sky-100 to-pink-100" },
+  { id: "cartoon", title: "Cartoon Coloring", subtitle: "Paint magical friends", color: "bg-[#ffdae2]" },
+  { id: "colors", title: "Rainbow Quest", subtitle: "Solve color puzzles", color: "bg-[#fff3d6]" },
+  { id: "memory", title: "Memory Garden", subtitle: "Find cartoon pairs", color: "bg-[#e7deff]" },
+  { id: "doodle", title: "Doodle Studio", subtitle: "Create your own art", color: "bg-[#ddf8e9]" },
+  { id: "numbers", title: "Pixel Art Club", subtitle: "Color by numbers", color: "bg-[#e5f3ff]" },
 ];
 
 function activeFromHash(): Game {
@@ -114,51 +114,64 @@ export default function KidsPlayZone() {
     sound("tap");
   }
 
+  function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
+    let nextIndex = index;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (index + 1) % TABS.length;
+    else if (event.key === "ArrowLeft" || event.key === "ArrowUp") nextIndex = (index - 1 + TABS.length) % TABS.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = TABS.length - 1;
+    else return;
+
+    event.preventDefault();
+    chooseGame(TABS[nextIndex].id);
+    event.currentTarget.closest('[role="tablist"]')
+      ?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[nextIndex]
+      ?.focus();
+  }
+
   const rank = stars>=250?"Legendary Cartoon Artist":stars>=100?"Super Star Artist":stars>=40?"Rainbow Explorer":stars>=15?"Creative Adventurer":"Little Explorer";
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6 overflow-x-clip px-3 pb-16 pt-5 sm:space-y-8 sm:px-6 sm:pt-8 lg:px-8">
-      <section className="relative isolate overflow-hidden rounded-[1.7rem] bg-[#25164f] px-5 py-8 text-white shadow-[0_22px_70px_rgba(68,35,137,.2)] sm:rounded-[2.7rem] sm:px-10 sm:py-12 lg:px-14">
-        <div className="pointer-events-none absolute -right-20 -top-32 h-80 w-80 rounded-full bg-pink-400/30 blur-3xl" aria-hidden="true"/>
-        <div className="pointer-events-none absolute bottom-0 left-10 h-48 w-96 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden="true"/>
+      <section className="relative isolate overflow-hidden rounded-[1.7rem] border-2 border-[#2b2140] bg-[#4c3176] px-5 py-8 text-white shadow-[7px_7px_0_#2b2140] sm:rounded-[2.7rem] sm:px-10 sm:py-12 lg:px-14">
         <div className="relative grid min-w-0 items-center gap-4 md:grid-cols-[1.2fr_.8fr] md:gap-8">
           <div className="min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-2 text-[10px] font-black uppercase tracking-wide text-yellow-200 sm:px-4 sm:text-xs">
               <Sparkles className="h-4 w-4"/> The CraftColoring Creative Club
             </span>
             <h1 className="mt-5 max-w-xl text-[clamp(2.2rem,7vw,4.6rem)] font-black leading-[1.05] tracking-tight">
-              Play, paint, <span className="bg-gradient-to-r from-yellow-300 via-pink-300 to-sky-300 bg-clip-text text-transparent">create!</span>
+              Play, paint, <span className="text-[#ffd23f]">create!</span>
             </h1>
-            <p className="mt-4 max-w-xl text-sm leading-7 text-indigo-100 sm:text-base">
+            <p className="mt-4 max-w-xl text-sm leading-7 text-white sm:text-base">
               Meet original cartoon friends, build your own masterpiece and explore five playful art adventures. Made for little hands, big imaginations and touchscreen fun.
             </p>
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-black text-white/90 sm:text-xs">
-              <span className="rounded-full bg-white/15 px-3 py-2">5 creative games</span>
-              <span className="rounded-full bg-white/15 px-3 py-2">Original cartoon art</span>
-              <span className="rounded-full bg-white/15 px-3 py-2">Free, no account</span>
+              <span className="rounded-full border border-white/40 bg-white/10 px-3 py-2">5 creative games</span>
+              <span className="rounded-full border border-white/40 bg-white/10 px-3 py-2">Original cartoon art</span>
+              <span className="rounded-full border border-white/40 bg-white/10 px-3 py-2">Free, no account</span>
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
               <Link href="/color-online/" className="cc-btn border border-yellow-200 bg-yellow-300 text-violet-950 hover:bg-yellow-200"><Palette className="h-4 w-4"/> Full coloring library</Link>
               <Link href="/printable-coloring-pages/" className="cc-btn border border-white/25 bg-white/15 text-white hover:bg-white/25">Print artwork <ArrowRight className="h-4 w-4"/></Link>
             </div>
           </div>
-          <div className="relative mx-auto w-full max-w-[350px] rounded-[2rem] border border-white/15 bg-white/10 p-2 backdrop-blur-sm">
+          <div className="relative mx-auto w-full max-w-[350px] rounded-[2rem] border-2 border-[#2b2140] bg-white p-2 shadow-[5px_5px_0_#2b2140]">
             <CartoonCharacter id="kitty" interactive={false} className="mx-auto block aspect-[4/3] w-full cc-float"/>
           </div>
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-violet-100 bg-white px-4 py-4 shadow-sm sm:rounded-3xl sm:px-7">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-[#2b2140] bg-white px-4 py-4 shadow-[5px_5px_0_rgba(43,33,64,0.14)] sm:rounded-3xl sm:px-7">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-yellow-100"><Trophy className="h-6 w-6 text-amber-600" aria-hidden="true"/></span>
-          <div className="min-w-0"><p className="text-[10px] font-black uppercase tracking-wider text-violet-600">Your artist passport</p><p className="text-sm font-black text-slate-900 sm:text-base">{rank}</p></div>
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-2 border-[#2b2140] bg-[#ffd23f]"><Trophy className="h-6 w-6 text-[#2b2140]" aria-hidden="true"/></span>
+          <div className="min-w-0"><p className="text-[10px] font-black uppercase tracking-wider text-[#59398a]">Your artist passport</p><p className="text-sm font-black text-[#2b2140] sm:text-base">{rank}</p></div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" aria-pressed={soundOn} aria-label={soundOn?"Mute game audio":"Enable game audio"} onClick={toggleAudio}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-black text-violet-800 transition hover:bg-violet-100 sm:text-sm">
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-[#2b2140] bg-[#e7deff] px-3 py-2 text-xs font-black text-[#2b2140] shadow-[3px_3px_0_#2b2140] transition hover:bg-[#d9c9ff] sm:text-sm">
             {soundOn?<Volume2 className="h-5 w-5"/>:<VolumeX className="h-5 w-5"/>} Sound {soundOn?"ON":"OFF"}
           </button>
-          <div aria-live="polite" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm font-black text-amber-800">
+          <div aria-live="polite" className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-[#2b2140] bg-[#fff3d6] px-3 py-2 text-sm font-black text-[#2b2140] shadow-[3px_3px_0_rgba(43,33,64,0.2)]">
             <Star className="h-5 w-5 fill-yellow-400 text-amber-500"/> {loaded?stars:"—"} stars {spark&&<span className="text-xs text-emerald-700">+★</span>}
           </div>
         </div>
@@ -167,23 +180,23 @@ export default function KidsPlayZone() {
       <section aria-labelledby="choose-game">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
           <div className="min-w-0"><p className="text-[11px] font-black uppercase tracking-[.15em] text-fuchsia-600">Choose an adventure</p><h2 id="choose-game" className="mt-1 text-2xl font-black tracking-tight text-slate-900 sm:text-4xl">What will we create today?</h2></div>
-          <p className="text-xs font-semibold text-slate-500">Tap a game to start</p>
+          <p className="text-xs font-semibold text-[#514461]">Tap a game to start</p>
         </div>
         <div role="tablist" aria-label="Creative games" className="grid min-w-0 grid-cols-1 gap-3 min-[390px]:grid-cols-2 xl:grid-cols-5">
           {TABS.map(game=>(
-            <button type="button" key={game.id} role="tab" aria-selected={active===game.id} aria-controls="kids-active-game" onClick={()=>chooseGame(game.id)}
-              className={`group relative flex min-w-0 min-h-32 flex-col items-start overflow-hidden rounded-[1.5rem] border-2 bg-gradient-to-br ${game.color} p-3 text-left shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-violet-700 sm:p-4 ${active===game.id?"border-violet-500 ring-2 ring-violet-100":"border-white"}`}>
+            <button type="button" key={game.id} id={`game-tab-${game.id}`} role="tab" tabIndex={active === game.id ? 0 : -1} aria-selected={active===game.id} aria-controls="kids-active-game" onClick={()=>chooseGame(game.id)} onKeyDown={event => handleTabKeyDown(event, TABS.findIndex(tab => tab.id === game.id))}
+              className={`group relative flex min-h-32 min-w-0 flex-col items-start overflow-hidden rounded-[1.5rem] border-2 ${game.color} p-3 text-left shadow-[4px_4px_0_rgba(43,33,64,0.14)] transition duration-200 hover:-translate-y-1 hover:shadow-[6px_6px_0_rgba(43,33,64,0.16)] sm:p-4 ${active===game.id?"border-[#2b2140] ring-2 ring-[#8b5cf6]":"border-[#2b2140]/60"}`}>
               {game.id === "cartoon" ? <CartoonCharacter id="kitty" interactive={false} className="mx-auto aspect-[4/3] w-full max-w-[145px] transition-transform group-hover:scale-105"/> : <GameIllustration variant={game.id} className="mx-auto aspect-[4/3] w-full max-w-[145px] transition-transform group-hover:scale-105"/>}
-              <span className="mt-auto block max-w-full text-[13px] font-black leading-tight text-slate-900 sm:text-base">{game.title}</span>
-              <span className="mt-1 block text-[11px] font-semibold leading-tight text-slate-600 sm:text-xs">{game.subtitle}</span>
-              {active===game.id&&<CheckCircle2 className="absolute right-2 top-2 h-5 w-5 text-violet-700"/>}
+              <span className="mt-auto block max-w-full text-[13px] font-black leading-tight text-[#2b2140] sm:text-base">{game.title}</span>
+              <span className="mt-1 block text-[11px] font-semibold leading-tight text-[#514461] sm:text-xs">{game.subtitle}</span>
+              {active===game.id&&<CheckCircle2 className="absolute right-2 top-2 h-5 w-5 text-[#2b2140]"/>}
             </button>
           ))}
         </div>
       </section>
 
-      <section id="kids-active-game" role="tabpanel" aria-label={TABS.find(game=>game.id===active)?.title}
-        className="min-w-0 scroll-mt-24 overflow-hidden rounded-[1.5rem] border border-violet-100 bg-white p-3 shadow-[0_20px_70px_rgba(50,37,114,.07)] sm:rounded-[2rem] sm:p-7 lg:p-9">
+      <section id="kids-active-game" role="tabpanel" aria-labelledby={`game-tab-${active}`}
+        className="min-w-0 scroll-mt-24 overflow-hidden rounded-[1.5rem] border-2 border-[#2b2140] bg-white p-3 shadow-[6px_6px_0_rgba(43,33,64,0.16)] sm:rounded-[2rem] sm:p-7 lg:p-9">
         {active==="cartoon"&&<CartoonColoring onAward={awardStars} onFeedback={feedback}/>}
         {active==="colors"&&<ColorQuest onAward={awardStars} onFeedback={feedback}/>}
         {active==="memory"&&<MemoryGarden onAward={awardStars} onFeedback={feedback}/>}
@@ -191,10 +204,10 @@ export default function KidsPlayZone() {
         {active==="numbers"&&<ColorByNumber onAward={awardStars} onFeedback={feedback}/>}
       </section>
 
-      <div className="grid gap-4 rounded-[1.5rem] bg-gradient-to-r from-amber-50 via-pink-50 to-violet-50 p-5 sm:grid-cols-3 sm:rounded-[2rem] sm:p-8">
-        <div className="flex items-start gap-3"><Medal className="h-7 w-7 shrink-0 text-amber-500"/><div><h3 className="font-black text-slate-900">Create at your pace</h3><p className="mt-1 text-sm leading-6 text-slate-600">No countdowns or pressure. Explore, try and learn.</p></div></div>
-        <div className="flex items-start gap-3"><Brain className="h-7 w-7 shrink-0 text-purple-500"/><div><h3 className="font-black text-slate-900">Learn through art</h3><p className="mt-1 text-sm leading-6 text-slate-600">Practice colors, creative thinking and memory.</p></div></div>
-        <div className="flex items-start gap-3"><Brush className="h-7 w-7 shrink-0 text-pink-500"/><div><h3 className="font-black text-slate-900">Make it yours</h3><p className="mt-1 text-sm leading-6 text-slate-600">Download art and keep your stars on this device.</p></div></div>
+      <div className="grid gap-4 rounded-[1.5rem] border-2 border-[#2b2140] bg-[#fff3d6] p-5 shadow-[5px_5px_0_rgba(43,33,64,0.14)] sm:grid-cols-3 sm:rounded-[2rem] sm:p-8">
+        <div className="flex items-start gap-3"><Medal className="h-7 w-7 shrink-0 text-[#2b2140]"/><div><h3 className="font-black text-[#2b2140]">Create at your pace</h3><p className="mt-1 text-sm leading-7 text-[#514461]">No countdowns or pressure. Explore, try and learn.</p></div></div>
+        <div className="flex items-start gap-3"><Brain className="h-7 w-7 shrink-0 text-[#59398a]"/><div><h3 className="font-black text-[#2b2140]">Learn through art</h3><p className="mt-1 text-sm leading-7 text-[#514461]">Practice colors, creative thinking and memory.</p></div></div>
+        <div className="flex items-start gap-3"><Brush className="h-7 w-7 shrink-0 text-[#b63d70]"/><div><h3 className="font-black text-[#2b2140]">Make it yours</h3><p className="mt-1 text-sm leading-7 text-[#514461]">Download art and keep your stars on this device.</p></div></div>
       </div>
     </div>
   );

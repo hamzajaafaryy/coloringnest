@@ -18,10 +18,10 @@ interface CategoryCardProps {
 }
 
 const accents = [
-  "from-[#ffecf1] via-[#fff8f4] to-[#ffe8d2]",
-  "from-[#e2f5fc] via-[#f7f8ff] to-[#ecedff]",
-  "from-[#fef0cc] via-[#fffdf0] to-[#e8f5dd]",
-  "from-[#eee2fd] via-[#fdf8ff] to-[#ffe4f0]",
+  "bg-[#ffecf1]",
+  "bg-[#e8f4ff]",
+  "bg-[#fff3d6]",
+  "bg-[#e7deff]",
 ];
 
 export default function CategoryCard({ category }: CategoryCardProps) {
@@ -34,9 +34,9 @@ export default function CategoryCard({ category }: CategoryCardProps) {
   return (
     <Link
       href={href}
-      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[1.6rem] border border-[#ede6f1] bg-white p-2 shadow-[0_9px_26px_rgba(61,35,81,0.06)] transition duration-300 hover:-translate-y-1.5 hover:border-[#d6b5ef] hover:shadow-[0_16px_38px_rgba(104,63,139,0.13)] sm:rounded-[1.9rem] sm:p-2.5"
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[1.6rem] border-2 border-[#2b2140] bg-white p-2 shadow-[5px_5px_0_rgba(43,33,64,0.16)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[8px_8px_0_rgba(43,33,64,0.16)] sm:rounded-[1.9rem] sm:p-2.5"
     >
-      <div className={"relative flex aspect-[1.2/1] min-h-0 items-center justify-center overflow-hidden rounded-[1.1rem] bg-gradient-to-br sm:rounded-[1.45rem] " + accent}>
+      <div className={"relative flex aspect-[1.2/1] min-h-0 items-center justify-center overflow-hidden rounded-[1.1rem] sm:rounded-[1.45rem] " + accent}>
         <span className="absolute -left-6 -top-6 h-24 w-24 rounded-full border-[12px] border-white/40" aria-hidden="true" />
         <span className="absolute -bottom-7 -right-5 h-24 w-24 rounded-full border-[12px] border-white/35" aria-hidden="true" />
         {category.imageUrl ? (

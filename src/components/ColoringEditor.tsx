@@ -421,14 +421,14 @@ export default function ColoringEditor({ slug, title, svgContent, imageUrl }: Co
     setZoomLevel((value) => Math.min(2, Math.max(0.5, value + amount)));
 
   return (
-    <div className="cc-editor min-w-0 bg-[#241b45] rounded-3xl p-3 sm:p-6 shadow-2xl border border-slate-800 text-white flex flex-col gap-6 max-w-5xl mx-auto my-4">
-      {editorError && <p role="alert" className="rounded-xl border border-amber-500/40 bg-amber-950 p-4 text-sm text-amber-100">{editorError}</p>}
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3 rounded-2xl border border-slate-700">
-        <div className="flex min-w-0 items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-700/60">
+    <div className="cc-editor my-4 mx-auto flex min-w-0 max-w-5xl flex-col gap-6 rounded-3xl border-2 border-[#2b2140] bg-[#fff3d6] p-3 text-[#2b2140] shadow-[7px_7px_0_rgba(43,33,64,0.2)] sm:p-6">
+      {editorError && <p role="alert" className="rounded-xl border-2 border-[#2b2140] bg-[#ffdae2] p-4 text-sm text-[#2b2140]">{editorError}</p>}
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-[#2b2140] bg-white p-3 shadow-[4px_4px_0_rgba(43,33,64,0.14)]">
+        <div className="flex min-w-0 items-center gap-1.5 rounded-xl border-2 border-[#2b2140]/20 bg-[#fffaf0] p-1.5">
           {(["fill", "brush", "eraser"] as Tool[]).map((tool) => {
             const Icon = tool === "fill" ? PaintBucket : tool === "brush" ? Brush : Eraser;
             return (
-              <button key={tool} onClick={() => setActiveTool(tool)} aria-label={`Use ${tool} tool`} aria-pressed={activeTool === tool} className={`flex min-h-11 items-center gap-2 px-3 py-2 rounded-lg font-medium text-xs sm:text-sm ${activeTool === tool ? "bg-indigo-600 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"}`}>
+              <button key={tool} type="button" onClick={() => setActiveTool(tool)} aria-label={`Use ${tool} tool`} aria-pressed={activeTool === tool} className={`flex min-h-11 items-center gap-2 rounded-lg border-2 px-3 py-2 text-xs font-bold transition sm:text-sm ${activeTool === tool ? "border-[#2b2140] bg-[#8b5cf6] text-white shadow-[3px_3px_0_#2b2140]" : "border-transparent text-[#2b2140] hover:border-[#2b2140]/20 hover:bg-[#e8f4ff]"}`}>
                 <Icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tool === "fill" ? "Fill Bucket" : tool === "brush" ? "Brush" : "Eraser"}</span>
               </button>
@@ -437,33 +437,33 @@ export default function ColoringEditor({ slug, title, svgContent, imageUrl }: Co
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button onClick={handleUndo} disabled={historyIndex <= 0} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" aria-label="Undo" title="Undo"><Undo2 className="w-4 h-4" /></button>
-          <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40" aria-label="Redo" title="Redo"><Redo2 className="w-4 h-4" /></button>
-          <button onClick={() => changeZoom(-0.1)} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Zoom out" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
-          <span className="text-xs font-semibold min-w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
-          <button onClick={() => changeZoom(0.1)} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Zoom in" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
-          <button onClick={handleReset} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700" aria-label="Reset" title="Reset"><RotateCcw className="w-4 h-4" /></button>
+          <button type="button" onClick={handleUndo} disabled={historyIndex <= 0} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border-2 border-[#2b2140] bg-white text-[#2b2140] shadow-[2px_2px_0_#2b2140] hover:bg-[#e8f4ff] disabled:opacity-40" aria-label="Undo" title="Undo"><Undo2 className="w-4 h-4" /></button>
+          <button type="button" onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border-2 border-[#2b2140] bg-white text-[#2b2140] shadow-[2px_2px_0_#2b2140] hover:bg-[#e8f4ff] disabled:opacity-40" aria-label="Redo" title="Redo"><Redo2 className="w-4 h-4" /></button>
+          <button type="button" onClick={() => changeZoom(-0.1)} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border-2 border-[#2b2140] bg-white text-[#2b2140] shadow-[2px_2px_0_#2b2140] hover:bg-[#e8f4ff]" aria-label="Zoom out" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
+          <span className="min-w-12 text-center text-xs font-semibold">{Math.round(zoomLevel * 100)}%</span>
+          <button type="button" onClick={() => changeZoom(0.1)} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border-2 border-[#2b2140] bg-white text-[#2b2140] shadow-[2px_2px_0_#2b2140] hover:bg-[#e8f4ff]" aria-label="Zoom in" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
+          <button type="button" onClick={handleReset} className="flex min-h-11 min-w-11 items-center justify-center rounded-xl border-2 border-[#2b2140] bg-white text-[#2b2140] shadow-[2px_2px_0_#2b2140] hover:bg-[#ffdae2]" aria-label="Reset" title="Reset"><RotateCcw className="w-4 h-4" /></button>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-800/70 p-3 rounded-2xl border border-slate-700">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-[#2b2140] bg-[#e8f4ff] p-3 shadow-[4px_4px_0_rgba(43,33,64,0.14)]">
         <div className="flex flex-wrap items-center gap-2">
           {PRESET_COLORS.map((color) => (
-            <button key={color} type="button" onClick={() => setSelectedColor(color)} aria-label={`Select ${color}`} className={`h-10 w-10 rounded-full border-2 ${selectedColor === color ? "border-white scale-110" : "border-slate-600"}`} style={{ backgroundColor: color }} />
+            <button key={color} type="button" onClick={() => setSelectedColor(color)} aria-label={`Select ${color}`} aria-pressed={selectedColor === color} className={`h-11 w-11 rounded-full border-2 border-[#2b2140] ${selectedColor === color ? "scale-110 ring-2 ring-[#8b5cf6] ring-offset-2" : ""}`} style={{ backgroundColor: color }} />
           ))}
-          <label className="flex items-center gap-2 text-xs text-slate-300 ml-2">
+          <label className="flex min-h-11 items-center gap-2 text-xs font-semibold text-[#2b2140] ml-2">
             Custom
             <input type="color" value={selectedColor} onChange={(event) => setSelectedColor(event.target.value)} className="w-8 h-8 rounded cursor-pointer bg-transparent" />
           </label>
         </div>
-        <label className="flex items-center gap-2 text-xs text-slate-300">
+        <label className="flex min-h-11 items-center gap-2 text-xs font-semibold text-[#2b2140]">
           Brush
           <input type="range" min="4" max="40" value={brushSize} onChange={(event) => setBrushSize(Number(event.target.value))} />
           <span className="w-8 text-right">{brushSize}</span>
         </label>
       </div>
 
-      <div className="printable-artwork relative min-h-[320px] min-w-0 overflow-auto rounded-2xl bg-white p-2 shadow-inner sm:min-h-[420px] sm:p-4">
+      <div className="printable-artwork relative min-h-[320px] min-w-0 overflow-auto rounded-2xl border-2 border-[#2b2140] bg-white p-2 shadow-[inset_0_2px_8px_rgba(43,33,64,0.12)] sm:min-h-[420px] sm:p-4">
         <div
           className="relative mx-auto w-full max-w-3xl"
           style={{ aspectRatio: String(rasterRatio || aspectRatio), transform: `scale(${zoomLevel})`, transformOrigin: "center" }}
@@ -483,14 +483,14 @@ export default function ColoringEditor({ slug, title, svgContent, imageUrl }: Co
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3">
-        <button onClick={handleSaveLocal} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-sm">
+        <button type="button" onClick={handleSaveLocal} className="cc-btn cc-btn-primary">
           {savedSuccess ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
           {savedSuccess ? "Saved" : "Save"}
         </button>
-        <button type="button" disabled={downloading} aria-busy={downloading} onClick={() => void handleDownload()} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm disabled:opacity-50"><Download aria-hidden="true" className="w-4 h-4" /><span aria-live="polite">{downloading ? "Creating PNG…" : "Download PNG"}</span></button>
-        <button onClick={handlePrint} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Printer className="w-4 h-4" />Print</button>
-        <button onClick={handleReset} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Sparkles className="w-4 h-4" />Start Over</button>
-        <button onClick={() => { const editor = canvasRef.current?.closest(".cc-editor"); void editor?.requestFullscreen?.().catch(() => {}); }} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 font-semibold text-sm"><Maximize2 className="w-4 h-4" />Fullscreen</button>
+        <button type="button" disabled={downloading} aria-busy={downloading} onClick={() => void handleDownload()} className="cc-btn cc-btn-dark disabled:opacity-50"><Download aria-hidden="true" className="w-4 h-4" /><span aria-live="polite">{downloading ? "Creating PNG…" : "Download PNG"}</span></button>
+        <button type="button" onClick={handlePrint} className="cc-btn cc-btn-print"><Printer className="w-4 h-4" />Print</button>
+        <button type="button" onClick={handleReset} className="cc-btn cc-btn-soft"><Sparkles className="w-4 h-4" />Start Over</button>
+        <button type="button" onClick={() => { const editor = canvasRef.current?.closest(".cc-editor"); void editor?.requestFullscreen?.().catch(() => {}); }} className="cc-btn cc-btn-outline"><Maximize2 className="w-4 h-4" />Fullscreen</button>
       </div>
     </div>
   );
