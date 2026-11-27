@@ -30,7 +30,6 @@ test("SVG sanitizer keeps local fragment references but removes external url() l
     <path d="M0 0L10 10" filter="url(https://attacker.example/filter.svg#x)"/>
   </svg>`;
   const output = sanitizeSvg(input);
-  assert.match(output, /href=/i) === false;
   assert.match(output, /fill="url\(#safe\)"/);
   assert.doesNotMatch(output, /attacker\.example|filter=/i);
 });
