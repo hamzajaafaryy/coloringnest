@@ -5,6 +5,7 @@ import { categories } from "@/db/schema";
 import { createColoringPage } from "@/lib/admin-crud-actions";
 import { AdminShell, Check, Field, Submit, TextArea } from "@/components/admin/AdminForm";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import SeoMetadataFields from "@/components/admin/SeoMetadataFields";
 
 export const dynamic = "force-dynamic";
 
@@ -43,10 +44,7 @@ export default async function NewColoringPage() {
           <Field label="Difficulty" name="difficulty" placeholder="Easy" />
         </section>
 
-        <section className="grid gap-5 md:grid-cols-2">
-          <Field label="SEO title" name="seoTitle" placeholder="Unicorn Rainbow Coloring Page | CraftColoring" />
-          <Field label="SEO description" name="seoDescription" placeholder="Color a unicorn rainbow coloring page online or download the optimized PNG for free." />
-        </section>
+        <SeoMetadataFields />
 
         <div className="flex flex-wrap gap-6">
           <Check label="Published" name="isPublished" />
