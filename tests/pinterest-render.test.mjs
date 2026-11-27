@@ -27,13 +27,18 @@ test("small artwork is centered at its original pixel size instead of being enla
   assert.deepEqual(pixel(120,500),[255,255,255]);
 });
 
-test("editorial pins use soft, clearly separated title and category panels", async () => {
+test("all template selections use the teal, yellow and coral family-friendly design", async () => {
   const image = await sharp({create:{width:100,height:100,channels:3,background:"#fff"}}).png().toBuffer();
-  const output = await renderPinterestPin({template:"editorial",headline:"A cheerful coloring page",category:"Animals",image});
-  const {data,info}=await sharp(output).removeAlpha().raw().toBuffer({resolveWithObject:true});
-  const pixel=(x,y)=>[...data.subarray((y*info.width+x)*3,(y*info.width+x)*3+3)];
-  assert.deepEqual(pixel(500,130),[244,226,246]);
-  assert.deepEqual(pixel(600,1390),[244,226,246]);
+  for (const template of ["editorial","lilac","sunshine","midnight","papercut"]) {
+    const output = await renderPinterestPin({template,headline:"A cheerful coloring page",category:"Animals",image});
+    const {data,info}=await sharp(output).removeAlpha().raw().toBuffer({resolveWithObject:true});
+    const pixel=(x,y)=>[...data.subarray((y*info.width+x)*3,(y*info.width+x)*3+3)];
+    assert.deepEqual(pixel(20,500),[11,60,69]);
+    assert.deepEqual(pixel(20,200),[17,83,92]);
+    assert.deepEqual(pixel(500,60),[248,216,78]);
+    assert.deepEqual(pixel(80,1300),[255,255,255]);
+    assert.deepEqual(pixel(894,1240),[242,119,101]);
+  }
 });
 
 test("renderer rejects unsupported files and oversized input", async () => {

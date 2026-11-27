@@ -1,9 +1,14 @@
 # Pinterest Studio embedded vector lettering
 
-This repository includes a limited subset of **glyph outlines** from Inter Display Black,
-not a font file, to render legible PNG headlines consistently on Vercel and local machines.
+Pinterest Studio PNG lettering uses the Fredoka SVG glyph outlines in
+`src/lib/name-coloring-glyphs.json`. The source font, pinned revision, generation
+process, and OFL license are documented in `docs/NAME_COLORING.md`; its complete
+license is also included in the generated JSON and `public/licenses/fredoka-OFL.txt`.
+The renderer uses these paths rather than SVG text or installed system fonts.
 
-The outline data is derived from Inter, © 2016 The Inter Project Authors.
+The repository also retains the former Inter Display Black glyph subset in
+`src/lib/pinterest-font-data.ts`; the current pin renderer no longer imports it.
+That outline data is derived from Inter, © 2016 The Inter Project Authors.
 The Inter font software is licensed under the SIL Open Font License, Version 1.1.
 The encoded subset is distributed under the same OFL 1.1; generated PNG images
 are not required to be distributed under that font license.

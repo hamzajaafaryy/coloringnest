@@ -2,14 +2,6 @@ import sharp from "sharp";
 import { isPinTemplate, type PinTemplate } from "./pinterest-studio.ts";
 import { letterPaths, titleLetterPaths } from "./pinterest-lettering.ts";
 
-const STYLES = {
-  editorial: { bg: "#FFF8EE", ink: "#56306F", accent: "#9B64BE", secondary: "#EFC955", soft: "#F4E2F6", paper: "#FFFFFF", label: "#FBEEFF" },
-  lilac: { bg: "#EEDFFF", ink: "#52277E", accent: "#8248B7", secondary: "#FFD968", soft: "#FBF3FF", paper: "#FFFFFF", label: "#FFDF6A" },
-  sunshine: { bg: "#FFF0B9", ink: "#49326C", accent: "#EB8C50", secondary: "#9356B9", soft: "#FFF9E8", paper: "#FFFFFF", label: "#FFFFFF" },
-  midnight: { bg: "#2D2345", ink: "#FFF8F0", accent: "#EAC670", secondary: "#AD8AE1", soft: "#47385F", paper: "#FFFFFF", label: "#47385F" },
-  papercut: { bg: "#DDF3EB", ink: "#1E5963", accent: "#327980", secondary: "#F2BA52", soft: "#FFF5E7", paper: "#FFFFFF", label: "#FFFFFF" },
-} as const;
-
 type RenderOptions = {
   template: PinTemplate;
   headline: string;
@@ -17,31 +9,7 @@ type RenderOptions = {
   image: Buffer | Uint8Array;
 };
 
-function decorate(template: PinTemplate, accent: string, second: string): string {
-  if (template === "editorial") {
-    return `<circle cx="932" cy="105" r="130" fill="${accent}" opacity=".11"/>
-      <path d="M44 395 Q120 352 195 393" fill="none" stroke="${second}" stroke-width="13" stroke-linecap="round"/>
-      <circle cx="55" cy="1200" r="30" fill="${second}" opacity=".30"/>`;
-  }
-  if (template === "lilac") {
-    return `<circle cx="960" cy="140" r="160" fill="${second}" opacity=".65"/>
-      <path d="M30 368q53-71 106 0t104 0" fill="none" stroke="${accent}" stroke-width="12" opacity=".28"/>
-      <path d="M877 370l13 27 28 10-28 9-13 28-10-28-27-9 27-10z" fill="${second}"/>`;
-  }
-  if (template === "sunshine") {
-    return `<circle cx="920" cy="100" r="165" fill="${accent}" opacity=".13"/>
-      <path d="M55 425l13-29 13 29 29 13-29 13-13 29-13-29-29-13z" fill="${second}" opacity=".55"/>
-      <circle cx="900" cy="1350" r="60" fill="${accent}" opacity=".18"/>`;
-  }
-  if (template === "midnight") {
-    return `<circle cx="920" cy="56" r="140" fill="${accent}" opacity=".13"/>
-      <circle cx="73" cy="367" r="23" fill="${second}" opacity=".40"/>
-      <path d="M880 384l12 30 30 12-30 12-12 30-12-30-30-12 30-12z" fill="${accent}" opacity=".74"/>`;
-  }
-  return `<circle cx="920" cy="118" r="148" fill="${second}" opacity=".25"/>
-    <path d="M34 364q56-26 108 14t100-4" fill="none" stroke="${accent}" stroke-width="13" opacity=".23"/>
-    <path d="M915 380q-22-52-55 0 33 29 55 0zm0 0q22-52 55 0-33 29-55 0z" fill="${accent}" opacity=".45"/>`;
-}
+const ART = { x: 150, y: 499, width: 700, height: 660 } as const;
 
 /** Produce a real 1000×1500 PNG. The original drawing is composited, never redrawn. */
 export async function renderPinterestPin({
@@ -54,39 +22,47 @@ export async function renderPinterestPin({
   if (!metadata.width || !metadata.height || !["png", "jpeg", "webp", "avif"].includes(metadata.format || "")) {
     throw new Error("A PNG, JPEG, WebP or AVIF artwork image is required");
   }
-  const c = STYLES[template];
+
   const title = headline.replace(/\s+/g, " ").trim().slice(0, 90) || "Free Printable Coloring Page";
-  const headerLines = titleLetterPaths(title, c.ink);
-  const cat = (category || "Coloring Pages").trim().slice(0, 50);
-  const artX = 116, artY = 491, artW = 768, artH = 808;
-  const paperTop = template === "papercut"
-    ? `<rect x="84" y="463" width="850" height="861" rx="26" fill="#68B5AF" transform="rotate(2 500 880)" opacity=".5"/>`
-    : "";
+  const cat = (category || "Coloring Pages").replace(/\s+/g, " ").trim().slice(0, 38);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
-    <rect width="1000" height="1500" fill="${c.bg}"/>
-    ${decorate(template, c.accent, c.secondary)}
-    <rect x="64" y="119" width="872" height="306" rx="38" fill="${c.soft}" stroke="#FFFFFF" stroke-width="8"/>
-    <rect x="293" y="46" width="414" height="56" rx="28" fill="${c.label}"/>
-    ${letterPaths("FREE PRINTABLE",{x:500,y:83,fontSize:23,maxWidth:380,color:template === "midnight" ? "#FFF7E6" : c.accent,align:"center"})}
-    ${headerLines}
-    ${paperTop}
-    <rect x="78" y="457" width="844" height="878" rx="31" fill="#352C42" opacity=".10"/>
-    <rect x="72" y="451" width="856" height="874" rx="29" fill="${c.paper}" stroke="${c.accent}" stroke-opacity=".22" stroke-width="5"/>
-    <rect x="104" y="480" width="792" height="832" rx="13" fill="#FFFFFF"/>
-    <rect x="68" y="1363" width="864" height="1" fill="${c.accent}" opacity=".26"/>
-    <rect x="560" y="1380" width="372" height="82" rx="30" fill="${c.soft}"/>
-    ${letterPaths("CraftColoring",{x:72,y:1423,fontSize:30,maxWidth:490,color:c.ink})}
-    ${letterPaths("FREE TO PRINT · FUN TO COLOR",{x:72,y:1460,fontSize:19,maxWidth:470,color:c.ink})}
-    ${letterPaths(cat.slice(0, 34),{x:929,y:1414,fontSize:19,maxWidth:330,color:c.ink,align:"right"})}
-    ${letterPaths("craftcoloring.com",{x:929,y:1456,fontSize:20,maxWidth:330,color:c.ink,align:"right"})}
+    <rect width="1000" height="1500" fill="#0B3C45"/>
+    <path d="M0 0H1000V456Q790 494 500 460Q210 426 0 474Z" fill="#11535C"/>
+    <circle cx="87" cy="369" r="37" fill="none" stroke="#75B4AE" stroke-width="5"/>
+    <circle cx="913" cy="359" r="27" fill="none" stroke="#75B4AE" stroke-width="5"/>
+    <path d="M183 395l8 19 20 8-20 8-8 20-8-20-20-8 20-8zM807 414l7 16 17 7-17 7-7 17-7-17-17-7 17-7z" fill="none" stroke="#F6D65C" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="275" y="52" width="450" height="64" rx="32" fill="#F8D84E"/>
+    ${letterPaths("PRINTABLE COLORING PAGE",{x:500,y:97,fontSize:23,maxWidth:420,color:"#103A41",align:"center"})}
+    ${titleLetterPaths(title,"#FFFFFF")}
+    ${letterPaths("A FUN PAGE TO PRINT, COLOR & ENJOY",{x:500,y:423,fontSize:24,maxWidth:830,color:"#F8D84E",align:"center"})}
+
+    <rect x="112" y="467" width="790" height="744" rx="43" fill="#F8D84E" transform="rotate(-1.2 507 839)"/>
+    <rect x="96" y="450" width="790" height="744" rx="43" fill="#082F36" transform="rotate(-1.2 491 822)"/>
+    <rect x="108" y="462" width="766" height="720" rx="31" fill="#FFFFFF" stroke="#082F36" stroke-width="9" transform="rotate(-1.2 491 822)"/>
+    <rect x="138" y="486" width="724" height="690" rx="18" fill="#FFFFFF"/>
+
+    <rect x="300" y="1168" width="400" height="62" rx="31" fill="#082F36"/>
+    ${letterPaths("COLOR · PRINT · CREATE",{x:500,y:1208,fontSize:23,maxWidth:360,color:"#FFFFFF",align:"center"})}
+
+    <rect x="65" y="1282" width="870" height="158" rx="34" fill="#FFFFFF"/>
+    ${letterPaths("CraftColoring",{x:101,y:1336,fontSize:34,maxWidth:420,color:"#0B3C45"})}
+    <rect x="95" y="1360" width="350" height="48" rx="24" fill="#0B3C45"/>
+    ${letterPaths(cat || "COLORING PAGES",{x:270,y:1391,fontSize:20,maxWidth:310,color:"#FFFFFF",align:"center"})}
+    <rect x="520" y="1310" width="300" height="72" rx="36" fill="#F8D84E"/>
+    ${letterPaths("CRAFTCOLORING.COM",{x:670,y:1355,fontSize:22,maxWidth:270,color:"#103A41",align:"center"})}
+
+    <circle cx="894" cy="1274" r="61" fill="#F27765" stroke="#FFFFFF" stroke-width="7"/>
+    ${letterPaths("FREE",{x:894,y:1267,fontSize:23,maxWidth:88,color:"#FFFFFF",align:"center"})}
+    ${letterPaths("TO PRINT",{x:894,y:1295,fontSize:15,maxWidth:92,color:"#FFFFFF",align:"center"})}
   </svg>`;
+
   // Keep original pixels: shrink large artwork to fit, but never upscale small artwork.
-  const { data: illustration, info: illustrationInfo } = await sharp(source, {limitInputPixels: 40_000_000})
+  const { data: illustration, info: illustrationInfo } = await sharp(source, { limitInputPixels: 40_000_000 })
     .rotate().flatten({ background: "#FFFFFF" })
-    .resize(artW, artH, { fit: "contain", background: "#FFFFFF", withoutEnlargement: true })
+    .resize(ART.width, ART.height, { fit: "contain", background: "#FFFFFF", withoutEnlargement: true })
     .png().toBuffer({ resolveWithObject: true });
-  const left = artX + Math.round((artW - illustrationInfo.width) / 2);
-  const top = artY + Math.round((artH - illustrationInfo.height) / 2);
+  const left = ART.x + Math.round((ART.width - illustrationInfo.width) / 2);
+  const top = ART.y + Math.round((ART.height - illustrationInfo.height) / 2);
   return sharp(Buffer.from(svg))
     .composite([{ input: illustration, left, top }])
     .png({ compressionLevel: 9, effort: 7 }).toBuffer();
