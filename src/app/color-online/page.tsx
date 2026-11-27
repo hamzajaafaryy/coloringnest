@@ -4,16 +4,21 @@ import ColoringGrid from "@/components/ColoringGrid";
 import { getPublishedCardPage } from "@/db/page-cards";
 import { parsePage } from "@/lib/paging";
 import PaginationLinks from "@/components/PaginationLinks";
-import { constructMetadata, generateBreadcrumbSchema, serializeJsonLd } from "@/lib/seo";
+import { constructMetadata, buildPaginatedCanonicalUrl, generateBreadcrumbSchema, serializeJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = constructMetadata({
-  title: "Coloring Pages Online",
-  description:
-    "Color free coloring pages online in your browser with CraftColoring's interactive tools. Choose a design and start coloring instantly.",
-  path: "/color-online/",
-});
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const page = parsePage((await searchParams).page);
+  const listing = await getPublishedCardPage({ onlineOnly: true, page });
+  const metadata = constructMetadata({
+    title: "Coloring Pages Online",
+    description:
+      "Color free coloring pages online in your browser with CraftColoring's interactive tools. Choose a design and start coloring instantly.",
+    path: "/color-online/",
+  });
+  return { ...metadata, alternates: { canonical: buildPaginatedCanonicalUrl("/color-online", listing.page) } };
+}
 
 export default async function ColorOnlineDirectoryPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const listing = await getPublishedCardPage({ onlineOnly: true, page: parsePage((await searchParams).page) });

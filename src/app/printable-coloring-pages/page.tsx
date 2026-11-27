@@ -5,7 +5,7 @@ import ColoringGrid from "@/components/ColoringGrid";
 import {
   getAllPublishedCategories,
 } from "@/db/queries";
-import { constructMetadata, buildCanonicalUrl } from "@/lib/seo";
+import { constructMetadata, buildPaginatedCanonicalUrl } from "@/lib/seo";
 import { getPublishedCardPage } from "@/db/page-cards";
 import { parsePage } from "@/lib/paging";
 import PaginationLinks from "@/components/PaginationLinks";
@@ -13,13 +13,14 @@ import PaginationLinks from "@/components/PaginationLinks";
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const page = parsePage((await searchParams).page);
+  const listing = await getPublishedCardPage({ page });
   const metadata = constructMetadata({
-  title: "Free Printable Coloring Pages for Kids",
-  description:
-    "Choose a free printable coloring page for kids. Browse our easy-to-print pictures for home, school, and fun afternoons with crayons.",
-  path: "/printable-coloring-pages/",
-});
-  return page > 1 ? { ...metadata, alternates: { canonical: `${buildCanonicalUrl("/printable-coloring-pages")}?page=${page}` } } : metadata;
+    title: "Free Printable Coloring Pages for Kids",
+    description:
+      "Choose a free printable coloring page for kids. Browse our easy-to-print pictures for home, school, and fun afternoons with crayons.",
+    path: "/printable-coloring-pages/",
+  });
+  return { ...metadata, alternates: { canonical: buildPaginatedCanonicalUrl("/printable-coloring-pages", listing.page) } };
 }
 
 export default async function PrintableDirectory({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
