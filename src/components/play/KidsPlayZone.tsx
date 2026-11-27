@@ -67,24 +67,33 @@ export default function KidsPlayZone() {
   }, []);
 
   useEffect(() => {
-    setActive(activeFromHash());
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) setActive(activeFromHash());
+    });
     const onHashChange = () => setActive(activeFromHash());
     window.addEventListener("hashchange",onHashChange);
     return () => {
+      cancelled = true;
       window.removeEventListener("hashchange",onHashChange);
       if(audioRef.current) void audioRef.current.close();
     };
   }, []);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STARS_KEY);
-      const saved = raw === null ? 0 : Number(raw);
-      if (Number.isSafeInteger(saved) && saved >= 0) setStars(Math.min(saved,999999));
-      const audio = localStorage.getItem(AUDIO_KEY);
-      if(audio === "off"){ setSoundOn(false); enabledRef.current=false; }
-    } catch {}
-    setLoaded(true);
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (cancelled) return;
+      try {
+        const raw = localStorage.getItem(STARS_KEY);
+        const saved = raw === null ? 0 : Number(raw);
+        if (Number.isSafeInteger(saved) && saved >= 0) setStars(Math.min(saved,999999));
+        const audio = localStorage.getItem(AUDIO_KEY);
+        if(audio === "off"){ setSoundOn(false); enabledRef.current=false; }
+      } catch {}
+      setLoaded(true);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
