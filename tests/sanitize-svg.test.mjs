@@ -14,7 +14,7 @@ test("SVG sanitizer removes executable elements, event handlers and inline style
 });
 
 test("SVG sanitizer rejects encoded, whitespace-prefixed and external href values", () => {
-  const input = `<svg xmlns="http://www.w3.org/2000/svg">
+  const input = `<svg xmlns="http://www.w3.org/2000/svg" xml:base="https://attacker.example/">
     <a href=" javascript:alert(1)"><path d="M0 0L1 1"/></a>
     <use href="&#x23;remote"/>
     <image href="//attacker.example/pixel.svg"/>
