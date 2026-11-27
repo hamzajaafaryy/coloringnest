@@ -231,7 +231,7 @@ export default function PinterestStudio(){
             <div><p className="text-[10px] font-black uppercase tracking-[.18em] text-violet-500">Step 01 / Artwork</p><h2 className="mt-1 text-xl font-black">Your library</h2></div>
             <span className="rounded-full bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700">{catalog.total}</span>
           </div>
-          <form onSubmit={e=>{e.preventDefault();setCatalogBusy(true);setError("");setPage(1);setSearch(searchInput.trim());}} className="mb-4 flex gap-2">
+          <form onSubmit={e=>{e.preventDefault();const nextSearch=searchInput.trim();setError("");if(page!==1||search!==nextSearch){setCatalogBusy(true);setPage(1);setSearch(nextSearch);}}} className="mb-4 flex gap-2">
             <label className="relative min-w-0 flex-1">
               <Search size={17} className="pointer-events-none absolute left-3 top-3.5 text-slate-400"/>
               <input aria-label="Search published coloring pages" value={searchInput} onChange={e=>setSearchInput(e.target.value)}
