@@ -33,7 +33,7 @@ export default function ColoringCard({ page, priority = false, variant = "colori
   const cardLabel = isPrintable ? `Open printable ${page.title}` : `View ${page.title}`;
 
   return (
-    <article className={`group relative flex h-full min-w-0 flex-col overflow-hidden rounded-[1.75rem] border bg-white transition-all duration-500 ${isPrintable ? "border-orange-200/80 shadow-[0_10px_35px_rgba(234,88,12,0.08)] hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(234,88,12,0.15)]" : "border-slate-200/80 shadow-[0_10px_35px_rgba(15,23,42,0.06)] hover:-translate-y-2 hover:shadow-[0_24px_55px_rgba(124,58,237,0.16)]"}`}>
+    <article className={`group relative flex h-full min-w-0 flex-col overflow-hidden rounded-[1.75rem] border-2 border-[#2b2140] bg-white shadow-[5px_5px_0_rgba(43,33,64,0.14)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[8px_8px_0_rgba(43,33,64,0.16)]`}>
       {pageSlug && categorySlug && <FavoriteButton slug={pageSlug} categorySlug={categorySlug} title={page.title} />}
       <span className={`pointer-events-none absolute -right-4 -top-4 h-14 w-14 rounded-full blur-[1px] transition-transform duration-500 group-hover:scale-150 ${isPrintable ? "bg-orange-300/70" : "bg-yellow-300/70"}`} />
       <span className="pointer-events-none absolute bottom-20 -left-3 h-7 w-7 rotate-12 rounded-lg bg-pink-300/60 transition-transform duration-500 group-hover:rotate-45" />
