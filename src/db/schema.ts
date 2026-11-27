@@ -190,4 +190,6 @@ export const coloringSheets = pgTable("coloring_sheets", {
   svgUrl: text("svg_url"),
   sortOrder: bigint("sort_order", { mode: "number" }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [
+  index("coloring_sheets_page_order_idx").on(table.coloringPageId, table.sortOrder),
+]);
