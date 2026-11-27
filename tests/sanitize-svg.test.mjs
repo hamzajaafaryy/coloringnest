@@ -20,7 +20,7 @@ test("SVG sanitizer rejects encoded, whitespace-prefixed and external href value
     <image href="//attacker.example/pixel.svg"/>
   </svg>`;
   const output = sanitizeSvg(input);
-  assert.doesNotMatch(output, /href=/i);
+  assert.doesNotMatch(output, /href=|xml:base/i);
 });
 
 test("SVG sanitizer keeps local fragment references but removes external url() loads", () => {
