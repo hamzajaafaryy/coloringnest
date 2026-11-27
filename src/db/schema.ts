@@ -48,7 +48,7 @@ export const categoryFaqs = pgTable("category_faqs", {
 
   categoryId: bigint("category_id", { mode: "number" })
     .notNull()
-    .references(() => categories.id),
+    .references(() => categories.id, { onDelete: "cascade" }),
 
   question: text("question"),
   answer: text("answer"),
@@ -162,7 +162,7 @@ export const faqs = pgTable("faqs", {
 
   coloringPageId: bigint("coloring_page_id", {
     mode: "number",
-  }).notNull().references(() => coloringPages.id),
+  }).notNull().references(() => coloringPages.id, { onDelete: "cascade" }),
 
   question: text("question"),
   answer: text("answer"),
