@@ -4,12 +4,12 @@ import { sanitizeSvg } from "../src/lib/sanitize-svg.ts";
 
 test("SVG sanitizer removes executable elements, event handlers and inline styles", () => {
   const input = `<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)">
-    <script>alert(1)</script>
+    <script>alert(1)</script>\n    <animate attributeName="href" to="javascript:alert(2)"/>
     <style>@import url(https://attacker.example/x.css);</style>
     <path d="M0 0L10 10" onclick="alert(1)" style="fill:red"/>
   </svg>`;
   const output = sanitizeSvg(input);
-  assert.doesNotMatch(output, /<script|<style|onload|onclick|style=/i);
+  assert.doesNotMatch(output, /<script|<style|<animate|onload|onclick|style=/i);
   assert.match(output, /<path\b/);
 });
 
