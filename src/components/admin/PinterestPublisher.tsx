@@ -25,13 +25,21 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
   if(!r.ok)throw Error(data.error||"Could not read Pinterest connection");
   setAccount(data);
  },[]);
- useEffect(()=>{refresh().catch(e=>setError(e.message));},[refresh]);
  useEffect(()=>{
-  const found=account?.boards.find(b=>b.id===boardId);
-  if(found)return;
-  const exact=account?.boards.find(b=>b.name.toLowerCase()===seo.board.toLowerCase());
-  setBoardId(exact?.id||"");
- },[account?.boards,seo.board,boardId]);
+  let cancelled=false;
+  fetch("/api/admin/pinterest/account",{cache:"no-store"})
+   .then(async r=>{
+    const data=await r.json();
+    if(!r.ok)throw Error(data.error||"Could not read Pinterest connection");
+    return data as Account;
+   })
+   .then(data=>{if(!cancelled)setAccount(data);})
+   .catch(e=>{if(!cancelled)setError(e instanceof Error?e.message:"Could not read Pinterest connection");});
+  return ()=>{cancelled=true;};
+ },[]);
+ const selectedBoardId = account?.boards.some(b=>b.id===boardId)
+  ? boardId
+  : account?.boards.find(b=>b.name.toLowerCase()===seo.board.toLowerCase())?.id||"";
  async function action(payload:Record<string,unknown>){
   setError("");setNotice("");setLoading(true);
   try{
@@ -53,16 +61,16 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
  }
  function selectedPin(){
   if(!item)throw Error("Choose an artwork");
-  if(!boardId)throw Error("Select an existing Pinterest Board");
+  if(!selectedBoardId)throw Error("Select an existing Pinterest Board");
   if(busy)throw Error("Finish editing your Pin first");
   return {pageId:item.id,sheetId,template,
     headline:seo.headline,title:seo.title,description:seo.description,
-    altText:seo.altText,boardId,destination:seo.destination};
+    altText:seo.altText,boardId:selectedBoardId,destination:seo.destination};
  }
  async function publishNow(){
   try{
    const pin=selectedPin();
-   const board=account?.boards.find(b=>b.id===boardId)?.name||"this Board";
+   const board=account?.boards.find(b=>b.id===selectedBoardId)?.name||"this Board";
    if(!window.confirm(account?.environment==="sandbox"?`Create this test Pin in Pinterest Sandbox on "${board}"? Only you will see it.`:`Publish this specific Pin NOW to "${board}"? This creates a public Pin.`))return;
    await action({...pin,action:"publishNow"});
   }catch(e){setError(e instanceof Error?e.message:"Invalid Pin");}
@@ -82,7 +90,7 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
    <h3 className="flex items-center gap-2 text-base font-black text-[#392554]"><Send size={18}/> Pinterest Auto-Publisher</h3>
    <button type="button" onClick={()=>refresh().catch(e=>setError(e.message))} className="rounded-lg bg-white p-2 text-violet-700" aria-label="Refresh Pinterest connection"><RefreshCcw size={16}/></button>
   </div>
-  <p className="text-xs leading-5 text-slate-600">Create and approve Pins with Pinterest's official API. Production publishing requires Standard Access.</p>
+  <p className="text-xs leading-5 text-slate-600">Create and approve Pins with Pinterest&apos;s official API. Production publishing requires Standard Access.</p>
   {account?.environment==="sandbox"&&<div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-xs leading-5 text-indigo-900">
     <p className="font-black">SANDBOX TEST MODE — creator-visible only</p>
     <p>Sandbox needs its own OAuth connection, Boards, and tokens. Tests here do not create public Pins or drive traffic. After your Standard Access upgrade, switch the app to Production and authorize again.</p>
@@ -118,7 +126,7 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
     {account.warning&&<p role="alert" className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">{account.warning}</p>}
     <label className="block space-y-2 text-xs font-black text-slate-700">
       <span>Choose a real Board</span>
-      <select className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm" value={boardId} onChange={e=>setBoardId(e.target.value)}>
+      <select className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm" value={selectedBoardId} onChange={e=>setBoardId(e.target.value)}>
         <option value="">Select a Pinterest Board…</option>
         {account.boards.map(board=><option value={board.id} key={board.id}>{board.name}</option>)}
       </select>
@@ -127,7 +135,7 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
     {account.environment==="sandbox"&&<button type="button" disabled={loading||busy} onClick={()=>{
       if(window.confirm("Create one private Pinterest Sandbox test Board? Only you can see it."))void action({action:"createSandboxBoard"});
     }} className="flex w-full items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-black text-indigo-700 disabled:opacity-40">Create or find Sandbox test Board</button>}
-    <button type="button" disabled={!boardId||!item||busy||loading||!account.publishingAllowed||account.auth?.publishReady===false} onClick={()=>void publishNow()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#BD1E44] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
+    <button type="button" disabled={!selectedBoardId||!item||busy||loading||!account.publishingAllowed||account.auth?.publishReady===false} onClick={()=>void publishNow()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#BD1E44] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
      {loading?<LoaderCircle size={16} className="animate-spin"/>:<Send size={16}/>} {account.environment==="sandbox"?"Test selected Pin in Sandbox":"Publish selected Pin now"}
     </button>
     <div className="rounded-xl border border-violet-100 bg-white p-3">
@@ -135,7 +143,7 @@ export default function PinterestPublisher({item,seo,template,sheetId,busy}:Prop
       <label className="block text-xs font-semibold text-slate-600">Publication day (09:00 UTC, within the following hour on Hobby)</label>
       <input type="date" min={tomorrow()} value={date} onChange={e=>setDate(e.target.value)} className="my-3 w-full rounded-xl border border-slate-200 p-3 text-sm"/>
       {!account.scheduleEnabled&&<p className="mb-2 text-xs font-bold text-amber-700">Add CRON_SECRET in Vercel to enable scheduled publishing.</p>}
-      <button type="button" disabled={!account.scheduleEnabled||!boardId||!item||busy||loading||!account.publishingAllowed||account.auth?.publishReady===false} onClick={()=>void schedule()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#57338B] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
+      <button type="button" disabled={!account.scheduleEnabled||!selectedBoardId||!item||busy||loading||!account.publishingAllowed||account.auth?.publishReady===false} onClick={()=>void schedule()} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#57338B] px-4 py-3 text-sm font-black text-white disabled:opacity-40">
        <CalendarClock size={16}/> Approve & schedule this Pin
       </button>
       <p className="mt-2 text-[11px] leading-5 text-slate-500">Up to 3 approved Pins are sent per daily run. No automatic retries after ambiguous network errors. Public visibility requires Pinterest Standard API access.</p>
