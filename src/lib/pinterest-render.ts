@@ -1,6 +1,5 @@
 import sharp from "sharp";
 import { isPinTemplate, type PinTemplate } from "./pinterest-studio.ts";
-import { letterPaths, titleLetterPaths } from "./pinterest-lettering.ts";
 
 type RenderOptions = {
   template: PinTemplate;
@@ -9,7 +8,35 @@ type RenderOptions = {
   image: Buffer | Uint8Array;
 };
 
-/** Produce a real 1000×1500 PNG. The original drawing is composited, never redrawn. */
+function xml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+}
+
+function wrapTitle(value: string, maxChars = 18): string[] {
+  const words = value.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  const lines: string[] = [];
+  let line = "";
+  for (const word of words) {
+    const next = line ? line + " " + word : word;
+    if (line && next.length > maxChars) {
+      lines.push(line);
+      line = word;
+    } else line = next;
+  }
+  if (line) lines.push(line);
+  if (lines.length > 2) {
+    const joined = lines.slice(1).join(" ");
+    lines.splice(1, lines.length - 1, joined);
+  }
+  return lines;
+}
+
+/**
+ * Render the CraftColoring Signature Pinterest pin.
+ * The composition follows the supplied 1000×1500 Baby Hippo design reference:
+ * teal canvas, Fredoka-style headline, rotated white artwork card, coral print
+ * sticker, three dark feature pills, and the white branded footer.
+ */
 export async function renderPinterestPin({
   template, headline, category, image,
 }: RenderOptions): Promise<Buffer> {
@@ -21,71 +48,89 @@ export async function renderPinterestPin({
     throw new Error("A PNG, JPEG, WebP or AVIF artwork image is required");
   }
 
-  // One consistent CraftColoring identity, adapted from the supplied Baby Hippo reference.
   const bg = "#0E7C86";
-  const deep = "#0B2F33";
   const teal = "#12929B";
+  const ink = "#0B2F33";
   const yellow = "#FFD95A";
   const coral = "#FF6B4A";
   const white = "#FFFFFF";
-  const title = headline.replace(/\\s+/g, " ").trim().slice(0, 76) || "Free Printable Coloring Page";
-  const rawCategory = (category || "Coloring").trim().replace(/\\s+coloring pages?$/i, "");
-  const categoryLabel = (rawCategory || "Coloring").slice(0, 34) + " Coloring Pages";
-  const titlePaths = titleLetterPaths(title, white);
-  const titleShadow = titleLetterPaths(title, deep);
-  const artW = 540, artH = 610;
-  const artX = 230, artY = 560;
-  const cat = categoryLabel.replace(/\\s+/g, " ").slice(0, 42);
+  const title = headline.replace(/\s+/g, " ").trim().slice(0, 58) || "Free Printable Coloring Page";
+  const rawCategory = (category || "Coloring").trim().replace(/\s+coloring pages?$/i, "").slice(0, 32) || "Coloring";
+  const subtitle = rawCategory + " Coloring Pages";
+  const lines = wrapTitle(title);
+  const titleSize = lines.some(line => line.length > 15) ? 88 : 104;
+  const titleMarkup = lines.map((line, index) =>
+    `<text x="500" y="${188 + index * (titleSize * 0.98)}" text-anchor="middle" font-family="Fredoka, DejaVu Sans, sans-serif" font-size="${titleSize}" font-weight="700" fill="${white}" stroke="${ink}" stroke-width="0" style="paint-order:stroke;filter:url(#titleShadow)">${xml(line)}</text>`
+  ).join("");
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
+  const artWidth = 540;
+  const artHeight = Math.min(670, Math.max(360, Math.round(artWidth * metadata.height / metadata.width)));
+  const cardX = 201;
+  const cardY = 510;
+  const cardWidth = 598;
+  const cardHeight = artHeight + 58;
+  const resized = await sharp(source, { limitInputPixels: 40_000_000 })
+    .rotate()
+    .flatten({ background: white })
+    .resize(artWidth, artHeight, { fit: "contain", background: white, withoutEnlargement: false })
+    .png()
+    .toBuffer();
+  const artMeta = await sharp(resized).metadata();
+  const imageX = cardX + 29 + Math.round((artWidth - (artMeta.width || artWidth)) / 2);
+  const imageY = cardY + 29 + Math.round((artHeight - (artMeta.height || artHeight)) / 2);
+  const imageBase64 = resized.toString("base64");
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1500" viewBox="0 0 1000 1500">
+    <defs>
+      <filter id="titleShadow" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="7" stdDeviation="0" flood-color="${ink}"/></filter>
+      <clipPath id="artClip"><rect x="${imageX}" y="${imageY}" width="${artMeta.width || artWidth}" height="${artMeta.height || artHeight}" rx="22"/></clipPath>
+    </defs>
     <rect width="1000" height="1500" fill="${bg}"/>
-    <ellipse cx="500" cy="20" rx="520" ry="350" fill="${teal}"/>
-    <circle cx="-5" cy="625" r="70" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="8"/>
-    <circle cx="74" cy="740" r="32" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="6"/>
-    <circle cx="1010" cy="1020" r="60" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="8"/>
-    <circle cx="920" cy="1160" r="25" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="6"/>
-    <path d="M92 88l13 34 34 13-34 13-13 34-13-34-34-13 34-13z" fill="${yellow}"/>
-    <path d="M904 328l10 25 25 10-25 10-10 25-10-25-25-10 25-10z" fill="${coral}"/>
-    <path d="M80 1200l11 27 27 11-27 11-11 27-11-27-27-11 27-11z" fill="${yellow}"/>
+    <ellipse cx="500" cy="150" rx="520" ry="350" fill="${teal}"/>
+    <circle cx="- -0" cy="630" r="70" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="8"/>
+    <circle cx="68" cy="732" r="32" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="6"/>
+    <circle cx="1010" cy="1040" r="60" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="8"/>
+    <circle cx="925" cy="1160" r="25" fill="none" stroke="${white}" stroke-opacity=".35" stroke-width="6"/>
+    <path d="M80 70 L92 105 L127 117 L92 129 L80 164 L68 129 L33 117 L68 105 Z" fill="${yellow}"/>
+    <path d="M920 310 L930 337 L957 347 L930 357 L920 384 L910 357 L883 347 L910 337 Z" fill="#FF8A65"/>
+    <path d="M80 1190 L91 1218 L119 1229 L91 1240 L80 1268 L69 1240 L41 1229 L69 1218 Z" fill="${yellow}"/>
 
-    <rect x="286" y="54" width="428" height="58" rx="29" fill="${yellow}" transform="rotate(-2 500 83)"/>
-    ${letterPaths("PRINTABLE COLORING PAGE",{x:500,y:92,fontSize:23,maxWidth:390,color:deep,align:"center"})}
-    <g transform="translate(0 7)">${titleShadow}</g>
-    ${titlePaths}
-    ${letterPaths(cat,{x:500,y:442,fontSize:43,maxWidth:840,color:yellow,align:"center"})}
+    <rect x="320" y="58" width="360" height="54" rx="27" fill="${yellow}" transform="rotate(-2 500 85)"/>
+    <text x="500" y="94" text-anchor="middle" font-family="Nunito, DejaVu Sans, sans-serif" font-size="22" font-weight="800" letter-spacing="2.5" fill="${ink}">PRINTABLE COLORING PAGE</text>
+    ${titleMarkup}
+    <text x="500" y="${lines.length === 1 ? 330 : 410}" text-anchor="middle" font-family="Fredoka, DejaVu Sans, sans-serif" font-size="48" font-weight="600" fill="${yellow}">${xml(subtitle)}</text>
 
-    <rect x="208" y="540" width="600" height="665" rx="44" fill="${yellow}" />
-    <rect x="190" y="520" width="600" height="665" rx="44" fill="${white}" stroke="${deep}" stroke-width="7"/>
-    <rect x="216" y="546" width="548" height="613" rx="24" fill="#FFFFFF"/>
-    <circle cx="814" cy="496" r="87" fill="${coral}" stroke="${deep}" stroke-width="7"/>
-    <g transform="translate(814 484)">
-      ${letterPaths("FREE",{x:0,y:0,fontSize:53,maxWidth:145,color:deep,align:"center"})}
-      ${letterPaths("TO PRINT",{x:0,y:38,fontSize:23,maxWidth:140,color:deep,align:"center"})}
+    <g transform="rotate(-2 500 ${cardY + cardHeight / 2})">
+      <rect x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" rx="44" fill="${white}" stroke="${ink}" stroke-width="7"/>
+      <image x="${imageX}" y="${imageY}" width="${artMeta.width || artWidth}" height="${artMeta.height || artHeight}" xlink:href="data:image/png;base64,${imageBase64}" clip-path="url(#artClip)"/>
     </g>
 
-    <rect x="160" y="1220" width="300" height="58" rx="29" fill="${deep}"/>
-    ${letterPaths("PRINT AT HOME",{x:310,y:1257,fontSize:22,maxWidth:260,color:white,align:"center"})}
-    <rect x="478" y="1220" width="362" height="58" rx="29" fill="${deep}"/>
-    ${letterPaths("LETTER & A4",{x:659,y:1257,fontSize:22,maxWidth:320,color:white,align:"center"})}
+    <g transform="rotate(14 809 496)">
+      <circle cx="809" cy="496" r="86" fill="${coral}" stroke="${ink}" stroke-width="7"/>
+      <text x="809" y="488" text-anchor="middle" font-family="Fredoka, DejaVu Sans, sans-serif" font-size="52" font-weight="700" fill="${ink}">FREE</text>
+      <text x="809" y="524" text-anchor="middle" font-family="Fredoka, DejaVu Sans, sans-serif" font-size="25" font-weight="700" fill="${ink}">TO PRINT</text>
+    </g>
 
-    <rect x="56" y="1332" width="888" height="116" rx="58" fill="${white}" stroke="${deep}" stroke-width="6"/>
-    <rect x="56" y="1440" width="888" height="8" rx="4" fill="${deep}"/>
-    ${letterPaths("CraftColoring",{x:94,y:1388,fontSize:38,maxWidth:390,color:deep})}
-    ${letterPaths(categoryLabel.slice(0,30),{x:94,y:1423,fontSize:20,maxWidth:390,color:"#0B6B73"})}
+    <g font-family="Nunito, DejaVu Sans, sans-serif" font-size="22" font-weight="800" fill="${white}" text-anchor="middle">
+      <rect x="86" y="1240" width="250" height="58" rx="29" fill="${ink}"/>
+      <text x="211" y="1277">FREE PDF</text>
+      <rect x="355" y="1240" width="290" height="58" rx="29" fill="${ink}"/>
+      <text x="500" y="1277">PRINT AT HOME</text>
+      <rect x="664" y="1240" width="250" height="58" rx="29" fill="${ink}"/>
+      <text x="789" y="1277">LETTER &amp; A4</text>
+    </g>
+
+    <rect x="56" y="1332" width="888" height="116" rx="58" fill="${white}" stroke="${ink}" stroke-width="6"/>
+    <rect x="56" y="1440" width="888" height="8" rx="4" fill="${ink}"/>
+    <text x="96" y="1390" font-family="Fredoka, DejaVu Sans, sans-serif" font-size="38" font-weight="700" fill="${ink}">CraftColoring</text>
+    <text x="96" y="1423" font-family="Nunito, DejaVu Sans, sans-serif" font-size="19" font-weight="800" fill="#0B6B73">${xml(subtitle.slice(0, 30))}</text>
     <rect x="622" y="1356" width="292" height="66" rx="33" fill="${coral}"/>
-    ${letterPaths("craftcoloring.com",{x:768,y:1399,fontSize:25,maxWidth:265,color:"#2A0F00",align:"center"})}
+    <text x="768" y="1399" text-anchor="middle" font-family="Nunito, DejaVu Sans, sans-serif" font-size="25" font-weight="800" fill="#2A0F00">craftcoloring.com</text>
   </svg>`;
 
-  // Keep the original coloring artwork intact; only scale it to fit the reference frame.
-  const { data: illustration, info: illustrationInfo } = await sharp(source, {limitInputPixels: 40_000_000})
-    .rotate().flatten({ background: "#FFFFFF" })
-    .resize(artW, artH, { fit: "contain", background: "#FFFFFF", withoutEnlargement: true })
-    .png().toBuffer({ resolveWithObject: true });
-  const left = artX + Math.round((artW - illustrationInfo.width) / 2);
-  const top = artY + Math.round((artH - illustrationInfo.height) / 2);
   return sharp(Buffer.from(svg))
-    .composite([{ input: illustration, left, top }])
-    .png({ compressionLevel: 9, effort: 7 }).toBuffer();
+    .png({ compressionLevel: 9, effort: 7 })
+    .toBuffer();
 }
 
 export async function fetchPinterestArtworkImage(imageUrl: string): Promise<Buffer> {
