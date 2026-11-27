@@ -86,7 +86,7 @@ try{
  assert.ok(categorySchema.mainEntity.itemListElement.every(item=>!item.item.url.endsWith('/')));
  console.log('PASS: crawlable article links, headings, lists, safe JSON-LD/HTML, article preview image, drafts, sitemap, artwork and category Schema');
  await page.goto(origin+'/admin/coloring-pages/1');assert.ok(page.url().includes('/admin/login'));
- const payload=Buffer.from(JSON.stringify({username:'fixture',exp:Date.now()+600000})).toString('base64url');const signature=createHmac('sha256','fixture-secret').update(payload).digest('hex');await context.addCookies([{name:'craftcoloring_admin',value:`${payload}.${signature}`,domain:'localhost',path:'/'}]);
+ const credentialVersion=createHmac('sha256','fixture-secret').update('fixture: fixture').digest('hex');const payload=Buffer.from(JSON.stringify({username:'fixture',credentialVersion,exp:Date.now()+600000})).toString('base64url');const signature=createHmac('sha256','fixture-secret').update(payload).digest('hex');await context.addCookies([{name:'craftcoloring_admin',value:`${payload}.${signature}`,domain:'localhost',path:'/'}]);
  await page.goto(origin+'/admin/coloring-pages/1');await page.getByRole('heading',{name:'Collection sheets',exact:true}).waitFor();assert.equal(await page.locator('fieldset').count(),2);
  const trusted=origin+'/storage/v1/object/public/coloring-pages/images/test.png';await page.route('**/api/admin/upload',route=>route.fulfill({json:{url:trusted,size:100,width:850,height:1100}}));
  for(const field of await page.locator('fieldset').all())await field.getByLabel('Printable image',{exact:true}).setInputFiles({name:'test.png',mimeType:'image/png',buffer:await readFile(root+'/public/collection-test/cat.png')});
