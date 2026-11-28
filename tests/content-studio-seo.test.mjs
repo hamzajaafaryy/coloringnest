@@ -15,6 +15,12 @@ const valid = () => ({
   category: 'Princess', tags: ['cat', 'princess', 'crown', 'dress'],
   ageRange: 'Suggested ages 4–8', difficulty: 'Easy',
   faqs: Array.from({ length: 3 }, (_, index) => ({ question: `Question ${index + 1}?`, answer: Array(40).fill('color').join(' ') })),
+  meetYourColoringPage: 'A crowned cat wears a dress in this printable picture.',
+  whatYoullNeed: ['Crayons', 'Colored pencils'],
+  funColoringIdeas: ['Try a bright color for the crown.'],
+  learningActivity: { title: 'Notice the details', description: 'Look closely at the shapes in the picture.', activity: 'Count the visible decorations before coloring.' },
+  makeItYourOwn: { description: 'Add a pattern to the dress.', challenge: 'Use three shapes in your pattern.' },
+  printingTips: ['Choose A4 or US Letter and fit the image to the page.'],
 });
 
 test('new SEO JSON needs no unused cardDescription field', () => {
@@ -35,8 +41,30 @@ test('invalid JSON roots cannot be saved as SEO content', () => {
   for (const value of [null, [], 'text', 1, false]) assert.equal(validateStudioSeo(value).seo, null);
 });
 
-test('legacy JSON with cardDescription still imports', () => {
+test('JSON with the legacy cardDescription field still imports', () => {
   assert.deepEqual(validateStudioSeo({ ...valid(), cardDescription: 'Old unused field' }).issues, []);
+});
+
+test('new JSON requires all six complete section fields', () => {
+  const missing = valid();
+  delete missing.funColoringIdeas;
+  delete missing.learningActivity;
+  const result = validateStudioSeo(missing);
+  assert.ok(result.issues.some(issue => issue.includes('funColoringIdeas')));
+  assert.ok(result.issues.some(issue => issue.includes('learningActivity')));
+
+  const malformed = validateStudioSeo({
+    ...valid(),
+    whatYoullNeed: ['Crayons', 4],
+    makeItYourOwn: { description: 'Add a pattern.' },
+  });
+  assert.ok(malformed.issues.some(issue => issue.includes('whatYoullNeed')));
+  assert.ok(malformed.issues.some(issue => issue.includes('makeItYourOwn.challenge')));
+});
+
+test('unknown JSON properties are rejected instead of silently discarded', () => {
+  const result = validateStudioSeo({ ...valid(), sectionNotes: 'This would be lost.' });
+  assert.ok(result.issues.some(issue => issue.includes('Unrecognized field: sectionNotes')));
 });
 
 test('unknown categories and unsupported difficulty cannot pass publication checks', () => {
@@ -72,4 +100,13 @@ test('master prompt treats collection labels as untrusted and reflects available
 test('master prompt only advertises SVG downloads when an SVG is attached to a single page', () => {
   assert.match(buildStudioPrompt(true), /Download SVG is also available/);
   assert.doesNotMatch(buildStudioPrompt(false), /Download SVG is also available/);
+});
+
+test('master prompt requires all six image-specific section fields', () => {
+  const prompt = buildStudioPrompt(false);
+  for (const field of ['meetYourColoringPage', 'whatYoullNeed', 'funColoringIdeas', 'learningActivity', 'makeItYourOwn', 'printingTips']) {
+    assert.ok(prompt.includes(field));
+  }
+  assert.match(prompt, /Do not invent species, cultural, historical, scientific, or other facts/);
+  assert.match(prompt, /Return exactly these keys/);
 });

@@ -3,6 +3,7 @@ import {
   bigint,
   text,
   boolean,
+  jsonb,
   timestamp,
   index,
   uniqueIndex,
@@ -70,6 +71,19 @@ export const coloringPages = pgTable("coloring_pages", {
   title: text("title").notNull(),
   slug: text("slug"),
   description: text("description"),
+  meetYourColoringPage: text("meet_your_coloring_page"),
+  whatYoullNeed: text("what_youll_need").array(),
+  funColoringIdeas: text("fun_coloring_ideas").array(),
+  learningActivity: jsonb("learning_activity").$type<{
+    title: string;
+    description: string;
+    activity: string;
+  }>(),
+  makeItYourOwn: jsonb("make_it_your_own").$type<{
+    description: string;
+    challenge: string;
+  }>(),
+  printingTips: text("printing_tips").array(),
 
   categoryId: bigint("category_id", { mode: "number" })
     .references(() => categories.id),

@@ -5,6 +5,12 @@ export interface StudioSeo {
   description: string; primaryKeyword: string; keywords: string[];
   altText: string; category: string; tags: string[]; ageRange: string;
   difficulty: string; faqs: { question: string; answer: string }[];
+  meetYourColoringPage: string;
+  whatYoullNeed: string[];
+  funColoringIdeas: string[];
+  learningActivity: { title: string; description: string; activity: string };
+  makeItYourOwn: { description: string; challenge: string };
+  printingTips: string[];
 }
 
 export const SEO_RULES = [
@@ -31,6 +37,15 @@ export function validateStudioSeo(value: unknown): { seo: StudioSeo | null; issu
   if (!value || typeof value !== "object" || Array.isArray(value)) return { seo: null, issues: ["JSON must be one object."] };
   const input = value as Record<string, unknown>;
   const issues: string[] = [];
+  const allowedKeys = new Set([
+    "title", "slug", "seoTitle", "seoDescription", "description", "primaryKeyword",
+    "keywords", "altText", "category", "tags", "ageRange", "difficulty", "faqs",
+    "meetYourColoringPage", "whatYoullNeed", "funColoringIdeas", "learningActivity",
+    "makeItYourOwn", "printingTips", "cardDescription",
+  ]);
+  for (const key of Object.keys(input)) {
+    if (!allowedKeys.has(key)) issues.push(`Unrecognized field: ${key}.`);
+  }
   const string = (key: string) => typeof input[key] === "string" ? input[key].trim() : "";
   const strings = (key: string) => {
     const items = input[key];
@@ -46,12 +61,52 @@ export function validateStudioSeo(value: unknown): { seo: StudioSeo | null; issu
     const row = item as Record<string, unknown>;
     return { question: typeof row.question === "string" ? row.question.trim() : "", answer: typeof row.answer === "string" ? row.answer.trim() : "" };
   });
+  const requiredText = (key: string) => {
+    if (typeof input[key] !== "string" || !input[key].trim()) {
+      issues.push(`${key} must be a non-empty string.`);
+      return "";
+    }
+    return input[key].trim();
+  };
+  const requiredTextArray = (key: string) => {
+    const items = input[key];
+    if (!Array.isArray(items) || !items.length || items.some(item => typeof item !== "string" || !item.trim())) {
+      issues.push(`${key} must be a non-empty array of non-empty strings.`);
+      return [];
+    }
+    return items.map(item => (item as string).trim());
+  };
+  const requiredObject = <K extends string>(key: string, keys: readonly K[]) => {
+    const value = input[key];
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      issues.push(`${key} must be an object with ${keys.join(", ")}.`);
+      return Object.fromEntries(keys.map(field => [field, ""])) as Record<K, string>;
+    }
+    const object = value as Record<string, unknown>;
+    const invalidKeys = Object.keys(object).filter(field => !keys.includes(field as K));
+    const result = Object.fromEntries(keys.map(field => {
+      const fieldValue = object[field];
+      if (typeof fieldValue !== "string" || !fieldValue.trim()) {
+        issues.push(`${key}.${field} must be a non-empty string.`);
+        return [field, ""];
+      }
+      return [field, fieldValue.trim()];
+    })) as Record<K, string>;
+    if (invalidKeys.length) issues.push(`${key} contains unrecognized fields: ${invalidKeys.join(", ")}.`);
+    return result;
+  };
   const seo: StudioSeo = {
     title: string("title"), slug: string("slug"), seoTitle: string("seoTitle"),
     seoDescription: string("seoDescription"), description: string("description"),
     primaryKeyword: string("primaryKeyword"), keywords: strings("keywords"), altText: string("altText"),
     category: string("category"), tags: strings("tags"), ageRange: string("ageRange"),
     difficulty: string("difficulty"), faqs,
+    meetYourColoringPage: requiredText("meetYourColoringPage"),
+    whatYoullNeed: requiredTextArray("whatYoullNeed"),
+    funColoringIdeas: requiredTextArray("funColoringIdeas"),
+    learningActivity: requiredObject("learningActivity", ["title", "description", "activity"] as const),
+    makeItYourOwn: requiredObject("makeItYourOwn", ["description", "challenge"] as const),
+    printingTips: requiredTextArray("printingTips"),
   };
   for (const rule of SEO_RULES) {
     const count = fieldCount(seo[rule.key], rule.unit);

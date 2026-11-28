@@ -45,6 +45,16 @@ export default async function ColoringDetail({ page, printable = false }: { page
   ];
   const faqs = dbFaqs.filter((faq) => faq.question && faq.answer)
     .map((faq) => ({ question: faq.question!, answer: faq.answer! }));
+  const materials = page.whatYoullNeed?.filter((item) => item.trim()) ?? [];
+  const coloringIdeas = page.funColoringIdeas?.filter((item) => item.trim()) ?? [];
+  const printingTips = page.printingTips?.filter((item) => item.trim()) ?? [];
+  const learningActivity = page.learningActivity?.title?.trim() &&
+    page.learningActivity.description?.trim() && page.learningActivity.activity?.trim()
+    ? page.learningActivity : null;
+  const makeItYourOwn = page.makeItYourOwn?.description?.trim() && page.makeItYourOwn.challenge?.trim()
+    ? page.makeItYourOwn : null;
+  const hasSections = Boolean(page.meetYourColoringPage?.trim() || materials.length || coloringIdeas.length ||
+    learningActivity || makeItYourOwn || printingTips.length);
   const fallbackFaqs = [
     { question: "Is this coloring page free?", answer: "Yes. You can print this picture for personal and classroom coloring activities without an account. See our Terms of Use for sharing details." },
     { question: "How do I print this picture?", answer: isCollection ? "Choose A4 or US Letter, download the complete PDF or an individual drawing, then open the PDF and print the pages you want." : "Select Print Coloring Sheet, choose your printer and paper size, and use the fit-to-page option in your browser's print settings." },
@@ -142,6 +152,34 @@ export default async function ColoringDetail({ page, printable = false }: { page
         {page.description && <section className="space-y-4 rounded-3xl border-2 border-[#2b2140] bg-white p-5 shadow-[5px_5px_0_rgba(43,33,64,0.14)] sm:p-8 lg:px-12">
           <h2 className="text-2xl font-black">About {isCollection ? "this coloring collection" : "this coloring picture"}</h2>
           {page.description.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index} className="max-w-3xl text-sm leading-8 text-[#514461] sm:text-base">{paragraph}</p>)}
+        </section>}
+        {hasSections && <section aria-label="Coloring page guide" className="grid gap-4 md:grid-cols-2">
+          {page.meetYourColoringPage?.trim() && <div className="rounded-3xl border-2 border-[#2b2140] bg-white p-5 shadow-[4px_4px_0_rgba(43,33,64,0.12)] sm:p-6">
+            <h2 className="text-xl font-black">Meet your coloring page</h2>
+            <p className="mt-3 text-sm leading-7 text-[#514461]">{page.meetYourColoringPage}</p>
+          </div>}
+          {materials.length > 0 && <div className="rounded-3xl border-2 border-[#2b2140] bg-[#c9f2dc] p-5 shadow-[4px_4px_0_rgba(43,33,64,0.12)] sm:p-6">
+            <h2 className="text-xl font-black">What you&apos;ll need</h2>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-[#2b2140]">{materials.map((item, index) => <li key={index}>{item}</li>)}</ul>
+          </div>}
+          {coloringIdeas.length > 0 && <div className="rounded-3xl border-2 border-[#2b2140] bg-[#fff0c2] p-5 shadow-[4px_4px_0_rgba(43,33,64,0.12)] sm:p-6">
+            <h2 className="text-xl font-black">Fun coloring ideas</h2>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-[#2b2140]">{coloringIdeas.map((idea, index) => <li key={index}>{idea}</li>)}</ul>
+          </div>}
+          {learningActivity && <div className="rounded-3xl border-2 border-[#2b2140] bg-[#e9ddff] p-5 shadow-[4px_4px_0_rgba(43,33,64,0.12)] sm:p-6">
+            <h2 className="text-xl font-black">{learningActivity.title}</h2>
+            <p className="mt-3 text-sm leading-7 text-[#514461]">{learningActivity.description}</p>
+            <p className="mt-3 text-sm leading-7 text-[#514461]"><strong>Try it:</strong> {learningActivity.activity}</p>
+          </div>}
+          {makeItYourOwn && <div className="rounded-3xl border-2 border-[#2b2140] bg-[#ffdbe5] p-5 shadow-[4px_4px_0_rgba(43,33,64,0.12)] sm:p-6">
+            <h2 className="text-xl font-black">Make it your own</h2>
+            <p className="mt-3 text-sm leading-7 text-[#514461]">{makeItYourOwn.description}</p>
+            <p className="mt-3 text-sm leading-7 text-[#514461]"><strong>Challenge:</strong> {makeItYourOwn.challenge}</p>
+          </div>}
+          {printingTips.length > 0 && <div className="rounded-3xl border-2 border-[#2b2140] bg-[#c4a8f8] p-5 shadow-[4px_4px_0_rgba(43,33,64,0.12)] sm:p-6">
+            <h2 className="text-xl font-black">Printing tips</h2>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-[#2b2140]">{printingTips.map((tip, index) => <li key={index}>{tip}</li>)}</ul>
+          </div>}
         </section>}
         <FAQ items={faqs.length ? faqs : fallbackFaqs} title="Before you get your crayons" />
         <RelatedColoringPages pages={related} title="More pictures to color" />

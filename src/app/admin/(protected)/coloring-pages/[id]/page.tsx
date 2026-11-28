@@ -50,6 +50,25 @@ export default async function EditColoringPage({ params }: { params: Promise<{ i
         <CollectionSheetsField initial={sheets} />
 
         <TextArea label="Description" name="description" defaultValue={page.description} rows={5} />
+        <section className="space-y-5 rounded-xl border border-slate-200 p-5">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">Coloring page sections</h2>
+            <p className="mt-1 text-sm text-slate-600">These optional sections are shown publicly when they contain content. Enter one list item per line.</p>
+          </div>
+          <TextArea label="Meet your coloring page" name="meetYourColoringPage" defaultValue={page.meetYourColoringPage} rows={3} />
+          <TextArea label="What you'll need — one material per line" name="whatYoullNeed" defaultValue={page.whatYoullNeed?.join("\n")} rows={3} />
+          <TextArea label="Fun coloring ideas — one idea per line" name="funColoringIdeas" defaultValue={page.funColoringIdeas?.join("\n")} rows={4} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextArea label="Learning activity title" name="learningActivityTitle" defaultValue={page.learningActivity?.title} rows={2} />
+            <TextArea label="Learning activity description" name="learningActivityDescription" defaultValue={page.learningActivity?.description} rows={3} />
+            <TextArea label="Learning activity" name="learningActivityActivity" defaultValue={page.learningActivity?.activity} rows={3} />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextArea label="Make it your own — description" name="makeItYourOwnDescription" defaultValue={page.makeItYourOwn?.description} rows={3} />
+            <TextArea label="Make it your own — challenge" name="makeItYourOwnChallenge" defaultValue={page.makeItYourOwn?.challenge} rows={3} />
+          </div>
+          <TextArea label="Printing tips — one tip per line" name="printingTips" defaultValue={page.printingTips?.join("\n")} rows={4} />
+        </section>
         <TextArea label="SVG content" name="svgContent" defaultValue={page.svgContent} rows={8} />
 
         <section className="grid gap-5 md:grid-cols-3">
