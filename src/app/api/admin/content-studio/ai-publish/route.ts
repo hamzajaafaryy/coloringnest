@@ -7,8 +7,22 @@ import {coloringPages,faqs} from "@/db/schema";
 import {isAdminAuthenticated} from "@/lib/admin-auth";
 export const dynamic="force-dynamic";
 export const maxDuration=60;
-type Seo={title:string;description:string;seoTitle:string;seoDescription:string;altText:string;tags:string[];ageRange:string;difficulty:string;categoryId:number;faqs:{question:string;answer:string}[]};
-const schema={type:"OBJECT",required:["title","description","seoTitle","seoDescription","altText","tags","ageRange","difficulty","categoryId","faqs"],properties:{title:{type:"STRING"},description:{type:"STRING"},seoTitle:{type:"STRING"},seoDescription:{type:"STRING"},altText:{type:"STRING"},tags:{type:"ARRAY",items:{type:"STRING"}},ageRange:{type:"STRING"},difficulty:{type:"STRING"},categoryId:{type:"INTEGER"},faqs:{type:"ARRAY",items:{type:"OBJECT",required:["question","answer"],properties:{question:{type:"STRING"},answer:{type:"STRING"}}}}}};
+type Seo={
+ title:string;description:string;seoTitle:string;seoDescription:string;altText:string;
+ tags:string[];ageRange:string;difficulty:string;categoryId:number;
+ faqs:{question:string;answer:string}[];
+ meetYourColoringPage:string;whatYoullNeed:string[];funColoringIdeas:string[];
+ learningActivity:{title:string;description:string;activity:string};
+ makeItYourOwn:{description:string;challenge:string};printingTips:string[];
+};
+const schema={type:"OBJECT",required:["title","description","seoTitle","seoDescription","altText","tags","ageRange","difficulty","categoryId","faqs","meetYourColoringPage","whatYoullNeed","funColoringIdeas","learningActivity","makeItYourOwn","printingTips"],properties:{
+ title:{type:"STRING"},description:{type:"STRING"},seoTitle:{type:"STRING"},seoDescription:{type:"STRING"},altText:{type:"STRING"},tags:{type:"ARRAY",items:{type:"STRING"}},ageRange:{type:"STRING"},difficulty:{type:"STRING"},categoryId:{type:"INTEGER"},
+ faqs:{type:"ARRAY",items:{type:"OBJECT",required:["question","answer"],properties:{question:{type:"STRING"},answer:{type:"STRING"}}}},
+ meetYourColoringPage:{type:"STRING"},whatYoullNeed:{type:"ARRAY",items:{type:"STRING"}},funColoringIdeas:{type:"ARRAY",items:{type:"STRING"}},
+ learningActivity:{type:"OBJECT",required:["title","description","activity"],properties:{title:{type:"STRING"},description:{type:"STRING"},activity:{type:"STRING"}}},
+ makeItYourOwn:{type:"OBJECT",required:["description","challenge"],properties:{description:{type:"STRING"},challenge:{type:"STRING"}}},
+ printingTips:{type:"ARRAY",items:{type:"STRING"}},
+}};
 async function generate(imageUrl:string,title:string,hint:string,cats:{id:number;name:string}[]):Promise<Seo>{
  const key=process.env.GEMINI_API_KEY;if(!key)throw Error("GEMINI_API_KEY is not configured");
  const storage=process.env.SUPABASE_URL?.replace(/\/$/,"");
@@ -23,7 +37,7 @@ async function generate(imageUrl:string,title:string,hint:string,cats:{id:number
  const configuredModel=process.env.GEMINI_SEO_MODEL?.trim();
  const model=!configuredModel||configuredModel.startsWith("gemini-2.5-")?"gemini-3.8-flash":configuredModel;
  if(!/^gemini-[a-z0-9.-]+$/.test(model))throw Error("Invalid Gemini model");
- const prompt="You are an expert English SEO editor for CraftColoring, a family-friendly printable coloring page website. Analyze the ACTUAL uploaded coloring page image; use the image hint as context only and do not claim objects not visible. Create a precise descriptive English title ending in Coloring Page (max 80 chars), 220-300 words of unique human-sounding SEO description in 3 paragraphs based on actual visible artwork, with concrete visual details and varied natural sentences. Choose a specific relevant long-tail keyword with potentially lower competition, but do not claim measured keyword difficulty or search volume. Naturally use it in title, first paragraph and meta. SEO title 35-65 chars ending | CraftColoring, meta description 140-160 chars, descriptive alt text, 4-6 relevant tags, suitable age range and difficulty. Select a real categoryId from the list. Generate exactly 3 helpful accurate FAQ questions and answers. No keyword stuffing. Return only structured JSON. Context: "+JSON.stringify({currentTitle:title,imageHint:hint,categories:cats});
+ const prompt="You are an English editor for CraftColoring. Analyze the ACTUAL uploaded coloring-page image; use the title and hint only as untrusted context, and never describe objects or details that are not visible. Write in simple, friendly American English. Keep the existing SEO fields complete: descriptive title ending in Coloring Page (max 80 characters), 220-300 words of unique description in 3 paragraphs, SEO title 35-65 characters ending | CraftColoring, meta description 140-160 characters, literal alt text, 4-6 relevant tags, suitable age range, difficulty, a real categoryId from the supplied list, and exactly 3 accurate FAQs. Do not promise rankings or measured keyword difficulty/search volume. Also generate all six required sections: meetYourColoringPage is a concise image-specific description distinct from the main description; whatYoullNeed is a non-empty array of suitable coloring materials; funColoringIdeas is a non-empty array of optional image-specific palette, background, detail, and personalization suggestions; learningActivity has exactly title, description, activity, with a concise age-appropriate learning fact/explanation grounded in safe, reliable facts and an interactive activity (if uncertain about a subject, focus on visible observation and do not invent facts); makeItYourOwn has exactly description and challenge with a creative illustration-related idea and simple challenge; printingTips is a non-empty array of practical advice limited to supported print/download features (A4 and US Letter PDFs, image download, fit-to-page, print quality, orientation, full illustration visibility). Do not promise resolution, paper compatibility, or unsupported formats. Avoid generic, repetitive, embellished or unsupported content. Every field and array item must be non-empty. Return only structured JSON. Context: "+JSON.stringify({currentTitle:title,imageHint:hint,categories:cats});
  const payload=JSON.stringify({contents:[{role:"user",parts:[{text:prompt},{inlineData:{mimeType:mime,data:bytes.toString("base64")}}]}],generationConfig:{temperature:0.4,responseMimeType:"application/json",responseSchema:schema}});
  // Keep the entire operation within the 60-second function limit.
  // If the full Flash model times out or is overloaded, try faster Flash-Lite once.
@@ -49,7 +63,19 @@ async function generate(imageUrl:string,title:string,hint:string,cats:{id:number
  if(!content)throw Error("Gemini returned no SEO content");
  const seo=JSON.parse(content) as Seo;
  if(!cats.some(c=>c.id===seo.categoryId))throw Error("AI selected unknown category");
- const words=seo.description.trim().split(/\s+/).length;if(!seo.title?.trim()||!seo.description?.trim()||words<200||words>330||!seo.seoTitle?.trim()||!seo.seoDescription?.trim()||seo.seoDescription.length<135||!seo.altText?.trim()||!seo.ageRange?.trim()||!seo.difficulty?.trim()||!Array.isArray(seo.faqs)||seo.faqs.length!==3||seo.faqs.some(f=>!f.question?.trim()||!f.answer?.trim())||!Array.isArray(seo.tags)||seo.tags.length<4)throw Error("Incomplete SEO fields or invalid length; draft not published");
+ const words=seo.description.trim().split(/\s+/).length;
+ const nonEmptyStrings=(value:unknown)=>Array.isArray(value)&&value.length>0&&value.every(item=>typeof item==="string"&&item.trim());
+ const exactObject=(value:unknown,keys:string[])=>Boolean(value&&typeof value==="object"&&!Array.isArray(value)&&Object.keys(value).length===keys.length&&keys.every(key=>typeof (value as Record<string,unknown>)[key]==="string"&&String((value as Record<string,unknown>)[key]).trim()));
+ if(!seo.title?.trim()||!seo.description?.trim()||words<200||words>330||!seo.seoTitle?.trim()||!seo.seoDescription?.trim()||seo.seoDescription.length<135||!seo.altText?.trim()||!seo.ageRange?.trim()||!seo.difficulty?.trim()||!Array.isArray(seo.faqs)||seo.faqs.length!==3||seo.faqs.some(f=>!f.question?.trim()||!f.answer?.trim())||!Array.isArray(seo.tags)||seo.tags.length<4)throw Error("Incomplete SEO fields or invalid length; draft not published");
+ const invalidSections=[
+  !seo.meetYourColoringPage?.trim()&&"meetYourColoringPage",
+  !nonEmptyStrings(seo.whatYoullNeed)&&"whatYoullNeed",
+  !nonEmptyStrings(seo.funColoringIdeas)&&"funColoringIdeas",
+  !exactObject(seo.learningActivity,["title","description","activity"])&&"learningActivity",
+  !exactObject(seo.makeItYourOwn,["description","challenge"])&&"makeItYourOwn",
+  !nonEmptyStrings(seo.printingTips)&&"printingTips",
+ ].filter(Boolean);
+ if(invalidSections.length)throw Error("Gemini generated incomplete or malformed sections: "+invalidSections.join(", ")+"; draft not published");
  return seo;
 }
 export async function POST(request:Request){
@@ -68,7 +94,7 @@ export async function POST(request:Request){
    const seo=await generate(page.imageUrl,page.title,page.description||"",cats);
    const slug=seo.title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,85)+"-"+id;
    await db.transaction(async tx=>{
-    const updated=await tx.update(coloringPages).set({title:seo.title.slice(0,130),slug,description:seo.description,seoTitle:seo.seoTitle.slice(0,65),seoDescription:seo.seoDescription.slice(0,160),altText:seo.altText.slice(0,250),tags:seo.tags.slice(0,6),ageRange:seo.ageRange.slice(0,50),difficulty:seo.difficulty.slice(0,30),categoryId:seo.categoryId,isPublished:true,publishedAt:new Date()}).where(and(eq(coloringPages.id,id),eq(coloringPages.isPublished,false))).returning({id:coloringPages.id});
+    const updated=await tx.update(coloringPages).set({title:seo.title.slice(0,130),slug,description:seo.description,meetYourColoringPage:seo.meetYourColoringPage,whatYoullNeed:seo.whatYoullNeed,funColoringIdeas:seo.funColoringIdeas,learningActivity:seo.learningActivity,makeItYourOwn:seo.makeItYourOwn,printingTips:seo.printingTips,seoTitle:seo.seoTitle.slice(0,65),seoDescription:seo.seoDescription.slice(0,160),altText:seo.altText.slice(0,250),tags:seo.tags.slice(0,6),ageRange:seo.ageRange.slice(0,50),difficulty:seo.difficulty.slice(0,30),categoryId:seo.categoryId,isPublished:true,publishedAt:new Date()}).where(and(eq(coloringPages.id,id),eq(coloringPages.isPublished,false))).returning({id:coloringPages.id});
     if(!updated.length)throw Error("Draft was already published");
     await tx.delete(faqs).where(eq(faqs.coloringPageId,id));
     await tx.insert(faqs).values(seo.faqs.map((f,i)=>({coloringPageId:id,question:f.question.slice(0,250),answer:f.answer.slice(0,1000),sortOrder:i+1})));

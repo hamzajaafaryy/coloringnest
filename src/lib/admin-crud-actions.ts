@@ -30,6 +30,46 @@ function list(formData: FormData, name: string) {
   return value ? value.split(",").map((item) => item.trim()).filter(Boolean) : null;
 }
 
+function sectionLines(formData: FormData, name: string) {
+  if (!formData.has(name)) return undefined;
+  const value = text(formData, name);
+  const items = value ? value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean) : [];
+  return items.length ? items : null;
+}
+
+function coloringPageSectionFields(formData: FormData) {
+  const fields: {
+    meetYourColoringPage?: string | null;
+    whatYoullNeed?: string[] | null;
+    funColoringIdeas?: string[] | null;
+    learningActivity?: { title: string; description: string; activity: string } | null;
+    makeItYourOwn?: { description: string; challenge: string } | null;
+    printingTips?: string[] | null;
+  } = {};
+  if (formData.has("meetYourColoringPage")) fields.meetYourColoringPage = text(formData, "meetYourColoringPage");
+  if (formData.has("whatYoullNeed")) fields.whatYoullNeed = sectionLines(formData, "whatYoullNeed") ?? null;
+  if (formData.has("funColoringIdeas")) fields.funColoringIdeas = sectionLines(formData, "funColoringIdeas") ?? null;
+  if (formData.has("printingTips")) fields.printingTips = sectionLines(formData, "printingTips") ?? null;
+
+  const activityKeys = ["learningActivityTitle", "learningActivityDescription", "learningActivityActivity"];
+  if (activityKeys.some((key) => formData.has(key))) {
+    const [title, description, activity] = activityKeys.map((key) => text(formData, key));
+    if ([title, description, activity].every((value) => !value)) fields.learningActivity = null;
+    else if (!title || !description || !activity) throw new Error("Complete all Learning Activity fields or clear them all.");
+    else fields.learningActivity = { title, description, activity };
+  }
+
+  const makeItYourOwnKeys = ["makeItYourOwnDescription", "makeItYourOwnChallenge"];
+  if (makeItYourOwnKeys.some((key) => formData.has(key))) {
+    const [description, challenge] = makeItYourOwnKeys.map((key) => text(formData, key));
+    if (!description && !challenge) fields.makeItYourOwn = null;
+    else if (!description || !challenge) throw new Error("Complete both Make It Your Own fields or clear them both.");
+    else fields.makeItYourOwn = { description, challenge };
+  }
+
+  return fields;
+}
+
 function slugify(value: string) {
   return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 180);
 }
@@ -111,7 +151,7 @@ export async function createColoringPage(formData: FormData) {
   await assertCategoryExists(categoryId);
   await assertUniqueColoringSlug(slug);
   await db.transaction(async tx => {
-  const [created] = await tx.insert(coloringPages).values({ title, slug, description: text(formData, "description"), categoryId, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null }).returning({ id: coloringPages.id });
+  const [created] = await tx.insert(coloringPages).values({ title, slug, description: text(formData, "description"), ...coloringPageSectionFields(formData), categoryId, imageUrl: text(formData, "imageUrl"), svgUrl: text(formData, "svgUrl"), svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt: published ? new Date() : null }).returning({ id: coloringPages.id });
     if (sheets.length) await tx.insert(coloringSheets).values(sheets.map((sheet, sortOrder) => ({ ...sheet, imageUrl: sheet.imageUrl!, coloringPageId: created.id, sortOrder })));
   });
   revalidatePath("/"); revalidatePath("/coloring-pages/"); revalidatePath("/sitemap.xml"); redirect("/admin/coloring-pages/");
@@ -133,7 +173,7 @@ export async function updateColoringPage(id: number, formData: FormData) {
   const nextImageUrl = text(formData, "imageUrl");
   const nextSvgUrl = text(formData, "svgUrl");
   await db.transaction(async tx => {
-  await tx.update(coloringPages).set({ updatedAt: new Date(), title, slug, description: text(formData, "description"), categoryId, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
+  await tx.update(coloringPages).set({ updatedAt: new Date(), title, slug, description: text(formData, "description"), ...coloringPageSectionFields(formData), categoryId, imageUrl: nextImageUrl, svgUrl: nextSvgUrl, svgContent: text(formData, "svgContent") ? sanitizeSvg(text(formData, "svgContent")!) : null, seoTitle: text(formData, "seoTitle"), seoDescription: text(formData, "seoDescription"), isPublished: published, altText: text(formData, "altText"), tags: list(formData, "tags"), ageRange: text(formData, "ageRange"), difficulty: text(formData, "difficulty"), featured: checkbox(formData, "featured"), popular: checkbox(formData, "popular"), publishedAt }).where(eq(coloringPages.id, id));
     await tx.delete(coloringSheets).where(eq(coloringSheets.coloringPageId, id));
     if (sheets.length) await tx.insert(coloringSheets).values(sheets.map((sheet, sortOrder) => ({ ...sheet, imageUrl: sheet.imageUrl!, coloringPageId: id, sortOrder })));
   });
